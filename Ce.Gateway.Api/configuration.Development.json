@@ -1,6 +1,24 @@
 {
   "Routes": [
     {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 44335
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/test/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "QoSOptions": {
+        "TimeoutValue": 300, // 300 mili giây
+        "ExceptionsAllowedBeforeBreaking": 2, // Sau 2 lỗi thì ngắt mạch
+        "DurationOfBreak": 5000 // Ngắt mạch 5s
+      }
+    },
+    {
       "DownstreamPathTemplate": "/api/auth/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -37,7 +55,12 @@
       ],
       "UpstreamPathTemplate": "/gateway/ocr/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "QoSOptions": {
+        "TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
+        "ExceptionsAllowedBeforeBreaking": 2, // Sau 2 lỗi thì ngắt mạch
+        "DurationOfBreak": 5000 // Ngắt mạch 5s
+      }
     },
     {
       "DownstreamPathTemplate": "/api/common-master-data/{everything}",
@@ -187,5 +210,4 @@
   "GlobalConfiguration": {
     "BaseUrl": "http://gateway.dev.axe.vn"
   }
-
 }

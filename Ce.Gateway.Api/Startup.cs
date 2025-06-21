@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Polly;
+using Serilog;
 using System.Text;
 
 namespace Ce.Gateway.Api
@@ -46,7 +48,8 @@ namespace Ce.Gateway.Api
                 };
             });
 
-            services.AddOcelot(Configuration);
+            services.AddOcelot(Configuration)
+                .AddPolly();
 
             // Use with SignalR
             services.AddCors(o => o.AddPolicy(CeCorsPolicy, b =>
@@ -84,6 +87,9 @@ namespace Ce.Gateway.Api
             app.UseWebSockets();
 
             await app.UseOcelot();
+
+            // Log after pipeline is configured
+            Log.Information("Service is running");
         }
     }
 }
