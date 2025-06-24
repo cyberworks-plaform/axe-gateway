@@ -34,7 +34,7 @@ jobs:
       - name: 📌 Get zip file name
         id: get_zip_name
         run: |
-            ZIP_FILE=$(find ./${{ env.BUILD_DIR }}/publish -name '*.zip' | head -n 1)
+            ZIP_FILE=$(find ${{ env.BUILD_DIR }}/publish -name '*.zip' | head -n 1)
             echo "zip_path=$ZIP_FILE" >> $GITHUB_OUTPUT
             echo "zip_name=$(basename $ZIP_FILE)" >> $GITHUB_OUTPUT
 
