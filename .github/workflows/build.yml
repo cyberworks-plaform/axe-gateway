@@ -1,0 +1,45 @@
+name: Build & Publish .NET App
+
+env:
+  BUILD_DIR: ./Ce.Gateway.Api
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout source code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup .NET SDK 6
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: 🧰 Install 7-Zip CLI (Linux)
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full
+
+      - name: 🚀 Run PowerShell build script
+        shell: pwsh
+        run: ./build.ps1
+        working-directory: ${{ env.BUILD_DIR }}
+
+      - name: 📌 Get zip file name
+        id: get_zip_name
+        run: |
+            ZIP_FILE=$(find ./${{ env.BUILD_DIR }}/publish -name '*.zip' | head -n 1)
+            echo "zip_path=$ZIP_FILE" >> $GITHUB_OUTPUT
+            echo "zip_name=$(basename $ZIP_FILE)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Upload ZIP as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.get_zip_name.outputs.zip_name }}
+          path: ${{ steps.get_zip_name.outputs.zip_path }}
