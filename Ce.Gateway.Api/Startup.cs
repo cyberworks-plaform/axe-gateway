@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
@@ -59,6 +62,11 @@ namespace Ce.Gateway.Api
                     .SetIsOriginAllowed(_ => true)
                     .AllowCredentials();
             }));
+
+            services.AddHealthChecks();
+
+            services.AddHealthChecksUI().AddInMemoryStorage(); // dùng memory để lưu trữ trạng thái health check
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,6 +90,20 @@ namespace Ce.Gateway.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                // Map endpoint /health
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                {
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+
+
+                // Map GUI /hc-ui và /hc-json
+                endpoints.MapHealthChecksUI(options =>
+                {
+                    options.UIPath = "/hc-ui";
+                    options.ApiPath = "/hc-json";
+                });
             });
 
             app.UseWebSockets();
