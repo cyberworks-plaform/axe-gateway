@@ -65,7 +65,10 @@ namespace Ce.Gateway.Api
 
             services.AddHealthChecks();
 
-            services.AddHealthChecksUI().AddInMemoryStorage(); // dùng memory để lưu trữ trạng thái health check
+            services.AddHealthChecksUI(setup =>
+            {
+                setup.SetHeaderText("CW Health Checks UI");
+            }).AddInMemoryStorage(); // dùng memory để lưu trữ trạng thái health check
 
         }
 
@@ -103,6 +106,7 @@ namespace Ce.Gateway.Api
                 {
                     options.UIPath = "/hc-ui";
                     options.ApiPath = "/hc-json";
+                    options.AddCustomStylesheet("health-ui.css");
                 });
             });
 
