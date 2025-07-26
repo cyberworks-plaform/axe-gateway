@@ -1,14 +1,18 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Polly;
 using Serilog;
+using System.IO;
 using System.Text;
 
 namespace Ce.Gateway.Api
@@ -59,6 +63,30 @@ namespace Ce.Gateway.Api
                     .SetIsOriginAllowed(_ => true)
                     .AllowCredentials();
             }));
+
+            services.AddHealthChecks();
+
+            services.AddHealthChecksUI(setupSettings: setup =>
+            {
+                setup.SetHeaderText("CW Health Checks UI");
+
+                //default check every 60 seconds
+                if (!int.TryParse(Configuration["HealthChecksUI:EvaluationTimeInSeconds"], out var evalTime))
+                {
+                    evalTime = 60;
+                }
+                setup.SetEvaluationTimeInSeconds(evalTime);
+
+                // default SetMinimumSecondsBetweenFailureNotifications = 300 seconds
+                if (!int.TryParse(Configuration["HealthChecksUI:MinimumSecondsBetweenFailureNotifications"], out var minimumSecondsBetweenFailureNotifications))
+                {
+                    minimumSecondsBetweenFailureNotifications = 300;
+                }
+
+                setup.SetMinimumSecondsBetweenFailureNotifications(minimumSecondsBetweenFailureNotifications);
+
+            })
+                .AddInMemoryStorage();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,8 +96,6 @@ namespace Ce.Gateway.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -82,6 +108,24 @@ namespace Ce.Gateway.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                // Map endpoint /health
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions
+                {
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+
+                // Map GUI /hc-ui và /hc-json và style
+                endpoints.MapHealthChecksUI(options =>
+                {
+                    options.UIPath = "/hc-ui";
+                    options.ApiPath = "/hc-json";
+
+                    if (File.Exists("health-ui.css"))
+                        options.AddCustomStylesheet("health-ui.css");
+                    else
+                        Log.Warning("health-ui.css not found, using default styles.");
+                });
             });
 
             app.UseWebSockets();
