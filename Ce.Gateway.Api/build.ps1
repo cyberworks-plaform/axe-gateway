@@ -35,7 +35,7 @@ Write-Host "📁 Publish Output: $publishDir"
 Write-Host "📌 Is-WindowOS: $IsWinPlatform"
 
 # Prepare ZIP info
-$zipFileName = "$appName-v$version-update-$timestamp-g$gitHash.zip"
+$zipFileName = "$appName-v$version-$gitHash-update-$timestamp.zip"
 $zipPath = Join-Path $publishDir $zipFileName
 
 # Determine 7-Zip path
