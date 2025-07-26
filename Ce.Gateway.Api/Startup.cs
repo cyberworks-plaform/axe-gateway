@@ -12,6 +12,7 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Polly;
 using Serilog;
+using System.IO;
 using System.Text;
 
 namespace Ce.Gateway.Api
@@ -65,11 +66,27 @@ namespace Ce.Gateway.Api
 
             services.AddHealthChecks();
 
-            services.AddHealthChecksUI(setup =>
+            services.AddHealthChecksUI(setupSettings: setup =>
             {
                 setup.SetHeaderText("CW Health Checks UI");
-            }).AddInMemoryStorage(); // dùng memory để lưu trữ trạng thái health check
 
+                //default check every 60 seconds
+                if (!int.TryParse(Configuration["HealthChecksUI:EvaluationTimeInSeconds"], out var evalTime))
+                {
+                    evalTime = 60;
+                }
+                setup.SetEvaluationTimeInSeconds(evalTime);
+
+                // default SetMinimumSecondsBetweenFailureNotifications = 300 seconds
+                if (!int.TryParse(Configuration["HealthChecksUI:MinimumSecondsBetweenFailureNotifications"], out var minimumSecondsBetweenFailureNotifications))
+                {
+                    minimumSecondsBetweenFailureNotifications = 300;
+                }
+
+                setup.SetMinimumSecondsBetweenFailureNotifications(minimumSecondsBetweenFailureNotifications);
+
+            })
+                .AddInMemoryStorage();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,8 +96,6 @@ namespace Ce.Gateway.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -100,13 +115,16 @@ namespace Ce.Gateway.Api
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
 
-
-                // Map GUI /hc-ui và /hc-json
+                // Map GUI /hc-ui và /hc-json và style
                 endpoints.MapHealthChecksUI(options =>
                 {
                     options.UIPath = "/hc-ui";
                     options.ApiPath = "/hc-json";
-                    options.AddCustomStylesheet("health-ui.css");
+
+                    if (File.Exists("health-ui.css"))
+                        options.AddCustomStylesheet("health-ui.css");
+                    else
+                        Log.Warning("health-ui.css not found, using default styles.");
                 });
             });
 
