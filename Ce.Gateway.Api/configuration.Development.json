@@ -23,25 +23,37 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "10.1.80.34",
-          "Port": 8001
+          "Host": "localhost",
+          "Port": 10501
         },
         {
-          "Host": "10.1.80.35",
-          "Port": 8001
+          "Host": "localhost",
+          "Port": 10502
         }
       ],
-
-      "UpstreamPathTemplate": "/gateway/axsdk-api/{everything}",
+      "UpstreamPathTemplate": "/gateway/axsdk-api/manual/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
       "LoadBalancerOptions": {
-        "Type": "LeastConnection"
-      },
-      "DangerousAcceptAnyServerCertificateValidator": true,
-      "QoSOptions": {
-        "TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
-        "ExceptionsAllowedBeforeBreaking": 2, // Sau 10 lỗi thì ngắt mạch
-        "DurationOfBreak": 5000 // Ngắt mạch 5s
+        "Type": "RoundRobin"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 10501
+        },
+        {
+          "Host": "localhost",
+          "Port": 10502
+        }
+      ],
+      "UpstreamPathTemplate": "/gateway/axsdk-api/auto/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin"
       }
     },
     {

@@ -1,8 +1,13 @@
-﻿using HealthChecks.UI.Client;
+﻿
+using Ce.Gateway.Api.Data;
+using Ce.Gateway.Api.Middleware;
+using Ce.Gateway.Api.Services;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -12,7 +17,9 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Polly;
 using Serilog;
+using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Ce.Gateway.Api
@@ -53,7 +60,8 @@ namespace Ce.Gateway.Api
             });
 
             services.AddOcelot(Configuration)
-                .AddPolly();
+                .AddPolly()
+                .AddDelegatingHandler<OcrLoggingDelegatingHandler>(true);
 
             // Use with SignalR
             services.AddCors(o => o.AddPolicy(CeCorsPolicy, b =>
@@ -87,6 +95,13 @@ namespace Ce.Gateway.Api
 
             })
                 .AddInMemoryStorage();
+
+            var dbPath = Path.Combine("data", "gateway.db");
+            services.AddDbContextFactory<GatewayDbContext>(options =>
+                options.UseSqlite($"Data Source={dbPath}"));
+
+            services.AddTransient<ILogWriter, EfLogWriter>();
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -128,9 +143,30 @@ namespace Ce.Gateway.Api
                 });
             });
 
+            // Ensure the data directory exists
+            Directory.CreateDirectory("data");
+
+            // Auto-migrate database
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<GatewayDbContext>>();
+                using (var dbContext = dbContextFactory.CreateDbContext())
+                {
+                    dbContext.Database.Migrate();
+                }
+            }
+
             app.UseWebSockets();
 
-            await app.UseOcelot();
+            var ocelotConfig = new OcelotPipelineConfiguration
+            {
+                PreErrorResponderMiddleware = async (ctx, next) =>
+                {
+                    await next();
+                }
+            };
+
+            await app.UseOcelot(ocelotConfig);
 
             // Log after pipeline is configured
             Log.Information("Service is running");
