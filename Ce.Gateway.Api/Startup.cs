@@ -1,6 +1,7 @@
 ﻿
 using Ce.Gateway.Api.Data;
 using Ce.Gateway.Api.Middleware;
+using Ce.Gateway.Api.Repositories;
 using Ce.Gateway.Api.Services;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -100,8 +101,11 @@ namespace Ce.Gateway.Api
             services.AddDbContextFactory<GatewayDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
 
-            services.AddTransient<ILogWriter, EfLogWriter>();
+            services.AddSingleton<ILogWriter, EfLogWriter>();
             services.AddHttpContextAccessor();
+
+            services.AddScoped<ILogRepository, LogRepository>();
+            services.AddScoped<IMonitoringService, MonitoringService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
