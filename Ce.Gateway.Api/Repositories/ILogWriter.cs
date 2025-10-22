@@ -2,10 +2,10 @@
 using System.Threading.Tasks;
 using Ce.Gateway.Api.Entities;
 
-namespace Ce.Gateway.Api.Services
+namespace Ce.Gateway.Api.Repositories
 {
     public interface ILogWriter
     {
-        Task WriteLogAsync(OcrGatewayLogEntry logEntry);
+        Task WriteLogAsync(RequestLogEntry logEntry);
     }
 }

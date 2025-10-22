@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Ce.Gateway.Api.Entities;
-using Ce.Gateway.Api.Services;
+using Ce.Gateway.Api.Repositories;
 using Microsoft.AspNetCore.Http;
 using Ocelot.Middleware;
 using Ocelot.DownstreamRouteFinder.UrlMatcher;
@@ -14,12 +14,12 @@ using Ocelot.Configuration;
 
 namespace Ce.Gateway.Api.Middleware
 {
-    public class OcrLoggingDelegatingHandler : DelegatingHandler
+    public class RequestLoggingDelegatingHandler : DelegatingHandler
     {
         private readonly ILogWriter _logWriter;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public OcrLoggingDelegatingHandler(ILogWriter logWriter, IHttpContextAccessor httpContextAccessor)
+        public RequestLoggingDelegatingHandler(ILogWriter logWriter, IHttpContextAccessor httpContextAccessor)
         {
             _logWriter = logWriter;
             _httpContextAccessor = httpContextAccessor;
@@ -60,7 +60,7 @@ namespace Ce.Gateway.Api.Middleware
                     serviceApi = request.RequestUri.Host;
                 }
 
-                var logEntry = new OcrGatewayLogEntry
+                var logEntry = new RequestLogEntry
                 {
                     Id = Guid.NewGuid(),
                     CreatedAtUtc = DateTime.UtcNow,

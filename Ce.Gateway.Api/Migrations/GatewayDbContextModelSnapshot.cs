@@ -17,7 +17,7 @@ namespace Ce.Gateway.Api.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.7");
 
-            modelBuilder.Entity("Ce.Gateway.Api.Entities.OcrGatewayLogEntry", b =>
+            modelBuilder.Entity("Ce.Gateway.Api.Entities.RequestLogEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -70,7 +70,7 @@ namespace Ce.Gateway.Api.Migrations
 
                     b.HasIndex("Route");
 
-                    b.ToTable("OcrGatewayLogEntries");
+                    b.ToTable("RequestLogEntries");
                 });
 #pragma warning restore 612, 618
         }

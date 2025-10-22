@@ -17,10 +17,10 @@ namespace Ce.Gateway.Api.Repositories
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<PaginatedResult<OcrGatewayLogEntry>> GetLogsAsync(LogFilter filter, int page, int pageSize)
+        public async Task<PaginatedResult<RequestLogEntry>> GetLogsAsync(LogFilter filter, int page, int pageSize)
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            IQueryable<OcrGatewayLogEntry> query = dbContext.OcrGatewayLogEntries.AsNoTracking();
+            IQueryable<RequestLogEntry> query = dbContext.OcrGatewayLogEntries.AsNoTracking();
 
             // Apply filters
             if (!string.IsNullOrWhiteSpace(filter.Route))
@@ -53,7 +53,7 @@ namespace Ce.Gateway.Api.Repositories
 
             var data = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            return new PaginatedResult<OcrGatewayLogEntry>
+            return new PaginatedResult<RequestLogEntry>
             {
                 TotalCount = totalCount,
                 TotalPages = totalPages,

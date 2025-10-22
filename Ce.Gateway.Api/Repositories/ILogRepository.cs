@@ -6,6 +6,6 @@ namespace Ce.Gateway.Api.Repositories
 {
     public interface ILogRepository
     {
-        Task<PaginatedResult<OcrGatewayLogEntry>> GetLogsAsync(LogFilter filter, int page, int pageSize);
+        Task<PaginatedResult<RequestLogEntry>> GetLogsAsync(LogFilter filter, int page, int pageSize);
     }
 }

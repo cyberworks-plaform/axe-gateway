@@ -62,7 +62,7 @@ namespace Ce.Gateway.Api
 
             services.AddOcelot(Configuration)
                 .AddPolly()
-                .AddDelegatingHandler<OcrLoggingDelegatingHandler>(true);
+                .AddDelegatingHandler<RequestLoggingDelegatingHandler>(true);
 
             // Use with SignalR
             services.AddCors(o => o.AddPolicy(CeCorsPolicy, b =>
@@ -101,7 +101,7 @@ namespace Ce.Gateway.Api
             services.AddDbContextFactory<GatewayDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
 
-            services.AddSingleton<ILogWriter, EfLogWriter>();
+            services.AddSingleton<ILogWriter, SqlLogWriter>();
             services.AddHttpContextAccessor();
 
             services.AddScoped<ILogRepository, LogRepository>();

@@ -10,13 +10,13 @@ namespace Ce.Gateway.Api.Data
         {
         }
 
-        public DbSet<OcrGatewayLogEntry> OcrGatewayLogEntries { get; set; }
+        public DbSet<RequestLogEntry> OcrGatewayLogEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<OcrGatewayLogEntry>(entity =>
+            modelBuilder.Entity<RequestLogEntry>(entity =>
             {
                 entity.HasIndex(e => e.CreatedAtUtc);
                 entity.HasIndex(e => e.Route);

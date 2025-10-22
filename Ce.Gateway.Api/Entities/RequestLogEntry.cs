@@ -3,7 +3,7 @@ using System;
 
 namespace Ce.Gateway.Api.Entities
 {
-    public class OcrGatewayLogEntry
+    public class RequestLogEntry
     {
         public Guid Id { get; set; }
         public DateTime CreatedAtUtc { get; set; }

@@ -10,7 +10,7 @@ namespace Ce.Gateway.Api.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "OcrGatewayLogEntries",
+                name: "RequestLogEntries",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -30,29 +30,29 @@ namespace Ce.Gateway.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OcrGatewayLogEntries", x => x.Id);
+                    table.PrimaryKey("PK_RequestLogEntries", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_OcrGatewayLogEntries_CreatedAtUtc",
-                table: "OcrGatewayLogEntries",
+                name: "IX_RequestLogEntries_CreatedAtUtc",
+                table: "RequestLogEntries",
                 column: "CreatedAtUtc");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OcrGatewayLogEntries_DownstreamNode",
-                table: "OcrGatewayLogEntries",
+                name: "IX_RequestLogEntries_DownstreamNode",
+                table: "RequestLogEntries",
                 column: "DownstreamNode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OcrGatewayLogEntries_Route",
-                table: "OcrGatewayLogEntries",
+                name: "IX_RequestLogEntries_Route",
+                table: "RequestLogEntries",
                 column: "Route");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "OcrGatewayLogEntries");
+                name: "RequestLogEntries");
         }
     }
 }
