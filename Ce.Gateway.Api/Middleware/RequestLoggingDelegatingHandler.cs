@@ -1,4 +1,3 @@
-
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Ocelot.Middleware;
 using Ocelot.DownstreamRouteFinder.UrlMatcher;
 using Ocelot.Configuration;
+using Ocelot.Request.Middleware; // Add this using statement
 
 namespace Ce.Gateway.Api.Middleware
 {
@@ -49,15 +49,15 @@ namespace Ce.Gateway.Api.Middleware
             {
                 stopwatch.Stop();
 
-                string downstreamNode = "unknown";
-                string route = "unknown";
-                string serviceApi = "unknown";
-
-                if (request.RequestUri != null)
+                // Capture error from response body if not successful
+                if (response != null && !response.IsSuccessStatusCode && response.Content != null)
                 {
-                    downstreamNode = $"{request.RequestUri.Scheme}://{request.RequestUri.Host}:{request.RequestUri.Port}";
-                    route = request.RequestUri.AbsolutePath;
-                    serviceApi = request.RequestUri.Host;
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrWhiteSpace(responseBody))
+                    {
+                        // Append response body to existing error or set it as the error
+                        error = string.IsNullOrWhiteSpace(error) ? responseBody : $"{error}; Response Body: {responseBody}";
+                    }
                 }
 
                 var logEntry = new RequestLogEntry
@@ -65,17 +65,33 @@ namespace Ce.Gateway.Api.Middleware
                     Id = Guid.NewGuid(),
                     CreatedAtUtc = DateTime.UtcNow,
                     TraceId = context.TraceIdentifier,
-                    Route = route,
-                    Method = context.Request.Method,
-                    Path = context.Request.Path,
-                    DownstreamNode = downstreamNode,
-                    StatusCode = statusCode,
-                    LatencyMs = stopwatch.ElapsedMilliseconds,
-                    ServiceApi = serviceApi,
-                    Client = context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                    RequestSize = context.Request.ContentLength ?? 0,
-                    ResponseSize = response?.Content?.Headers?.ContentLength ?? 0,
-                    Error = error ?? (context.Items.Errors().Any() ? string.Join("; ", context.Items.Errors().Select(e => e.Message)) : null)
+
+                    // Upstream Information
+                    UpstreamHost = context.Request.Host.Host,
+                    UpstreamPort = context.Request.Host.Port,
+                    UpstreamScheme = context.Request.Scheme,
+                    UpstreamHttpMethod = context.Request.Method,
+                    UpstreamPathTemplate = context.Items.DownstreamRoute()?.UpstreamPathTemplate.ToString(),
+                    UpstreamPath = context.Request.Path,
+                    UpstreamQueryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : null,
+                    UpstreamRequestSize = context.Request.ContentLength,
+                    UpstreamClientIp = context.Connection.RemoteIpAddress?.ToString(),
+
+                    // Downstream Information
+                    DownstreamScheme = request.RequestUri?.Scheme,
+                    DownstreamHost = request.RequestUri?.Host,
+                    DownstreamPort = request.RequestUri?.Port,
+                    DownstreamPathTemplate = context.Items.DownstreamRoute()?.DownstreamPathTemplate.ToString(),
+                    DownstreamPath = request.RequestUri?.AbsolutePath,
+                    DownstreamQueryString = request.RequestUri?.Query,
+                    DownstreamRequestSize = request.Content?.Headers?.ContentLength,
+                    DownstreamResponseSize = response?.Content?.Headers?.ContentLength,
+                    DownstreamStatusCode = (int?)response?.StatusCode,
+
+                    // Gateway Information
+                    GatewayLatencyMs = stopwatch.ElapsedMilliseconds,
+                    IsError = error != null || (response != null && !response.IsSuccessStatusCode) || context.Items.Errors().Any(), // Update IsError logic
+                    ErrorMessage = error ?? (context.Items.Errors().Any() ? string.Join("; ", context.Items.Errors().Select(e => e.Message)) : null)
                 };
 
                 // Fire and forget

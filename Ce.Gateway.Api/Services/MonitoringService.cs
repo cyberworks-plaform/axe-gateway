@@ -23,15 +23,33 @@ namespace Ce.Gateway.Api.Services
                 Id = entry.Id,
                 CreatedAtUtc = entry.CreatedAtUtc,
                 TraceId = entry.TraceId,
-                Route = entry.Route,
-                Method = entry.Method,
-                Path = entry.Path,
-                DownstreamNode = entry.DownstreamNode,
-                StatusCode = entry.StatusCode,
-                LatencyMs = entry.LatencyMs,
-                ServiceApi = entry.ServiceApi,
-                Client = entry.Client,
-                Error = entry.Error
+
+                // Upstream Information
+                UpstreamHost = entry.UpstreamHost,
+                UpstreamPort = entry.UpstreamPort,
+                UpstreamScheme = entry.UpstreamScheme,
+                UpstreamHttpMethod = entry.UpstreamHttpMethod,
+                UpstreamPathTemplate = entry.UpstreamPathTemplate,
+                UpstreamPath = entry.UpstreamPath,
+                UpstreamQueryString = entry.UpstreamQueryString,
+                UpstreamRequestSize = entry.UpstreamRequestSize,
+                UpstreamClientIp = entry.UpstreamClientIp,
+
+                // Downstream Information
+                DownstreamScheme = entry.DownstreamScheme,
+                DownstreamHost = entry.DownstreamHost,
+                DownstreamPort = entry.DownstreamPort,
+                DownstreamPathTemplate = entry.DownstreamPathTemplate,
+                DownstreamPath = entry.DownstreamPath,
+                DownstreamQueryString = entry.DownstreamQueryString,
+                DownstreamRequestSize = entry.DownstreamRequestSize,
+                DownstreamResponseSize = entry.DownstreamResponseSize,
+                DownstreamStatusCode = entry.DownstreamStatusCode,
+
+                // Gateway information
+                GatewayLatencyMs = entry.GatewayLatencyMs,
+                IsError = entry.IsError,
+                ErrorMessage = entry.ErrorMessage
             }).ToList();
 
             return new PaginatedResult<LogDto>

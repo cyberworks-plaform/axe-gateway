@@ -23,17 +23,21 @@ namespace Ce.Gateway.Api.Repositories
             IQueryable<RequestLogEntry> query = dbContext.OcrGatewayLogEntries.AsNoTracking();
 
             // Apply filters
-            if (!string.IsNullOrWhiteSpace(filter.Route))
+            if (!string.IsNullOrWhiteSpace(filter.UpstreamPathTemplate))
             {
-                query = query.Where(l => l.Route.Contains(filter.Route));
+                query = query.Where(l => l.UpstreamPathTemplate.Contains(filter.UpstreamPathTemplate));
             }
-            if (!string.IsNullOrWhiteSpace(filter.Node))
+            if (!string.IsNullOrWhiteSpace(filter.DownstreamHost))
             {
-                query = query.Where(l => l.DownstreamNode.Contains(filter.Node));
+                query = query.Where(l => l.DownstreamHost.Contains(filter.DownstreamHost));
             }
-            if (filter.StatusCode.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.UpstreamClientIp))
             {
-                query = query.Where(l => l.StatusCode == filter.StatusCode.Value);
+                query = query.Where(l => l.UpstreamClientIp.Contains(filter.UpstreamClientIp));
+            }
+            if (filter.DownstreamStatusCode.HasValue)
+            {
+                query = query.Where(l => l.DownstreamStatusCode == filter.DownstreamStatusCode.Value);
             }
             if (filter.From.HasValue)
             {

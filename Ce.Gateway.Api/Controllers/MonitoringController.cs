@@ -21,9 +21,10 @@ namespace Ce.Gateway.Api.Controllers
         public async Task<IActionResult> GetLogs(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 50,
-            [FromQuery] string route = null,
-            [FromQuery] string node = null,
-            [FromQuery] int? statusCode = null,
+            [FromQuery] string upstreamPathTemplate = null,
+            [FromQuery] string downstreamHost = null,
+            [FromQuery] string upstreamClientIp = null,
+            [FromQuery] int? downstreamStatusCode = null,
             [FromQuery] DateTime? from = null,
             [FromQuery] DateTime? to = null)
         {
@@ -33,9 +34,10 @@ namespace Ce.Gateway.Api.Controllers
 
             var filter = new LogFilter
             {
-                Route = route,
-                Node = node,
-                StatusCode = statusCode,
+                UpstreamPathTemplate = upstreamPathTemplate,
+                DownstreamHost = downstreamHost,
+                UpstreamClientIp = upstreamClientIp,
+                DownstreamStatusCode = downstreamStatusCode,
                 From = from,
                 To = to
             };

@@ -5,9 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorRateElem = document.getElementById('errorRate');
     const avgLatencyElem = document.getElementById('avgLatency');
 
-    const filterRoute = document.getElementById('filterRoute');
-    const filterNode = document.getElementById('filterNode');
-    const filterStatusCode = document.getElementById('filterStatusCode');
+    const filterUpstreamPathTemplate = document.getElementById('filterUpstreamPathTemplate');
+    const filterDownstreamHost = document.getElementById('filterDownstreamHost');
+    const filterDownstreamStatusCode = document.getElementById('filterDownstreamStatusCode');
+    const filterUpstreamClientIp = document.getElementById('filterUpstreamClientIp');
     const filterFrom = document.getElementById('filterFrom');
     const filterTo = document.getElementById('filterTo');
     const applyFiltersBtn = document.getElementById('applyFilters');
@@ -44,15 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSummary(data);
         } catch (error) {
             console.error('Error fetching logs:', error);
-            logTableBody.innerHTML = `<tr><td colspan="11" class="text-center text-danger">Error loading logs: ${error.message}</td></tr>`;
-            updateSummary({ totalCount: 0, errorCount: 0, totalLatency: 0 });
+            logTableBody.innerHTML = `<tr><td colspan="15" class="text-center text-danger">Error loading logs: ${error.message}</td></tr>`;
+            updateSummary({ totalCount: 0, data: [] }); // Pass empty data array to avoid errors
         }
     }
 
     function renderLogs(logs) {
         logTableBody.innerHTML = '';
         if (logs.length === 0) {
-            logTableBody.innerHTML = '<tr><td colspan="11" class="text-center">No log entries found.</td></tr>';
+            logTableBody.innerHTML = '<tr><td colspan="15" class="text-center">No log entries found.</td></tr>';
             return;
         }
 
@@ -61,15 +62,19 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td>${new Date(log.createdAtUtc).toLocaleString()}</td>
                 <td>${log.traceId}</td>
-                <td>${log.route}</td>
-                <td>${log.method}</td>
-                <td>${log.path}</td>
-                <td>${log.downstreamNode}</td>
-                <td><span class="badge bg-${log.statusCode >= 200 && log.statusCode < 300 ? 'success' : log.statusCode >= 400 && log.statusCode < 500 ? 'warning' : 'danger'}">${log.statusCode}</span></td>
-                <td>${log.latencyMs}</td>
-                <td>${log.serviceApi}</td>
-                <td>${log.client}</td>
-                <td>${log.error || '-'}</td>
+                <td>${log.upstreamHost || '-'}</td>
+                <td>${log.upstreamPort || '-'}</td>
+                <td>${log.upstreamHttpMethod || '-'}</td>
+                <td>${log.upstreamPath || '-'}</td>
+                <td>${log.upstreamPathTemplate || '-'}</td>
+                <td>${log.downstreamHost || '-'}</td>
+                <td>${log.downstreamPort || '-'}</td>
+                <td>${log.downstreamPathTemplate || '-'}</td>
+                <td><span class="badge bg-${log.downstreamStatusCode >= 200 && log.downstreamStatusCode < 300 ? 'success' : log.downstreamStatusCode >= 400 && log.downstreamStatusCode < 500 ? 'warning' : 'danger'}">${log.downstreamStatusCode || '-'}</span></td>
+                <td>${log.gatewayLatencyMs || '-'}</td>
+                <td>${log.upstreamClientIp || '-'}</td>
+                <td>${log.isError ? 'Yes' : 'No'}</td>
+                <td>${log.errorMessage || '-'}</td>
             `;
         });
     }
@@ -131,20 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSummary(data) {
         totalRequestsElem.textContent = data.totalCount;
 
-        const errorCount = data.data.filter(log => log.statusCode >= 400).length;
+        const errorCount = data.data.filter(log => log.isError).length;
         const errorRate = data.totalCount > 0 ? ((errorCount / data.totalCount) * 100).toFixed(2) : 0;
         errorRateElem.textContent = `${errorRate}%`;
 
-        const totalLatency = data.data.reduce((sum, log) => sum + log.latencyMs, 0);
+        const totalLatency = data.data.reduce((sum, log) => sum + log.gatewayLatencyMs, 0);
         const avgLatency = data.data.length > 0 ? (totalLatency / data.data.length).toFixed(0) : 0;
         avgLatencyElem.textContent = avgLatency;
     }
 
     function applyCurrentFilters() {
         currentFilters = {
-            route: filterRoute.value || undefined,
-            node: filterNode.value || undefined,
-            statusCode: filterStatusCode.value || undefined,
+            upstreamPathTemplate: filterUpstreamPathTemplate.value || undefined,
+            downstreamHost: filterDownstreamHost.value || undefined,
+            downstreamStatusCode: filterDownstreamStatusCode.value || undefined,
+            upstreamClientIp: filterUpstreamClientIp.value || undefined,
             from: filterFrom.value || undefined,
             to: filterTo.value || undefined,
         };
@@ -153,9 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearAllFilters() {
-        filterRoute.value = '';
-        filterNode.value = '';
-        filterStatusCode.value = '';
+        filterUpstreamPathTemplate.value = '';
+        filterDownstreamHost.value = '';
+        filterDownstreamStatusCode.value = '';
+        filterUpstreamClientIp.value = '';
         filterFrom.value = '';
         filterTo.value = '';
         applyCurrentFilters(); // Apply empty filters

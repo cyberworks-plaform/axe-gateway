@@ -47,16 +47,20 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label for="filterRoute" class="form-label">Route</label>
-                        <input type="text" class="form-control" id="filterRoute">
+                        <label for="filterUpstreamPathTemplate" class="form-label">Upstream Path Template</label>
+                        <input type="text" class="form-control" id="filterUpstreamPathTemplate">
                     </div>
                     <div class="col-md-3">
-                        <label for="filterNode" class="form-label">Node</label>
-                        <input type="text" class="form-control" id="filterNode">
+                        <label for="filterDownstreamHost" class="form-label">Downstream Host</label>
+                        <input type="text" class="form-control" id="filterDownstreamHost">
                     </div>
                     <div class="col-md-2">
-                        <label for="filterStatusCode" class="form-label">Status Code</label>
-                        <input type="number" class="form-control" id="filterStatusCode">
+                        <label for="filterDownstreamStatusCode" class="form-label">Downstream Status Code</label>
+                        <input type="number" class="form-control" id="filterDownstreamStatusCode">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="filterUpstreamClientIp" class="form-label">Upstream Client IP</label>
+                        <input type="text" class="form-control" id="filterUpstreamClientIp">
                     </div>
                     <div class="col-md-2">
                         <label for="filterFrom" class="form-label">From</label>
@@ -81,15 +85,19 @@
                     <tr>
                         <th>Time (UTC)</th>
                         <th>Trace ID</th>
-                        <th>Route</th>
-                        <th>Method</th>
-                        <th>Path</th>
-                        <th>Downstream Node</th>
-                        <th>Status</th>
-                        <th>Latency (ms)</th>
-                        <th>Service API</th>
-                        <th>Client</th>
-                        <th>Error</th>
+                        <th>Upstream Host</th>
+                        <th>Upstream Port</th>
+                        <th>Upstream Method</th>
+                        <th>Upstream Path</th>
+                        <th>Upstream Path Template</th>
+                        <th>Downstream Host</th>
+                        <th>Downstream Port</th>
+                        <th>Downstream Path Template</th>
+                        <th>Downstream Status Code</th>
+                        <th>Gateway Latency (ms)</th>
+                        <th>Upstream Client IP</th>
+                        <th>Is Error</th>
+                        <th>Error Message</th>
                     </tr>
                 </thead>
                 <tbody id="logTableBody">

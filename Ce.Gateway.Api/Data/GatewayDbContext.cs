@@ -19,8 +19,8 @@ namespace Ce.Gateway.Api.Data
             modelBuilder.Entity<RequestLogEntry>(entity =>
             {
                 entity.HasIndex(e => e.CreatedAtUtc);
-                entity.HasIndex(e => e.Route);
-                entity.HasIndex(e => e.DownstreamNode);
+                entity.HasIndex(e => e.UpstreamPathTemplate);
+                entity.HasIndex(e => e.DownstreamHost);
             });
         }
     }

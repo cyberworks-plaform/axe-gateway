@@ -8,16 +8,32 @@ namespace Ce.Gateway.Api.Entities
         public Guid Id { get; set; }
         public DateTime CreatedAtUtc { get; set; }
         public string TraceId { get; set; }
-        public string Route { get; set; }
-        public string Method { get; set; }
-        public string Path { get; set; }
-        public string DownstreamNode { get; set; }
-        public int StatusCode { get; set; }
-        public long LatencyMs { get; set; }
-        public string ServiceApi { get; set; }
-        public string Client { get; set; }
-        public long RequestSize { get; set; }
-        public long ResponseSize { get; set; }
-        public string Error { get; set; }
+
+        // Upstream information (from client to gateway)
+        public string UpstreamHost { get; set; }
+        public int? UpstreamPort { get; set; }
+        public string UpstreamScheme { get; set; }
+        public string UpstreamHttpMethod { get; set; }
+        public string UpstreamPathTemplate { get; set; } // The matched Ocelot route template
+        public string UpstreamPath { get; set; } // The actual request path
+        public string UpstreamQueryString { get; set; }
+        public long? UpstreamRequestSize { get; set; }
+        public string UpstreamClientIp { get; set; } // IP address or client name
+
+        // Downstream information (from gateway to service)
+        public string DownstreamScheme { get; set; }
+        public string DownstreamHost { get; set; }
+        public int? DownstreamPort { get; set; }
+        public string DownstreamPathTemplate { get; set; } // The Ocelot downstream template
+        public string DownstreamPath { get; set; } // The actual path requested to the downstream service
+        public string DownstreamQueryString { get; set; }
+        public long? DownstreamRequestSize { get; set; }
+        public long? DownstreamResponseSize { get; set; }
+        public int? DownstreamStatusCode { get; set; }
+        public long GatewayLatencyMs { get; set; } // Total time spent in the gateway, including DownstreamLatencyMs
+
+        // Gateway information
+        public bool IsError { get; set; }
+        public string ErrorMessage { get; set; }
     }
 }

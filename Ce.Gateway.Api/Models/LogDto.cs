@@ -7,14 +7,32 @@ namespace Ce.Gateway.Api.Models
         public Guid Id { get; set; }
         public DateTime CreatedAtUtc { get; set; }
         public string TraceId { get; set; }
-        public string Route { get; set; }
-        public string Method { get; set; }
-        public string Path { get; set; }
-        public string DownstreamNode { get; set; }
-        public int StatusCode { get; set; }
-        public long LatencyMs { get; set; }
-        public string ServiceApi { get; set; }
-        public string Client { get; set; }
-        public string Error { get; set; }
+
+        // Upstream information (from client to gateway)
+        public string UpstreamHost { get; set; }
+        public int? UpstreamPort { get; set; }
+        public string UpstreamScheme { get; set; }
+        public string UpstreamHttpMethod { get; set; }
+        public string UpstreamPathTemplate { get; set; }
+        public string UpstreamPath { get; set; }
+        public string UpstreamQueryString { get; set; }
+        public long? UpstreamRequestSize { get; set; }
+        public string UpstreamClientIp { get; set; }
+
+        // Downstream information (from gateway to service)
+        public string DownstreamScheme { get; set; }
+        public string DownstreamHost { get; set; }
+        public int? DownstreamPort { get; set; }
+        public string DownstreamPathTemplate { get; set; }
+        public string DownstreamPath { get; set; }
+        public string DownstreamQueryString { get; set; }
+        public long? DownstreamRequestSize { get; set; }
+        public long? DownstreamResponseSize { get; set; }
+        public int? DownstreamStatusCode { get; set; }
+
+        // Gateway information
+        public long GatewayLatencyMs { get; set; }
+        public bool IsError { get; set; }
+        public string ErrorMessage { get; set; }
     }
 }
