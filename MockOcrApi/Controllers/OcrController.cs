@@ -1,0 +1,61 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+
+namespace MockOcrApi.Controllers
+{
+    [ApiController]
+    [Route("ocr")]
+    public class OcrController : ControllerBase
+    {
+        private readonly ILogger<OcrController> _logger;
+        private static readonly Random _random = new Random();
+
+        public OcrController(ILogger<OcrController> logger)
+        {
+            _logger = logger;
+        }
+
+        [HttpGet("cccd")]
+        public async Task<IActionResult> GetCccd()
+        {
+            return await HandleOcrRequest("cccd");
+        }
+
+        [HttpGet("hopdong")]
+        public async Task<IActionResult> GetHopDong()
+        {
+            return await HandleOcrRequest("hopdong");
+        }
+
+        [HttpGet("summary")]
+        public async Task<IActionResult> GetSummary()
+        {
+            return await HandleOcrRequest("summary");
+        }
+
+        private async Task<IActionResult> HandleOcrRequest(string route)
+        {
+            var delay = _random.Next(100, 2000);
+            await Task.Delay(delay);
+
+            if (_random.NextDouble() < 0.05)
+            {
+                var errorMessage = "Mockup node return error when processing request";
+                _logger.LogInformation($"Route: /ocr/{route}, Delay: {delay}ms, Result: Error - {errorMessage}");
+                return StatusCode(500, errorMessage);
+            }
+            else if (_random.NextDouble() < 0.1)
+            {
+                var errorMessage = "Mockup ratelimit node return 423 code ";
+                _logger.LogInformation($"Route: /ocr/{route}, Delay: {delay}ms, Result: Error - {errorMessage}");
+                return StatusCode(423, errorMessage);
+            }
+
+            var result = new { status = "Success" };
+            _logger.LogInformation($"Route: /ocr/{route}, Delay: {delay}ms, Result: Success");
+            return Ok(result);
+        }
+    }
+}

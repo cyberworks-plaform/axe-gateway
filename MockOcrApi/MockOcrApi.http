@@ -1,0 +1,6 @@
+@MockOcrApi_HostAddress = http://localhost:10501
+
+GET {{MockOcrApi_HostAddress}}
+Accept: application/json
+
+###
