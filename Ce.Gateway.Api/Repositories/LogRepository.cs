@@ -24,10 +24,7 @@ namespace Ce.Gateway.Api.Repositories
             IQueryable<RequestLogEntry> query = dbContext.OcrGatewayLogEntries.AsNoTracking();
 
             // Apply filters
-            if (!string.IsNullOrWhiteSpace(filter.UpstreamPathTemplate))
-            {
-                query = query.Where(l => l.UpstreamPathTemplate.Contains(filter.UpstreamPathTemplate));
-            }
+
             if (!string.IsNullOrWhiteSpace(filter.DownstreamHost))
             {
                 query = query.Where(l => l.DownstreamHost.Contains(filter.DownstreamHost));

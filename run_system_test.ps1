@@ -1,3 +1,7 @@
+﻿param (
+    [int]$K6VUs = 1 # Default to 1 VU if not specified
+)
+
 # Define paths
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $gatewayApiPath = Join-Path $scriptDir "Ce.Gateway.Api"
@@ -11,23 +15,33 @@ $mockOcrPort1 = 10501
 $mockOcrPort2 = 10502
 
 function Stop-ProcessUsingPort {
-    param (
-        [int]$Port
-    )
+    param ([int]$Port)
 
-    Write-Host "Checking if port $Port is in use..."
-    $processId = (netstat -ano | Select-String -Pattern ":$Port\s+LISTENING" | ForEach-Object { $_ -match '(\d+)$' | Out-Null; $matches[1] } | Select-Object -First 1)
+    Write-Host "`n🔍 Checking and clearing all processes related to port $Port..."
 
-    if ($processId) {
-        Write-Warning "Port $Port is in use by process with PID: $processId. Attempting to stop it."
-        try {
-            Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
-            Write-Host "Successfully stopped process with PID: $processId."
-            # Give it a moment to release the port
-            Start-Sleep -Seconds 2
-        } catch {
-            Write-Error "Failed to stop process with PID: $processId. Error: $($_.Exception.Message)"
-            return $false
+    $processIds = (netstat -ano |
+        Select-String -Pattern ":$Port\s+" |
+        ForEach-Object { $_ -match '(\d+)$' | Out-Null; $matches[1] } |
+        Where-Object { $_ -ne 0 -and $_ -ne 4 } |
+        Select-Object -Unique)
+
+    if ($processIds.Count -gt 0) {
+        foreach ($processId in $processIds) {
+            Write-Warning "Port $Port is in use by process with PID: $processId. Attempting to terminate its process tree."
+            try {
+                # Use taskkill to terminate the process and its children
+                $taskkillResult = cmd /c "taskkill /F /T /PID $processId 2>&1"
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warning "taskkill for PID $processId failed: $taskkillResult"
+                } else {
+                    Write-Host "Successfully terminated process tree for PID: $processId (Port: $Port)."
+                }
+                # Give it a moment to release the port
+                Start-Sleep -Seconds 2
+            } catch {
+                Write-Error "Failed to terminate process tree for PID: $processId. Error: $($_.Exception.Message)"
+                return $false
+            }
         }
     } else {
         Write-Host "Port $Port is free."
@@ -47,101 +61,124 @@ function Start-DotNetApi {
         [string]$LogFilePath = $null
     )
 
-    Write-Host "Starting $ApiName on port $Port..."
+    Write-Host "`n🚀 Starting $ApiName on port $Port..."
 
-    # Use `Start-Process` to run dotnet in a new, hidden window
-    # We need to wrap the dotnet command in `powershell -Command` to ensure proper execution and output redirection
-    $dotnetCommand = "dotnet run --project `"$ProjectPath`" --urls http://localhost:$Port"
+    $env:ASPNETCORE_URLS = "http://localhost:$Port"
+    $env:ASPNETCORE_ENVIRONMENT = "Development"
 
+    $arguments = "run --no-launch-profile --project `"$ProjectPath`" --urls http://localhost:$Port"
     if ($LogFilePath) {
-        $commandArgs = "-NoExit -Command `"$dotnetCommand | Out-File -FilePath `"$LogFilePath`" -Append`""
-    } else {
-        $commandArgs = "-NoExit -Command `"$dotnetCommand`""
+        $arguments += " >> `"$LogFilePath`" 2>&1"
     }
 
-    $process = Start-Process powershell -ArgumentList $commandArgs -PassThru -NoNewWindow
+    # Khởi động tiến trình và không chiếm console
+    $process = Start-Process dotnet -ArgumentList $arguments -PassThru -WindowStyle Hidden -ErrorAction SilentlyContinue
 
-    if ($process) {
-        $processesToClean += $process.Id
-        Write-Host "$ApiName started with PID: $($process.Id)"
-        # Give it some time to fully initialize
-        Start-Sleep -Seconds 15 # Increased sleep time
+    Remove-Item Env:ASPNETCORE_URLS -ErrorAction SilentlyContinue
+    Remove-Item Env:ASPNETCORE_ENVIRONMENT -ErrorAction SilentlyContinue
 
-        # Assume it's running if dotnet run didn't immediately fail and we got a PID
-        Write-Host "$ApiName assumed to be running on port $Port."
-        return $true
-    } else {
-        Write-Error "Failed to start $ApiName."
-        return $false
+    if (-not $process) {
+        throw ("❌ Failed to start {0} on port {1}" -f $ApiName, $Port)
     }
-}
 
-# Cleanup function
-function Stop-Processes {
-    param (
-        [int[]]$Pids
-    )
-    Write-Host "Cleaning up processes..."
-    foreach ($pid in $Pids) {
+    Write-Host "⏳ Waiting for $ApiName to initialize (PID: $($process.Id))..."
+    Start-Sleep -Seconds 3
+
+    # Thử kiểm tra nhiều cách
+    $maxAttempts = 30
+    $isReady = $false
+    for ($i = 0; $i -lt $maxAttempts; $i++) {
+        # 1️⃣ Ưu tiên Test-NetConnection nếu có
         try {
-            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
-            Write-Host "Stopped process with PID: $pid"
-        } catch {
-            Write-Warning "Could not stop process with PID: $pid. Error: $($_.Exception.Message)"
-        }
-    }
-}
-
-# --- Main Script Logic ---
-try {
-    # Pre-check and kill processes using ports
-    if (-not (Stop-ProcessUsingPort -Port $mockOcrPort1)) { throw "Failed to clear port $mockOcrPort1." }
-    if (-not (Stop-ProcessUsingPort -Port $mockOcrPort2)) { throw "Failed to clear port $mockOcrPort2." }
-    if (-not (Stop-ProcessUsingPort -Port $gatewayPort)) { throw "Failed to clear port $gatewayPort." }
-
-    # 1. Start Mock APIs
-    if (-not (Start-DotNetApi -ProjectPath $mockOcrApiPath -Port $mockOcrPort1 -ApiName "Mock OCR API 1")) {
-        throw "Mock OCR API 1 failed to start."
-    }
-    if (-not (Start-DotNetApi -ProjectPath $mockOcrApiPath -Port $mockOcrPort2 -ApiName "Mock OCR API 2")) {
-        throw "Mock OCR API 2 failed to start."
-    }
-
-    # 2. Start Gateway API
-    if (-not (Start-DotNetApi -ProjectPath $gatewayApiPath -Port $gatewayPort -ApiName "Gateway API" -LogFilePath $gatewayLogPath)) {
-        throw "Gateway API failed to start."
-    }
-
-    # 3. Run k6 Test
-    Write-Host "Running k6 test..."
-    # Ensure k6 is in your PATH or provide the full path to k6.exe
-    $k6Result = & k6 run $k6ScriptPath
-    Write-Host "k6 test completed."
-    Write-Output $k6Result
-
-    # 4. Monitor Gateway API Logs for errors
-    Write-Host "Analyzing Gateway API logs for errors..."
-    if (Test-Path $gatewayLogPath) {
-        $logContent = Get-Content $gatewayLogPath
-        $errorPatterns = @("error", "fail", "exception", "500 Internal Server Error")
-        $foundErrors = $false
-        foreach ($pattern in $errorPatterns) {
-            if ($logContent | Select-String -Pattern $pattern -CaseSensitive -Quiet) {
-                Write-Warning "Found potential error pattern '$pattern' in Gateway API logs."
-                $logContent | Select-String -Pattern $pattern -CaseSensitive | ForEach-Object { Write-Output $_.Line }
-                $foundErrors = $true
+            $conn = Test-NetConnection -ComputerName "localhost" -Port $Port -WarningAction SilentlyContinue
+            if ($conn.TcpTestSucceeded) {
+                $isReady = $true
+                break
             }
+        } catch { }
+
+        # 2️⃣ Fallback bằng netstat nếu Test-NetConnection bị chặn
+        $isListening = (netstat -ano | Select-String -Pattern ":$Port\s+LISTENING")
+        if ($isListening) {
+            $isReady = $true
+            break
         }
-        if (-not $foundErrors) {
-            Write-Host "No obvious error patterns found in Gateway API logs."
-        }
-    } else {
-        Write-Warning "Gateway API log file not found at $gatewayLogPath."
+
+        Start-Sleep -Seconds 1
     }
 
-} catch {
-    Write-Error "An error occurred during the test execution: $($_.Exception.Message)"
-} finally {
-    Stop-Processes -Pids $processesToClean
-    Write-Host "Test script finished."
+    if ($isReady) {
+        Write-Host ("✅ {0} is listening on port {1} (PID: {2})" -f $ApiName, $Port, $process.Id)
+        Start-Sleep -Seconds 1
+        return $process
+    } else {
+        throw ("❌ Failed to confirm {0} is listening on port {1} after multiple attempts. Check logs for details." -f $ApiName, $Port)
+    }
 }
+# ==========================
+# 🧹 CLEANUP HANDLER
+# ==========================
+
+$processesToClean = @()
+
+function Cleanup {
+    Write-Host "`n🧹 Cleaning up all processes and ports..."
+    foreach ($procId in $processesToClean) {
+        try {
+            $proc = Get-Process -Id $procId -ErrorAction SilentlyContinue
+            if ($null -ne $proc) {
+                Write-Host ("🧨 Terminating PID {0} ({1})..." -f $procId, $proc.ProcessName)
+                Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+                cmd /c "taskkill /F /T /PID $procId" | Out-Null
+                Start-Sleep -Milliseconds 500
+            } else {
+                Write-Host ("PID {0} already terminated." -f $procId)
+            }
+        } catch {
+            $errMsg = $_.Exception.Message
+            Write-Warning ("⚠️ Unable to terminate PID {0}: {1}" -f $procId, $errMsg)
+        }
+    }
+
+    Stop-ProcessUsingPort $gatewayPort
+    Stop-ProcessUsingPort $mockOcrPort1
+    Stop-ProcessUsingPort $mockOcrPort2
+
+    Write-Host "✅ Cleanup completed."
+}
+
+Register-EngineEvent PowerShell.Exiting -Action { Cleanup }
+
+# ==========================
+# 🚦 MAIN FLOW
+# ==========================
+
+Write-Host "`n==============================="
+Write-Host "🧪 Starting Automated Test Setup"
+Write-Host "==============================="
+
+Stop-ProcessUsingPort $gatewayPort
+Stop-ProcessUsingPort $mockOcrPort1
+Stop-ProcessUsingPort $mockOcrPort2
+
+$mock1 = Start-DotNetApi -ProjectPath $mockOcrApiPath -Port $mockOcrPort1 -ApiName "Mock OCR API 1"
+$mock2 = Start-DotNetApi -ProjectPath $mockOcrApiPath -Port $mockOcrPort2 -ApiName "Mock OCR API 2"
+$gateway = Start-DotNetApi -ProjectPath $gatewayApiPath -Port $gatewayPort -ApiName "Gateway API" -LogFilePath $gatewayLogPath
+
+$processesToClean += @($mock1.Id, $mock2.Id, $gateway.Id)
+
+# ==========================
+# ▶️ RUN LOAD TEST (K6)
+# ==========================
+if (Test-Path $k6ScriptPath) {
+    Write-Host "`n⚙️ Running K6 load test with $K6VUs Virtual Users..."
+    & k6 run --vus $K6VUs --iterations $K6VUs $k6ScriptPath
+} else {
+    Write-Warning "⚠️ K6 script not found: $k6ScriptPath"
+}
+
+
+
+Write-Host "`n🎯 All tests finished successfully!"
+Write-Host "You can now safely run Visual Studio debugging."
+Start-Sleep -Seconds 5

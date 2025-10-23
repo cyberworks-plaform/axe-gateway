@@ -13,7 +13,6 @@ namespace Ce.Gateway.Api.Models
         public int? UpstreamPort { get; set; }
         public string UpstreamScheme { get; set; }
         public string UpstreamHttpMethod { get; set; }
-        public string UpstreamPathTemplate { get; set; }
         public string UpstreamPath { get; set; }
         public string UpstreamQueryString { get; set; }
         public long? UpstreamRequestSize { get; set; }
@@ -23,7 +22,6 @@ namespace Ce.Gateway.Api.Models
         public string DownstreamScheme { get; set; }
         public string DownstreamHost { get; set; }
         public int? DownstreamPort { get; set; }
-        public string DownstreamPathTemplate { get; set; }
         public string DownstreamPath { get; set; }
         public string DownstreamQueryString { get; set; }
         public long? DownstreamRequestSize { get; set; }

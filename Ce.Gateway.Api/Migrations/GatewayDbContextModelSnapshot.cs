@@ -32,9 +32,6 @@ namespace Ce.Gateway.Api.Migrations
                     b.Property<string>("DownstreamPath")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DownstreamPathTemplate")
-                        .HasColumnType("TEXT");
-
                     b.Property<int?>("DownstreamPort")
                         .HasColumnType("INTEGER");
 
@@ -77,9 +74,6 @@ namespace Ce.Gateway.Api.Migrations
                     b.Property<string>("UpstreamPath")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UpstreamPathTemplate")
-                        .HasColumnType("TEXT");
-
                     b.Property<int?>("UpstreamPort")
                         .HasColumnType("INTEGER");
 
@@ -97,8 +91,6 @@ namespace Ce.Gateway.Api.Migrations
                     b.HasIndex("CreatedAtUtc");
 
                     b.HasIndex("DownstreamHost");
-
-                    b.HasIndex("UpstreamPathTemplate");
 
                     b.ToTable("OcrGatewayLogEntries");
                 });

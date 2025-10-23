@@ -14,7 +14,6 @@ namespace Ce.Gateway.Api.Entities
         public int? UpstreamPort { get; set; }
         public string UpstreamScheme { get; set; }
         public string UpstreamHttpMethod { get; set; }
-        public string UpstreamPathTemplate { get; set; } // The matched Ocelot route template
         public string UpstreamPath { get; set; } // The actual request path
         public string UpstreamQueryString { get; set; }
         public long? UpstreamRequestSize { get; set; }
@@ -24,7 +23,6 @@ namespace Ce.Gateway.Api.Entities
         public string DownstreamScheme { get; set; }
         public string DownstreamHost { get; set; }
         public int? DownstreamPort { get; set; }
-        public string DownstreamPathTemplate { get; set; } // The Ocelot downstream template
         public string DownstreamPath { get; set; } // The actual path requested to the downstream service
         public string DownstreamQueryString { get; set; }
         public long? DownstreamRequestSize { get; set; }

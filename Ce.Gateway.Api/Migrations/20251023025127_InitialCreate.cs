@@ -22,7 +22,6 @@ namespace Ce.Gateway.Api.Migrations
                     UpstreamPort = table.Column<int>(type: "INTEGER", nullable: true),
                     UpstreamScheme = table.Column<string>(type: "TEXT", nullable: true),
                     UpstreamHttpMethod = table.Column<string>(type: "TEXT", nullable: true),
-                    UpstreamPathTemplate = table.Column<string>(type: "TEXT", nullable: true),
                     UpstreamPath = table.Column<string>(type: "TEXT", nullable: true),
                     UpstreamQueryString = table.Column<string>(type: "TEXT", nullable: true),
                     UpstreamRequestSize = table.Column<long>(type: "INTEGER", nullable: true),
@@ -30,7 +29,6 @@ namespace Ce.Gateway.Api.Migrations
                     DownstreamScheme = table.Column<string>(type: "TEXT", nullable: true),
                     DownstreamHost = table.Column<string>(type: "TEXT", nullable: true),
                     DownstreamPort = table.Column<int>(type: "INTEGER", nullable: true),
-                    DownstreamPathTemplate = table.Column<string>(type: "TEXT", nullable: true),
                     DownstreamPath = table.Column<string>(type: "TEXT", nullable: true),
                     DownstreamQueryString = table.Column<string>(type: "TEXT", nullable: true),
                     DownstreamRequestSize = table.Column<long>(type: "INTEGER", nullable: true),
@@ -54,11 +52,6 @@ namespace Ce.Gateway.Api.Migrations
                 name: "IX_OcrGatewayLogEntries_DownstreamHost",
                 table: "OcrGatewayLogEntries",
                 column: "DownstreamHost");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OcrGatewayLogEntries_UpstreamPathTemplate",
-                table: "OcrGatewayLogEntries",
-                column: "UpstreamPathTemplate");
         }
 
         /// <inheritdoc />

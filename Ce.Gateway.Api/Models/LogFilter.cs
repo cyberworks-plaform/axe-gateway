@@ -4,7 +4,7 @@ namespace Ce.Gateway.Api.Models
 {
     public class LogFilter
     {
-        public string UpstreamPathTemplate { get; set; }
+
         public string DownstreamHost { get; set; }
         public string UpstreamClientIp { get; set; }
         public int? DownstreamStatusCode { get; set; }

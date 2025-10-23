@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ce.Gateway.Api.Migrations
 {
     [DbContext(typeof(GatewayDbContext))]
-    [Migration("20251022111350_InitialCreate")]
+    [Migration("20251023025127_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,9 +33,6 @@ namespace Ce.Gateway.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DownstreamPath")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DownstreamPathTemplate")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("DownstreamPort")
@@ -80,9 +77,6 @@ namespace Ce.Gateway.Api.Migrations
                     b.Property<string>("UpstreamPath")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UpstreamPathTemplate")
-                        .HasColumnType("TEXT");
-
                     b.Property<int?>("UpstreamPort")
                         .HasColumnType("INTEGER");
 
@@ -100,8 +94,6 @@ namespace Ce.Gateway.Api.Migrations
                     b.HasIndex("CreatedAtUtc");
 
                     b.HasIndex("DownstreamHost");
-
-                    b.HasIndex("UpstreamPathTemplate");
 
                     b.ToTable("OcrGatewayLogEntries");
                 });

@@ -2,8 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export const options = {
-  vus: 100,
-  iterations: 100, // Each VU runs once
+    
   // No duration needed as iterations will control the test length
 };
 
