@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Ce.Gateway.Api.Entities;
 
-namespace Ce.Gateway.Api.Repositories
+namespace Ce.Gateway.Api.Repositories.Interface
 {
     public interface ILogWriter
     {

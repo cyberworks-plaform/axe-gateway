@@ -5,12 +5,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Ce.Gateway.Api.Entities;
-using Ce.Gateway.Api.Repositories;
 using Microsoft.AspNetCore.Http;
 using Ocelot.Middleware;
-using Ocelot.DownstreamRouteFinder.UrlMatcher;
-using Ocelot.Configuration;
-using Ocelot.Request.Middleware; // Add this using statement
+using Ce.Gateway.Api.Repositories.Interface; // Add this using statement
 
 namespace Ce.Gateway.Api.Middleware
 {

@@ -1,6 +1,7 @@
 using Ce.Gateway.Api.Data;
 using Ce.Gateway.Api.Entities;
 using Ce.Gateway.Api.Models;
+using Ce.Gateway.Api.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Ce.Gateway.Api.Data;
 using Ce.Gateway.Api.Entities;
+using Ce.Gateway.Api.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ce.Gateway.Api.Repositories

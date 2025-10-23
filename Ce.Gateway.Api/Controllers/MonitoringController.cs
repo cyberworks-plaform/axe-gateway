@@ -1,5 +1,5 @@
 using Ce.Gateway.Api.Models;
-using Ce.Gateway.Api.Services;
+using Ce.Gateway.Api.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;

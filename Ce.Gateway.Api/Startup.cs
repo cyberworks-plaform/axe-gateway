@@ -2,7 +2,9 @@
 using Ce.Gateway.Api.Data;
 using Ce.Gateway.Api.Middleware;
 using Ce.Gateway.Api.Repositories;
+using Ce.Gateway.Api.Repositories.Interface;
 using Ce.Gateway.Api.Services;
+using Ce.Gateway.Api.Services.Interface;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;

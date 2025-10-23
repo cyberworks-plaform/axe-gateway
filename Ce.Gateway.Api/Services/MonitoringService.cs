@@ -1,5 +1,6 @@
 using Ce.Gateway.Api.Models;
-using Ce.Gateway.Api.Repositories;
+using Ce.Gateway.Api.Repositories.Interface;
+using Ce.Gateway.Api.Services.Interface;
 using System.Linq;
 using System.Threading.Tasks;
 
