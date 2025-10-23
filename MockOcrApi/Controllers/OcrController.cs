@@ -17,6 +17,12 @@ namespace MockOcrApi.Controllers
             _logger = logger;
         }
 
+        [HttpPost("process")]
+        public async Task<IActionResult> ProcessOcr([FromBody] OcrRequestDto request)
+        {
+            return await HandleOcrRequest($"process (FileId: {request.FileId}, FilePath: {request.FilePath})");
+        }
+
         [HttpGet("cccd")]
         public async Task<IActionResult> GetCccd()
         {
@@ -58,4 +64,10 @@ namespace MockOcrApi.Controllers
             return Ok(result);
         }
     }
+}
+
+public class OcrRequestDto
+{
+    public string FileId { get; set; }
+    public string FilePath { get; set; }
 }
