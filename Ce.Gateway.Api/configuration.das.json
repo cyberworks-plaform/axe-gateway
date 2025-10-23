@@ -1,0 +1,52 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+		{          "Host": "10.10.1.80",    "Port": 8001        },
+		{          "Host": "10.10.1.180",    "Port": 8001        }
+      ],
+	  
+      "UpstreamPathTemplate": "/gateway/axsdk-api/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
+	  "LoadBalancerOptions": {
+			"Type": "LeastConnection"
+		},
+      "DangerousAcceptAnyServerCertificateValidator": true,
+	  "QoSOptions": {
+		"TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
+		"ExceptionsAllowedBeforeBreaking": 2, // Sau 10 lỗi thì ngắt mạch
+		"DurationOfBreak": 5000 // Ngắt mạch 5s
+		}
+    },
+    {
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+	  	{          "Host": "10.10.1.181",    "Port": 8001        },
+		{          "Host": "10.10.1.182",    "Port": 8001        },
+		{          "Host": "10.10.1.183",    "Port": 8001        },
+		{          "Host": "10.10.1.184",    "Port": 8001        },
+		{          "Host": "10.10.1.185",    "Port": 8001        },
+		{          "Host": "10.10.1.186",    "Port": 8001        }
+		
+      ],
+	  
+      "UpstreamPathTemplate": "/gateway/axsdk-api-background/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
+	  "LoadBalancerOptions": {
+			"Type": "LeastConnection"
+		},
+      "DangerousAcceptAnyServerCertificateValidator": true,
+	  "QoSOptions": {
+		"TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
+		"ExceptionsAllowedBeforeBreaking": 2, // Sau 10 lỗi thì ngắt mạch
+		"DurationOfBreak": 5000 // Ngắt mạch 5s
+		}
+    },
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:8801"
+  }
+}

@@ -2,21 +2,29 @@
   "Routes": [
     {
       "DownstreamPathTemplate": "/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44335
+          "Port": 10501
+        },
+        {
+          "Host": "localhost",
+          "Port": 10502
         }
       ],
-      "UpstreamPathTemplate": "/gateway/test/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
+      "UpstreamPathTemplate": "/gateway/axsdk-api/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
       "DangerousAcceptAnyServerCertificateValidator": true,
       "QoSOptions": {
-        "TimeoutValue": 300, // 300 mili giây
-        "ExceptionsAllowedBeforeBreaking": 2, // Sau 2 lỗi thì ngắt mạch
+        "TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
+        "ExceptionsAllowedBeforeBreaking": 2, // Sau 10 lỗi thì ngắt mạch
         "DurationOfBreak": 5000 // Ngắt mạch 5s
       }
+
     },
     {
       "DownstreamPathTemplate": "/{everything}",
@@ -31,30 +39,18 @@
           "Port": 10502
         }
       ],
-      "UpstreamPathTemplate": "/gateway/axsdk-api/manual/{everything}",
+      "UpstreamPathTemplate": "/gateway/axsdk-api-background/{everything}", // route này dùng cho background chạy ocr
       "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
       "LoadBalancerOptions": {
-        "Type": "RoundRobin"
+        "Type": "LeastConnection"
+      },
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "QoSOptions": {
+        "TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
+        "ExceptionsAllowedBeforeBreaking": 2, // Sau 10 lỗi thì ngắt mạch
+        "DurationOfBreak": 5000 // Ngắt mạch 5s
       }
-    },
-    {
-      "DownstreamPathTemplate": "/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 10501
-        },
-        {
-          "Host": "localhost",
-          "Port": 10502
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/axsdk-api/auto/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
-      "LoadBalancerOptions": {
-        "Type": "RoundRobin"
-      }
+
     },
     {
       "DownstreamPathTemplate": "/api/auth/{everything}",
