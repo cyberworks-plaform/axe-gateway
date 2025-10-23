@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorRateElem = document.getElementById('errorRate');
     const avgLatencyElem = document.getElementById('avgLatency');
 
-    const filterUpstreamPathTemplate = document.getElementById('filterUpstreamPathTemplate');
     const filterDownstreamHost = document.getElementById('filterDownstreamHost');
     const filterDownstreamStatusCode = document.getElementById('filterDownstreamStatusCode');
     const filterUpstreamClientIp = document.getElementById('filterUpstreamClientIp');
@@ -66,15 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${log.upstreamPort || '-'}</td>
                 <td>${log.upstreamHttpMethod || '-'}</td>
                 <td>${log.upstreamPath || '-'}</td>
-                <td>${log.upstreamPathTemplate || '-'}</td>
                 <td>${log.downstreamHost || '-'}</td>
                 <td>${log.downstreamPort || '-'}</td>
-                <td>${log.downstreamPathTemplate || '-'}</td>
                 <td><span class="badge bg-${log.downstreamStatusCode >= 200 && log.downstreamStatusCode < 300 ? 'success' : log.downstreamStatusCode >= 400 && log.downstreamStatusCode < 500 ? 'warning' : 'danger'}">${log.downstreamStatusCode || '-'}</span></td>
                 <td>${log.gatewayLatencyMs || '-'}</td>
                 <td>${log.upstreamClientIp || '-'}</td>
                 <td>${log.isError ? 'Yes' : 'No'}</td>
                 <td>${log.errorMessage || '-'}</td>
+                <td>${log.requestBody || '-'}</td>
             `;
         });
     }
@@ -147,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyCurrentFilters() {
         currentFilters = {
-            upstreamPathTemplate: filterUpstreamPathTemplate.value || undefined,
             downstreamHost: filterDownstreamHost.value || undefined,
             downstreamStatusCode: filterDownstreamStatusCode.value || undefined,
             upstreamClientIp: filterUpstreamClientIp.value || undefined,
@@ -159,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearAllFilters() {
-        filterUpstreamPathTemplate.value = '';
         filterDownstreamHost.value = '';
         filterDownstreamStatusCode.value = '';
         filterUpstreamClientIp.value = '';

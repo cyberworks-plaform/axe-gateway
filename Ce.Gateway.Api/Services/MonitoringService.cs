@@ -48,7 +48,8 @@ namespace Ce.Gateway.Api.Services
                 // Gateway information
                 GatewayLatencyMs = entry.GatewayLatencyMs,
                 IsError = entry.IsError,
-                ErrorMessage = entry.ErrorMessage
+                ErrorMessage = entry.ErrorMessage,
+                RequestBody = entry.RequestBody
             }).ToList();
 
             return new PaginatedResult<LogDto>

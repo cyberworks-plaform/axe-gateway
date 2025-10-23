@@ -32,5 +32,6 @@ namespace Ce.Gateway.Api.Models
         public long GatewayLatencyMs { get; set; }
         public bool IsError { get; set; }
         public string ErrorMessage { get; set; }
+        public string RequestBody { get; set; }
     }
 }

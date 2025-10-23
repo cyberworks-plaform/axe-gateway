@@ -33,5 +33,6 @@ namespace Ce.Gateway.Api.Entities
         // Gateway information
         public bool IsError { get; set; }
         public string ErrorMessage { get; set; }
+        public string RequestBody { get; set; }
     }
 }
