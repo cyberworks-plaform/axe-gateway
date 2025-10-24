@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>OCR Gateway Monitoring - Prototype</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{ --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#22c55e; --danger:#ef4444; --glass: rgba(255,255,255,0.03);}
+    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:linear-gradient(180deg,#071024 0%, #0b1220 100%); color:#e6eef6;}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.03);}
+    h1{font-size:18px;margin:0}
+    .container{display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px;}
+    .sidebar{background:var(--card);padding:12px;border-radius:10px;height:calc(100vh - 100px);overflow:auto}
+    .card{background:var(--glass); padding:12px;border-radius:10px; margin-bottom:12px; box-shadow: 0 6px 18px rgba(2,6,23,0.6);}
+    .small{font-size:12px;color:var(--muted)}
+    .metric{display:flex;gap:12px;align-items:center}
+    .metric .num{font-weight:700;font-size:20px}
+    .nodes-list{font-size:13px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;text-align:left;font-size:13px}
+    th{color:var(--muted);font-weight:600}
+    tr:nth-child(odd) td{background:rgba(255,255,255,0.01)}
+    .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}
+    .up{background:#10b981} .down{background:#ef4444} .deg{background:#f59e0b}
+    .logs-table tbody tr{cursor:pointer}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+    .btn{background:#0b1220;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    .chips{display:flex;gap:6px;flex-wrap:wrap}
+    .chip{padding:6px 8px;background:rgba(255,255,255,0.02);border-radius:6px;font-size:12px}
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(rgba(2,6,23,0.6),rgba(2,6,23,0.6));}
+    .modal .box{width:900px;max-height:80vh;overflow:auto;background:#081227;padding:16px;border-radius:10px}
+    .muted{color:var(--muted)}
+    .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+    .kpi{background:#071226;padding:10px;border-radius:8px}
+    @media (max-width:900px){ .container{grid-template-columns:1fr; } .sidebar{height:auto} .kpi-grid{grid-template-columns:repeat(2,1fr);} }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>OCR Gateway Monitoring — Prototype</h1>
+    <div class="small">Admin • <span id="server-time">--</span></div>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="card">
+        <div class="small">Overview</div>
+        <div style="margin-top:8px" class="metric">
+          <div>
+            <div class="num" id="total-rps">-</div>
+            <div class="small">RPS</div>
+          </div>
+          <div>
+            <div class="num" id="total-requests">-</div>
+            <div class="small">Requests (1h)</div>
+          </div>
+          <div>
+            <div class="num" id="error-rate">-</div>
+            <div class="small">Error %</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="small">Routes</div>
+        <div style="margin-top:8px">
+          <div class="chips" id="routes-chips"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="small">Downstream Nodes</div>
+        <div style="margin-top:8px" class="nodes-list" id="nodes-list">
+          <!-- nodes here -->
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="small">Live Filters</div>
+        <div class="filters" style="margin-top:8px">
+          <select id="filter-route" class="btn">
+            <option value="">All routes</option>
+          </select>
+          <select id="filter-status" class="btn">
+            <option value="">All status</option>
+            <option value="2">2xx</option>
+            <option value="4">4xx</option>
+            <option value="5">5xx</option>
+          </select>
+          <button class="btn" id="btn-tail">Tail</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>Overview metrics</b><div class="small">RPS, latency, errors</div></div>
+          <div><small class="muted">Window:</small> <select id="overview-window" class="btn"><option>1m</option><option selected>5m</option><option>30m</option><option>1h</option><option>1d</option></select></div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <div style="flex:1;padding:8px" class="card">
+            <canvas id="rpsChart" height="120"></canvas>
+          </div>
+          <div style="flex:1;padding:8px" class="card">
+            <canvas id="latencyChart" height="120"></canvas>
+          </div>
+          <div style="width:260px;padding:8px" class="card">
+            <div class="small">Status distribution</div>
+            <canvas id="statusChart" height="160"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>Downstream nodes detail</b><div class="small">latency / success / requests</div></div>
+          <div><button id="refresh-btn" class="btn">Refresh</button></div>
+        </div>
+        <div style="margin-top:12px">
+          <table>
+            <thead><tr><th>Node</th><th>Route(s)</th><th>Status</th><th>Avg Latency (ms)</th><th>Req/hr</th></tr></thead>
+            <tbody id="nodes-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>Recent Errors</b><div class="small">click a row to see details</div></div>
+          <div><div class="small">Show last <select id="errors-window"><option>1h</option><option selected>6h</option><option>24h</option></select></div></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <table class="logs-table">
+            <thead><tr><th>Time</th><th>Route</th><th>Node</th><th>Status</th><th>Latency ms</th><th>CorrelationId</th></tr></thead>
+            <tbody id="errors-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="detailModal">
+    <div class="box">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><b>Request Detail</b><div class="small muted" id="detail-sub"></div></div>
+        <div><button class="btn" onclick="closeModal()">Close</button></div>
+      </div>
+
+      <div class="kpi-grid" style="margin-top:12px">
+        <div class="kpi"><div class="small">Status</div><div id="det-status" style="font-weight:700"></div></div>
+        <div class="kpi"><div class="small">Latency</div><div id="det-lat">- ms</div></div>
+        <div class="kpi"><div class="small">Downstream</div><div id="det-node">-</div></div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="small">Upstream Request</div>
+        <pre id="det-up" style="white-space:pre-wrap;background:#061323;padding:8px;border-radius:6px;max-height:160px;overflow:auto"></pre>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="small">Downstream Response</div>
+        <pre id="det-down" style="white-space:pre-wrap;background:#061323;padding:8px;border-radius:6px;max-height:260px;overflow:auto"></pre>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* -------------------------
+   Fake data generator (demo)
+   Replace fetchFakeData() with real API calls like:
+   fetch('/api/monitoring/overview?window=5m').then(r=>r.json())
+----------------------------*/
+
+function nowIso(){return new Date().toISOString().replace('T',' ').slice(0,19);}
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+const ROUTES = ['/api/ocr/hopdong','/api/ocr/giaykhaisinh','/api/ocr/summary','/api/ocr/spellcheck'];
+const NODES = [
+  {id:'ocr-node-1','addr':'10.0.0.11:5000','routes':['/api/ocr/hopdong','/api/ocr/summary'],status:'up'},
+  {id:'ocr-node-2','addr':'10.0.0.12:5000','routes':['/api/ocr/giaykhaisinh','/api/ocr/spellcheck'],status:'up'},
+  {id:'ocr-node-3','addr':'10.0.0.13:5000','routes':['/api/ocr/hopdong'],status:'down'}
+];
+
+function fakeOverview(windowKey){
+  // return rps timeseries + latency timeseries + status dist
+  const labels = Array.from({length:12}).map((_,i)=> (new Date(Date.now()- (11-i)*5000)).toLocaleTimeString());
+  const rps = labels.map(()=> Math.max(1, Math.round(Math.abs(Math.sin(Math.random()*3))*50)));
+  const latency = labels.map(()=> Math.round(50 + Math.abs(Math.cos(Math.random()*5))*400));
+  const status = { '2xx': 1200, '4xx': 45, '5xx': 12 };
+  const totals = {rps: rps[rps.length-1], requests: rps.reduce((a,b)=>a+b,0), errorRate: ((status['4xx']+status['5xx'])/(status['2xx']+status['4xx']+status['5xx'])*100).toFixed(1)};
+  return {labels,rps,latency,status,totals};
+}
+
+function fakeNodes(){
+  return NODES.map(n => ({
+    id:n.id, addr:n.addr, routes:n.routes, status:n.status, avgLatency: randInt(60,300), reqPerHour: randInt(300,1200)
+  }));
+}
+
+function fakeErrors(){
+  const arr=[];
+  for(let i=0;i<8;i++){
+    const route = ROUTES[randInt(0,ROUTES.length-1)];
+    const node = NODES[randInt(0,NODES.length-1)];
+    arr.push({
+      time: new Date(Date.now() - randInt(1000,1000*60*60)).toISOString(),
+      route, node: node.addr, status: [404,500,502,400][randInt(0,3)], latency: randInt(30,2000), cid: 'cid-'+randInt(1000,9999),
+      request: {method:'POST',path:route,headers:{'User-Agent':'webapp/1.2'},body:'{ "doc":"...."}'},
+      response: {status: [404,500,502,400][randInt(0,3)], body:'error detail: something went wrong\nstack...'}
+    });
+  }
+  return arr;
+}
+
+/* -------------------------
+   UI glue & charts
+----------------------------*/
+let rpsChart, latChart, statusChart;
+
+function initCharts(){
+  const rpsCtx = document.getElementById('rpsChart').getContext('2d');
+  rpsChart = new Chart(rpsCtx, {type:'line', data:{labels:[],datasets:[{label:'RPS',data:[],tension:0.3, fill:true}]}, options:{scales:{y:{beginAtZero:true}}}});
+
+  const latCtx = document.getElementById('latencyChart').getContext('2d');
+  latChart = new Chart(latCtx, {type:'line', data:{labels:[],datasets:[{label:'Latency ms',data:[],tension:0.3}]}, options:{scales:{y:{beginAtZero:true}}}});
+
+  const stCtx = document.getElementById('statusChart').getContext('2d');
+  statusChart = new Chart(stCtx, {type:'doughnut', data:{labels:['2xx','4xx','5xx'],datasets:[{data:[0,0,0],label:'Status'}]}} );
+}
+
+function refreshAll(){
+  document.getElementById('server-time').innerText = new Date().toLocaleString();
+  const windowKey = document.getElementById('overview-window').value;
+  const ov = fakeOverview(windowKey);
+  // update metrics
+  document.getElementById('total-rps').innerText = ov.totals.rps + ' /s';
+  document.getElementById('total-requests').innerText = ov.totals.requests;
+  document.getElementById('error-rate').innerText = ov.totals.errorRate + '%';
+
+  rpsChart.data.labels = ov.labels; rpsChart.data.datasets[0].data = ov.rps; rpsChart.update();
+  latChart.data.labels = ov.labels; latChart.data.datasets[0].data = ov.latency; latChart.update();
+  statusChart.data.datasets[0].data = [ov.status['2xx'], ov.status['4xx'], ov.status['5xx']]; statusChart.update();
+
+  // routes chips
+  const rc = document.getElementById('routes-chips'); rc.innerHTML='';
+  ROUTES.forEach(r=>{ const el = document.createElement('div'); el.className='chip'; el.innerText=r; rc.appendChild(el); });
+
+  // nodes list & table
+  const nodes = fakeNodes();
+  const nl = document.getElementById('nodes-list'); nl.innerHTML='';
+  const tb = document.getElementById('nodes-table-body'); tb.innerHTML='';
+  nodes.forEach(n=>{
+    const d = document.createElement('div');
+    const st = n.status==='up' ? '<span class="status-dot up"></span>UP' : (n.status==='down' ? '<span class="status-dot down"></span>DOWN' : '<span class="status-dot deg"></span>DEG');
+    d.innerHTML = `<div style="margin-bottom:8px"><b>${n.addr}</b><div class="small muted">${n.routes.join(', ')}</div><div class="small">status: ${st} • latency ${n.avgLatency}ms • ${n.reqPerHour}/hr</div></div>`;
+    nl.appendChild(d);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${n.addr}</td><td>${n.routes.join('<br>')}</td><td>${n.status==='up' ? '<span class="status-dot up"></span>UP' : '<span class="status-dot down"></span>DOWN'}</td><td>${n.avgLatency}</td><td>${n.reqPerHour}</td>`;
+    tb.appendChild(tr);
+  });
+
+  // populate filters routes select
+  const sel = document.getElementById('filter-route'); sel.innerHTML = '<option value="">All routes</option>';
+  ROUTES.forEach(r=> sel.innerHTML += `<option value="${r}">${r}</option>`);
+
+  // errors
+  const errs = fakeErrors();
+  const eb = document.getElementById('errors-body'); eb.innerHTML='';
+  errs.forEach(e=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${new Date(e.time).toLocaleString()}</td><td>${e.route}</td><td>${e.node}</td><td style="color:${e.status>=500? '#ff6b6b':'#f59e0b'}">${e.status}</td><td>${e.latency}</td><td>${e.cid}</td>`;
+    tr.onclick = ()=> openDetail(e);
+    eb.appendChild(tr);
+  });
+}
+
+function openDetail(e){
+  document.getElementById('detail-sub').innerText = `${new Date(e.time).toLocaleString()} • ${e.cid}`;
+  document.getElementById('det-status').innerText = e.status;
+  document.getElementById('det-lat').innerText = e.latency + ' ms';
+  document.getElementById('det-node').innerText = e.node;
+  document.getElementById('det-up').innerText = JSON.stringify(e.request,null,2);
+  document.getElementById('det-down').innerText = JSON.stringify(e.response,null,2);
+  document.getElementById('detailModal').style.display='flex';
+}
+function closeModal(){ document.getElementById('detailModal').style.display='none'; }
+
+document.getElementById('refresh-btn').addEventListener('click', refreshAll);
+document.getElementById('btn-tail').addEventListener('click', ()=>alert('Tail mode (live) — in real deploy connect SignalR/WebSocket)'));
+document.getElementById('overview-window').addEventListener('change', refreshAll);
+
+initCharts();
+refreshAll();
+// auto-refresh every 15s in prototype
+setInterval(refreshAll, 15000);
+</script>
+</body>
+</html>

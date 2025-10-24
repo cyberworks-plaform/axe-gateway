@@ -108,6 +108,17 @@ namespace Ce.Gateway.Api
 
             services.AddScoped<ILogRepository, LogRepository>();
             services.AddScoped<IMonitoringService, MonitoringService>();
+
+            #region đăng ký DownstreamHealthMonitorService để dùng cho cả IHostedService và IDownstreamHealthMonitorService
+            // Tạo một singleton duy nhất => để đảm bảo có 1 instance duy nhất
+            services.AddSingleton<DownstreamHealthMonitorService>();
+
+            // Map interface tới cùng instance này
+            services.AddSingleton<IDownstreamHealthMonitorService>(sp => sp.GetRequiredService<DownstreamHealthMonitorService>());
+
+            // Đăng ký background service dùng chính instance đó
+            services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<DownstreamHealthMonitorService>());
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

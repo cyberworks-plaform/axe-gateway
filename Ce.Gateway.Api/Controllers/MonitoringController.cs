@@ -2,6 +2,7 @@ using Ce.Gateway.Api.Models;
 using Ce.Gateway.Api.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Controllers
@@ -11,10 +12,12 @@ namespace Ce.Gateway.Api.Controllers
     public class MonitoringController : ControllerBase
     {
         private readonly IMonitoringService _monitoringService;
+        private readonly IDownstreamHealthMonitorService _downstreamHealthMonitorService;
 
-        public MonitoringController(IMonitoringService monitoringService)
+        public MonitoringController(IMonitoringService monitoringService, IDownstreamHealthMonitorService downstreamHealthMonitorService)
         {
             _monitoringService = monitoringService;
+            _downstreamHealthMonitorService = downstreamHealthMonitorService;
         }
 
         [HttpGet("logs")]
@@ -42,6 +45,32 @@ namespace Ce.Gateway.Api.Controllers
 
             var result = await _monitoringService.GetLogsAsync(filter, page, pageSize);
             return Ok(result);
+        }
+
+        [HttpGet("nodestatus/summary")]
+        public IActionResult GetNodeStatusSummary()
+        {
+            
+            var healthStatus = _downstreamHealthMonitorService.GetHealthStatus().Values;
+            var totalNodes = healthStatus.Count;
+            var nodesUp = healthStatus.Count(s => s.IsHealthy);
+            var nodesDown = totalNodes - nodesUp;
+
+            var summary = new NodeStatusSummaryDto
+            {
+                TotalNodes = totalNodes,
+                NodesUp = nodesUp,
+                NodesDown = nodesDown
+            };
+
+            return Ok(summary);
+        }
+
+        [HttpGet("downstreamhealth")]
+        public IActionResult GetDownstreamHealth()
+        {
+            var healthStatus = _downstreamHealthMonitorService.GetHealthStatus();
+            return Ok(healthStatus);
         }
     }
 }

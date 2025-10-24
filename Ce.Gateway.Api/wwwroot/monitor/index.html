@@ -13,35 +13,121 @@
     <div class="container-fluid mt-3">
         <h1 class="mb-4">Gateway Log Monitoring</h1>
 
-        <!-- Summary Section -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card text-white bg-primary mb-3">
-                    <div class="card-header">Total Requests</div>
-                    <div class="card-body">
-                        <h5 class="card-title" id="totalRequests">0</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-danger mb-3">
-                    <div class="card-header">Error Rate</div>
-                    <div class="card-body">
-                        <h5 class="card-title" id="errorRate">0%</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-white bg-success mb-3">
-                    <div class="card-header">Avg Latency (ms)</div>
-                    <div class="card-body">
-                        <h5 class="card-title" id="avgLatency">0</h5>
-                    </div>
-                </div>
-            </div>
-        </div>
+                <!-- Summary Section -->
 
-        <!-- Filter Section -->
+                <div class="row mb-4">
+
+                    <div class="col-md-4">
+
+                        <div class="card text-white bg-primary mb-3">
+
+                            <div class="card-header">Total Requests</div>
+
+                            <div class="card-body">
+
+                                <h5 class="card-title" id="totalRequests">0</h5>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card text-white bg-danger mb-3">
+
+                            <div class="card-header">Error Rate</div>
+
+                            <div class="card-body">
+
+                                <h5 class="card-title" id="errorRate">0%</h5>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="card text-white bg-success mb-3">
+
+                            <div class="card-header">Avg Latency (ms)</div>
+
+                            <div class="card-body">
+
+                                <h5 class="card-title" id="avgLatency">0</h5>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+        
+
+                <!-- Downstream Health Check Widget -->
+
+                <div class="row mb-4">
+
+                    <div class="col-md-12">
+
+                        <div class="card">
+
+                            <div class="card-header">Downstream Service Health</div>
+
+                            <div class="card-body">
+
+                                <div class="row text-center">
+
+                                    <div class="col-md-4">
+
+                                        <h5 class="card-title">Total Nodes</h5>
+
+                                        <p class="display-6" id="totalNodes">0</p>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <h5 class="card-title">Nodes Up</h5>
+
+                                        <p class="display-6 text-success" id="nodesUp">0</p>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <h5 class="card-title">Nodes Down</h5>
+
+                                        <p class="display-6 text-danger" id="nodesDown">0</p>
+
+                                    </div>
+
+                                </div>
+
+                                <hr>
+
+                                <div id="downstreamServiceDetails">
+
+                                    <!-- Downstream service details will be loaded here -->
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+        
+
+                <!-- Filter Section -->
         <div class="card mb-4">
             <div class="card-header">Filters</div>
             <div class="card-body">

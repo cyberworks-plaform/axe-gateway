@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>OCR Gateway Monitoring - Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>OCR Gateway Monitoring — Dashboard</h1>
+    <div class="small">Admin • <span id="server-time">--</span></div>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="card">
+        <div class="small">Menu</div>
+        <ul class="sidebar-menu">
+          <li><a href="#" class="active">Home</a></li>
+          <li><a href="/monitor">Monitor</a></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="small">Overview</div>
+        <div style="margin-top:8px" class="metric">
+          <div>
+            <div class="num" id="total-rps">-</div>
+            <div class="small">RPS</div>
+          </div>
+          <div>
+            <div class="num" id="total-requests">-</div>
+            <div class="small">Requests (1h)</div>
+          </div>
+          <div>
+            <div class="num" id="error-rate">-</div>
+            <div class="small">Error %</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="small">Routes</div>
+        <div style="margin-top:8px">
+          <div class="chips" id="routes-chips"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="small">Downstream Nodes</div>
+        <div style="margin-top:8px" class="nodes-list" id="nodes-list">
+          <!-- nodes here -->
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="small">Live Filters</div>
+        <div class="filters" style="margin-top:8px">
+          <select id="filter-route" class="btn">
+            <option value="">All routes</option>
+          </select>
+          <select id="filter-status" class="btn">
+            <option value="">All status</option>
+            <option value="2">2xx</option>
+            <option value="4">4xx</option>
+            <option value="5">5xx</option>
+          </select>
+          <button class="btn" id="btn-tail">Tail</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>Overview metrics</b><div class="small">RPS, latency, errors</div></div>
+          <div><small class="muted">Window:</small> <select id="overview-window" class="btn"><option>1m</option><option selected>5m</option><option>30m</option><option>1h</option><option>1d</option></select></div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <div style="flex:1;padding:8px" class="card">
+            <canvas id="rpsChart" height="120"></canvas>
+          </div>
+          <div style="flex:1;padding:8px" class="card">
+            <canvas id="latencyChart" height="120"></canvas>
+          </div>
+          <div style="width:260px;padding:8px" class="card">
+            <div class="small">Status distribution</div>
+            <canvas id="statusChart" height="160"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>Downstream nodes detail</b><div class="small">latency / success / requests</div></div>
+          <div><button id="refresh-btn" class="btn">Refresh</button></div>
+        </div>
+        <div style="margin-top:12px">
+          <table>
+            <thead><tr><th>Node</th><th>Route(s)</th><th>Status</th><th>Avg Latency (ms)</th><th>Req/hr</th></tr></thead>
+            <tbody id="nodes-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>Recent Errors</b><div class="small">click a row to see details</div></div>
+          <div><div class="small">Show last <select id="errors-window"><option>1h</option><option selected>6h</option><option>24h</option></select></div></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <table class="logs-table">
+            <thead><tr><th>Time</th><th>Route</th><th>Node</th><th>Status</th><th>Latency ms</th><th>CorrelationId</th></tr></thead>
+            <tbody id="errors-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="detailModal">
+    <div class="box">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><b>Request Detail</b><div class="small muted" id="detail-sub"></div></div>
+        <div><button class="btn" onclick="closeModal()">Close</button></div>
+      </div>
+
+      <div class="kpi-grid" style="margin-top:12px">
+        <div class="kpi"><div class="small">Status</div><div id="det-status" style="font-weight:700"></div></div>
+        <div class="kpi"><div class="small">Latency</div><div id="det-lat">- ms</div></div>
+        <div class="kpi"><div class="small">Downstream</div><div id="det-node">-</div></div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="small">Upstream Request</div>
+        <pre id="det-up" style="white-space:pre-wrap;background:#061323;padding:8px;border-radius:6px;max-height:160px;overflow:auto"></pre>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="small">Downstream Response</div>
+        <pre id="det-down" style="white-space:pre-wrap;background:#061323;padding:8px;border-radius:6px;max-height:260px;overflow:auto"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
