@@ -1,3 +1,4 @@
+using Ce.Gateway.Api.Repositories.Interface;
 using Ce.Gateway.Api.Models;
 using Ce.Gateway.Api.Services.Interface;
 using Microsoft.Extensions.Configuration;
@@ -16,31 +17,34 @@ using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Services
 {
-    public class DownstreamHealthMonitorService : BackgroundService, IDownstreamHealthMonitorService
+    public class DownstreamHealthMonitorService : BackgroundService
     {
         private readonly ILogger<DownstreamHealthMonitorService> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
-        private ConcurrentDictionary<string, DownstreamServiceHealth> _healthStatus;
+        private readonly IDownstreamHealthStore _downstreamHealthStore;
+        private readonly int _evaluationTimeInSeconds;
         private Timer _timer;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         public DownstreamHealthMonitorService(
             ILogger<DownstreamHealthMonitorService> logger,
             IHttpClientFactory httpClientFactory,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IDownstreamHealthStore downstreamHealthStore)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
-            _healthStatus = new ConcurrentDictionary<string, DownstreamServiceHealth>();
+            _downstreamHealthStore = downstreamHealthStore;
+            _evaluationTimeInSeconds = _configuration.GetValue<int?>("HealthChecksUI:EvaluationTimeInSeconds") ?? 60;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Downstream Health Monitor Service running.");
 
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(30)); // Check every 30 seconds
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(_evaluationTimeInSeconds));
 
             await Task.CompletedTask;
         }
@@ -66,7 +70,6 @@ namespace Ce.Gateway.Api.Services
 
         private async Task CheckAllDownstreamServicesHealth()
         {
-            var currentHealthStatus = new ConcurrentDictionary<string, DownstreamServiceHealth>();
             var downstreamServices = GetUniqueDownstreamServicesFromOcelotConfig();
             var tasks = new List<Task>();
 
@@ -74,32 +77,73 @@ namespace Ce.Gateway.Api.Services
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    var isHealthy = false;
-                    var statusMessage = "Unknown";
+                    var client = _httpClientFactory.CreateClient();
+                    client.Timeout = TimeSpan.FromSeconds(5); // 5 second timeout for health checks
+
+                    service.LastChecked = DateTime.UtcNow; // Set last checked time regardless of outcome
+
+                    HttpResponseMessage response = null;
+                    string jsonResponse = null;
+                    HealthReportDto healthReport = null;
+
                     try
                     {
-                        var client = _httpClientFactory.CreateClient();
-                        client.Timeout = TimeSpan.FromSeconds(5); // 5 second timeout for health checks
-                        var response = await client.GetAsync(service.Url);
-                        isHealthy = response.IsSuccessStatusCode;
-                        statusMessage = isHealthy ? "Healthy" : $"Unhealthy: {response.StatusCode}";
+                        response = await client.GetAsync(service.Url);
+                        
+                        // Always try to read content, even for non-success status codes
+                        jsonResponse = await response.Content.ReadAsStringAsync();
+
+                        // Attempt to deserialize JSON content
+                        if (!string.IsNullOrEmpty(jsonResponse))
+                        {
+                            try
+                            {
+                                healthReport = JsonConvert.DeserializeObject<HealthReportDto>(jsonResponse);
+                            }
+                            catch (JsonSerializationException jsonEx)
+                            {
+                                _logger.LogWarning(jsonEx, "Could not deserialize health response for {Url}. Content: {Content}", service.Url, jsonResponse);
+                                // If deserialization fails, healthReport remains null
+                            }
+                        }
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Successful response, use parsed health report or default to Healthy
+                            service.Status = healthReport?.Status ?? "Healthy";
+                            service.TotalDuration = healthReport?.TotalDuration;
+                            service.Entries = healthReport?.Entries;
+                            service.StatusMessage = $"Healthy: {service.Status}";
+                        }
+                        else
+                        {
+                            // Non-success status code (4xx, 5xx)
+                            service.Status = healthReport?.Status ?? "Unhealthy"; // Use parsed status if available, else Unhealthy
+                            service.TotalDuration = healthReport?.TotalDuration;
+                            service.Entries = healthReport?.Entries;
+                            service.StatusMessage = $"Unhealthy: HTTP {response.StatusCode} - {response.ReasonPhrase}";
+                            _logger.LogWarning("Health check for {Url} returned non-success status {StatusCode}. Message: {Message}", service.Url, response.StatusCode, service.StatusMessage);
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        service.Status = "Unhealthy";
+                        service.StatusMessage = $"Unhealthy: Could not reach service. {ex.Message}";
+                        _logger.LogError(ex, "Error checking health for {Url}: {Message}", service.Url, ex.Message);
                     }
                     catch (Exception ex)
                     {
-                        statusMessage = $"Unhealthy: {ex.Message}";
-                        _logger.LogError(ex, "Error checking health for {Url}", service.Url);
+                        service.Status = "Unhealthy";
+                        service.StatusMessage = $"Unhealthy: An unexpected error occurred. {ex.Message}";
+                        _logger.LogError(ex, "Unexpected error checking health for {Url}: {Message}", service.Url, ex.Message);
                     }
                     finally
                     {
-                        service.IsHealthy = isHealthy;
-                        service.LastChecked = DateTime.UtcNow;
-                        service.StatusMessage = statusMessage;
-                        currentHealthStatus.AddOrUpdate(service.Url, service, (key, oldValue) => service);
+                        await _downstreamHealthStore.UpdateHealthAsync(service);
                     }
                 }));
             }
             await Task.WhenAll(tasks);
-            _healthStatus = currentHealthStatus;
         }
 
         private HashSet<DownstreamServiceHealth> GetUniqueDownstreamServicesFromOcelotConfig()
@@ -146,10 +190,6 @@ namespace Ce.Gateway.Api.Services
             return uniqueServices;
         }
 
-        public ConcurrentDictionary<string, DownstreamServiceHealth> GetHealthStatus()
-        {
-            return _healthStatus;
-        }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
         {

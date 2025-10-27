@@ -5,10 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorRateElem = document.getElementById('errorRate');
     const avgLatencyElem = document.getElementById('avgLatency');
 
-    const totalNodesElem = document.getElementById('totalNodes');
     const nodesUpElem = document.getElementById('nodesUp');
     const nodesDownElem = document.getElementById('nodesDown');
-    const downstreamServiceDetailsElem = document.getElementById('downstreamServiceDetails');
+
 
     const filterDownstreamHost = document.getElementById('filterDownstreamHost');
     const filterDownstreamStatusCode = document.getElementById('filterDownstreamStatusCode');
@@ -62,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const summaryData = await response.json();
-            totalNodesElem.textContent = summaryData.totalNodes;
             nodesUpElem.textContent = summaryData.nodesUp;
             nodesDownElem.textContent = summaryData.nodesDown;
         } catch (error) {
@@ -73,40 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function fetchDownstreamServiceDetails() {
-        try {
-            const response = await fetch('/api/monitor/downstreamhealth');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const healthDataDict = await response.json();
-            const healthDataArray = Object.values(healthDataDict);
-            renderDownstreamServiceDetails(healthDataArray);
-        } catch (error) {
-            console.error('Error fetching downstream service details:', error);
-            downstreamServiceDetailsElem.innerHTML = `<p class="text-danger">Error loading health data: ${error.message}</p>`;
-        }
-    }
 
-    function renderDownstreamServiceDetails(healthData) {
-        downstreamServiceDetailsElem.innerHTML = '';
-        if (healthData.length === 0) {
-            downstreamServiceDetailsElem.innerHTML = '<p class="text-muted">No downstream services configured for health monitoring.</p>';
-            return;
-        }
-
-        healthData.forEach(service => {
-            const serviceDiv = document.createElement('div');
-            serviceDiv.className = `alert alert-${service.isHealthy ? 'success' : 'danger'} py-1`;
-            serviceDiv.innerHTML = `
-                <strong>${service.host}:${service.port} (${service.scheme.toUpperCase()})</strong> - 
-                Status: ${service.isHealthy ? 'Healthy' : 'Unhealthy'} - 
-                Last Checked: ${new Date(service.lastChecked).toLocaleTimeString()} - 
-                Message: ${service.statusMessage}
-            `;
-            downstreamServiceDetailsElem.appendChild(serviceDiv);
-        });
-    }
 
     function renderLogs(logs) {
         logTableBody.innerHTML = '';
@@ -232,19 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
         autoRefreshIntervalLogs = setInterval(fetchLogs, 10000);
     }
 
-    // Auto-refresh downstream health every 5 seconds
-    function startAutoRefreshHealth() {
-        if (autoRefreshIntervalHealth) clearInterval(autoRefreshIntervalHealth);
-        autoRefreshIntervalHealth = setInterval(() => {
-            fetchNodeStatusSummary();
-            fetchDownstreamServiceDetails();
-        }, 5000);
-    }
-
     // Initial fetches and start auto-refresh
     fetchLogs();
     fetchNodeStatusSummary();
-    fetchDownstreamServiceDetails();
     startAutoRefreshLogs();
-    startAutoRefreshHealth();
 });

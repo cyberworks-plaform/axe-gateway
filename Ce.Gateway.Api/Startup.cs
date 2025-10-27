@@ -41,7 +41,7 @@ namespace Ce.Gateway.Api
         // This method gets called by the runtime. Use this method to add services to the container
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllersWithViews();
 
             services.AddAuthentication(o =>
             {
@@ -109,12 +109,11 @@ namespace Ce.Gateway.Api
             services.AddScoped<ILogRepository, LogRepository>();
             services.AddScoped<IMonitoringService, MonitoringService>();
 
+            services.AddSingleton<Ce.Gateway.Api.Repositories.Interface.IDownstreamHealthStore, Ce.Gateway.Api.Repositories.DownstreamHealthStore>();
+
             #region đăng ký DownstreamHealthMonitorService để dùng cho cả IHostedService và IDownstreamHealthMonitorService
             // Tạo một singleton duy nhất => để đảm bảo có 1 instance duy nhất
             services.AddSingleton<DownstreamHealthMonitorService>();
-
-            // Map interface tới cùng instance này
-            services.AddSingleton<IDownstreamHealthMonitorService>(sp => sp.GetRequiredService<DownstreamHealthMonitorService>());
 
             // Đăng ký background service dùng chính instance đó
             services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<DownstreamHealthMonitorService>());
@@ -140,6 +139,9 @@ namespace Ce.Gateway.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
 
                 // Map endpoint /health
                 endpoints.MapHealthChecks("/health", new HealthCheckOptions

@@ -69,60 +69,24 @@
 
         
 
-                <!-- Downstream Health Check Widget -->
-
+                <!-- Node Summary Section -->
                 <div class="row mb-4">
-
-                    <div class="col-md-12">
-
-                        <div class="card">
-
-                            <div class="card-header">Downstream Service Health</div>
-
+                    <div class="col-md-6">
+                        <div class="card text-white bg-success mb-3">
+                            <div class="card-header">Nodes Up</div>
                             <div class="card-body">
-
-                                <div class="row text-center">
-
-                                    <div class="col-md-4">
-
-                                        <h5 class="card-title">Total Nodes</h5>
-
-                                        <p class="display-6" id="totalNodes">0</p>
-
-                                    </div>
-
-                                    <div class="col-md-4">
-
-                                        <h5 class="card-title">Nodes Up</h5>
-
-                                        <p class="display-6 text-success" id="nodesUp">0</p>
-
-                                    </div>
-
-                                    <div class="col-md-4">
-
-                                        <h5 class="card-title">Nodes Down</h5>
-
-                                        <p class="display-6 text-danger" id="nodesDown">0</p>
-
-                                    </div>
-
-                                </div>
-
-                                <hr>
-
-                                <div id="downstreamServiceDetails">
-
-                                    <!-- Downstream service details will be loaded here -->
-
-                                </div>
-
+                                <h5 class="card-title" id="nodesUp">0</h5>
                             </div>
-
                         </div>
-
                     </div>
-
+                    <div class="col-md-6">
+                        <div class="card text-white bg-danger mb-3">
+                            <div class="card-header">Nodes Down</div>
+                            <div class="card-body">
+                                <h5 class="card-title" id="nodesDown">0</h5>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
         

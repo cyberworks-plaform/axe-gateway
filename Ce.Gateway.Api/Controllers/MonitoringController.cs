@@ -1,3 +1,4 @@
+using Ce.Gateway.Api.Repositories.Interface;
 using Ce.Gateway.Api.Models;
 using Ce.Gateway.Api.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,12 @@ namespace Ce.Gateway.Api.Controllers
     public class MonitoringController : ControllerBase
     {
         private readonly IMonitoringService _monitoringService;
-        private readonly IDownstreamHealthMonitorService _downstreamHealthMonitorService;
+        private readonly IDownstreamHealthStore _downstreamHealthStore;
 
-        public MonitoringController(IMonitoringService monitoringService, IDownstreamHealthMonitorService downstreamHealthMonitorService)
+        public MonitoringController(IMonitoringService monitoringService, IDownstreamHealthStore downstreamHealthStore)
         {
             _monitoringService = monitoringService;
-            _downstreamHealthMonitorService = downstreamHealthMonitorService;
+            _downstreamHealthStore = downstreamHealthStore;
         }
 
         [HttpGet("logs")]
@@ -48,12 +49,11 @@ namespace Ce.Gateway.Api.Controllers
         }
 
         [HttpGet("nodestatus/summary")]
-        public IActionResult GetNodeStatusSummary()
+        public async Task<IActionResult> GetNodeStatusSummary()
         {
-            
-            var healthStatus = _downstreamHealthMonitorService.GetHealthStatus().Values;
-            var totalNodes = healthStatus.Count;
-            var nodesUp = healthStatus.Count(s => s.IsHealthy);
+            var healthStatus = await _downstreamHealthStore.GetAllHealthAsync();
+            var totalNodes = healthStatus.ToList().Count();
+            var nodesUp = healthStatus.Count(s => s.Status == "Healthy");
             var nodesDown = totalNodes - nodesUp;
 
             var summary = new NodeStatusSummaryDto
@@ -67,9 +67,9 @@ namespace Ce.Gateway.Api.Controllers
         }
 
         [HttpGet("downstreamhealth")]
-        public IActionResult GetDownstreamHealth()
+        public async Task<IActionResult> GetDownstreamHealth()
         {
-            var healthStatus = _downstreamHealthMonitorService.GetHealthStatus();
+            var healthStatus = await _downstreamHealthStore.GetAllHealthAsync();
             return Ok(healthStatus);
         }
     }
