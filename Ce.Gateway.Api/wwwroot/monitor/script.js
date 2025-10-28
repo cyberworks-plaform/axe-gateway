@@ -5,8 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorRateElem = document.getElementById('errorRate');
     const avgLatencyElem = document.getElementById('avgLatency');
 
-    const nodesUpElem = document.getElementById('nodesUp');
-    const nodesDownElem = document.getElementById('nodesDown');
+    const nodesStatusElem = document.getElementById('nodesStatus');
+    const nodesStatusTitleElem = document.getElementById('nodesStatusTitle');
+    const nodesStatusBox = nodesStatusElem.closest('.small-box');
 
 
     const filterDownstreamHost = document.getElementById('filterDownstreamHost');
@@ -24,18 +25,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let autoRefreshIntervalHealth;
 
     async function fetchLogs() {
-        const queryParams = new URLSearchParams({
-            page: currentPage,
-            pageSize: pageSize,
-            ...currentFilters
-        });
+        const queryParams = new URLSearchParams();
+        queryParams.set('page', currentPage);
+        queryParams.set('pageSize', pageSize);
 
-        // Format dates to ISO string if they exist
-        if (currentFilters.from) {
-            queryParams.set('from', new Date(currentFilters.from).toISOString());
-        }
-        if (currentFilters.to) {
-            queryParams.set('to', new Date(currentFilters.to).toISOString());
+        for (const key in currentFilters) {
+            if (currentFilters.hasOwnProperty(key)) {
+                let value = currentFilters[key];
+                if (key === 'from' || key === 'to') {
+                    const date = new Date(value);
+                    if (!isNaN(date.getTime())) {
+                        value = date.toISOString();
+                    } else {
+                        continue; // Skip invalid dates
+                    }
+                }
+                queryParams.set(key, value);
+            }
         }
 
         try {
@@ -61,17 +67,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const summaryData = await response.json();
-            nodesUpElem.textContent = summaryData.nodesUp;
-            nodesDownElem.textContent = summaryData.nodesDown;
+            
+            const totalNodes = summaryData.totalNodes;
+            const nodesDown = summaryData.nodesDown;
+
+            if (nodesDown === 0) {
+                nodesStatusElem.textContent = totalNodes;
+                nodesStatusTitleElem.textContent = 'All nodes Up';
+                nodesStatusBox.classList.remove('bg-danger');
+                nodesStatusBox.classList.add('bg-info');
+            } else {
+                nodesStatusElem.textContent = `${nodesDown} / ${totalNodes}`;
+                nodesStatusTitleElem.textContent = 'Nodes Down / Total';
+                nodesStatusBox.classList.remove('bg-info');
+                nodesStatusBox.classList.add('bg-danger');
+            }
+
         } catch (error) {
             console.error('Error fetching node status summary:', error);
-            totalNodesElem.textContent = 'Error';
-            nodesUpElem.textContent = 'Error';
-            nodesDownElem.textContent = 'Error';
+            nodesStatusElem.textContent = 'Error';
+            nodesStatusTitleElem.textContent = 'Error';
+            nodesStatusBox.classList.remove('bg-info', 'bg-danger');
+            nodesStatusBox.classList.add('bg-secondary'); // Indicate error state
         }
     }
 
 
+
+    function formatUtcDate(dateString) {
+        const date = new Date(dateString);
+        // Add 7 hours for UTC+7
+        date.setUTCHours(date.getUTCHours() + 7);
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false // Use 24-hour format
+        });
+    }
 
     function renderLogs(logs) {
         logTableBody.innerHTML = '';
@@ -83,20 +119,20 @@ document.addEventListener('DOMContentLoaded', () => {
         logs.forEach(log => {
             const row = logTableBody.insertRow();
             row.innerHTML = `
-                <td>${new Date(log.createdAtUtc).toLocaleString()}</td>
-                <td>${log.traceId}</td>
-                <td>${log.upstreamHost || '-'}</td>
-                <td>${log.upstreamPort || '-'}</td>
-                <td>${log.upstreamHttpMethod || '-'}</td>
-                <td>${log.upstreamPath || '-'}</td>
-                <td>${log.downstreamHost || '-'}</td>
-                <td>${log.downstreamPort || '-'}</td>
-                <td><span class="badge bg-${log.downstreamStatusCode >= 200 && log.downstreamStatusCode < 300 ? 'success' : log.downstreamStatusCode >= 400 && log.downstreamStatusCode < 500 ? 'warning' : 'danger'}">${log.downstreamStatusCode || '-'}</span></td>
-                <td>${log.gatewayLatencyMs || '-'}</td>
-                <td>${log.upstreamClientIp || '-'}</td>
-                <td>${log.isError ? 'Yes' : 'No'}</td>
-                <td>${log.errorMessage || '-'}</td>
-                <td>${log.requestBody || '-'}</td>
+                <td>${formatUtcDate(log.createdAtUtc)}</td>
+                <td>${log.traceId || ''}</td>
+                <td>${log.upstreamHost || ''}</td>
+                <td class="text-right">${log.upstreamPort || ''}</td>
+                <td>${log.upstreamHttpMethod || ''}</td>
+                <td>${log.upstreamPath || ''}</td>
+                <td>${log.downstreamHost || ''}</td>
+                <td class="text-right">${log.downstreamPort || ''}</td>
+                <td class="text-center"><span class="badge bg-${log.downstreamStatusCode >= 200 && log.downstreamStatusCode < 300 ? 'success' : log.downstreamStatusCode >= 400 && log.downstreamStatusCode < 500 ? 'warning' : 'danger'}">${log.downstreamStatusCode || ''}</span></td>
+                <td class="text-right">${log.gatewayLatencyMs || ''}</td>
+                <td>${log.upstreamClientIp || ''}</td>
+                <td class="text-center">${log.isError ? 'Yes' : 'No'}</td>
+                <td>${log.errorMessage || ''}</td>
+                <td>${log.requestBody || ''}</td>
             `;
         });
     }
@@ -163,18 +199,22 @@ document.addEventListener('DOMContentLoaded', () => {
         errorRateElem.textContent = `${errorRate}%`;
 
         const totalLatency = data.data.reduce((sum, log) => sum + log.gatewayLatencyMs, 0);
-        const avgLatency = data.data.length > 0 ? (totalLatency / data.data.length).toFixed(0) : 0;
-        avgLatencyElem.textContent = avgLatency;
+        const avgLatency = data.data.length > 0 ? totalLatency / data.data.length : 0;
+        avgLatencyElem.textContent = Math.round(avgLatency);
     }
 
     function applyCurrentFilters() {
-        currentFilters = {
-            downstreamHost: filterDownstreamHost.value || undefined,
-            downstreamStatusCode: filterDownstreamStatusCode.value || undefined,
-            upstreamClientIp: filterUpstreamClientIp.value || undefined,
-            from: filterFrom.value || undefined,
-            to: filterTo.value || undefined,
+        const filters = {
+            downstreamHost: filterDownstreamHost.value.trim(),
+            downstreamStatusCode: filterDownstreamStatusCode.value.trim(),
+            upstreamClientIp: filterUpstreamClientIp.value.trim(),
+            from: filterFrom.value,
+            to: filterTo.value,
         };
+
+        // Only include filters that have a non-empty value
+        currentFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '' && v !== undefined));
+
         currentPage = 1; // Reset to first page on filter change
         fetchLogs();
     }

@@ -108,6 +108,7 @@ namespace Ce.Gateway.Api
 
             services.AddScoped<ILogRepository, LogRepository>();
             services.AddScoped<IMonitoringService, MonitoringService>();
+            services.AddScoped<IDashboardService, DashboardService>();
 
             services.AddSingleton<Ce.Gateway.Api.Repositories.Interface.IDownstreamHealthStore, Ce.Gateway.Api.Repositories.DownstreamHealthStore>();
 
