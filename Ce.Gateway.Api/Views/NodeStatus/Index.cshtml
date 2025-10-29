@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Node Status Monitor";
+    var evaluationTimeInSeconds = ViewBag.EvaluationTimeInSeconds;
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12 d-flex justify-content-between align-items-center">
+                <h1 class="m-0">Node Status Monitoring</h1>
+                <div class="d-flex align-items-center">
+                    <small class="text-muted me-3" id="refreshIntervalDisplay">Refresh every @evaluationTimeInSeconds seconds</small>
+                    <small class="text-muted" id="nextCheckDisplay">Next check in: --s</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.content-header -->
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table health-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;"></th>
+                                <th style="width: 25%;">NAME</th>
+                                <th style="width: 15%;">HEALTH</th>
+                                <th style="width: 30%;">DESCRIPTION</th>
+                                <th style="width: 15%;">LAST CHECKED</th>
+                                <th style="width: 10%;">DURATION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nodeHealthTableBody">
+                            <!-- Node health data will be loaded here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Hidden input to pass config to JS -->
+<input type="hidden" id="evaluationTimeInSeconds" value="@evaluationTimeInSeconds" />
+
+@section Scripts {
+    <script src="/js/nodestatus.js"></script>
+}

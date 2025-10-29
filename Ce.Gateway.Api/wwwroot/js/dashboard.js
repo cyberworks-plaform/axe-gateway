@@ -5,7 +5,7 @@ let httpStatusDonutChart;
 // Register Chart.js Datalabels Plugin
 Chart.register(ChartDataLabels);
 
-const API_BASE_URL = '/api/Dashboard';
+const API_BASE_URL = '/api/dashboard';
 const RELOAD_INTERVAL_MS = 30000; // 30 seconds
 
 // Function to get start and end time based on selected filter

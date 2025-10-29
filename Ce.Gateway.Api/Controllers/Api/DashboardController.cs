@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Ce.Gateway.Api.Controllers
+namespace Ce.Gateway.Api.Controllers.Api
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/dashboard")]
     public class DashboardController : ControllerBase
     {
         private readonly IDashboardService _dashboardService;

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Services.Interface
 {
-    public interface IMonitoringService
+    public interface IRequestLogService
     {
         Task<PaginatedResult<LogDto>> GetLogsAsync(LogFilter filter, int page, int pageSize);
     }

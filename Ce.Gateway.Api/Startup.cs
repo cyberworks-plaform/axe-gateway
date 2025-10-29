@@ -107,10 +107,10 @@ namespace Ce.Gateway.Api
             services.AddHttpContextAccessor();
 
             services.AddScoped<ILogRepository, LogRepository>();
-            services.AddScoped<IMonitoringService, MonitoringService>();
+            services.AddScoped<IRequestLogService, RequestLogService>();
             services.AddScoped<IDashboardService, DashboardService>();
 
-            services.AddSingleton<Ce.Gateway.Api.Repositories.Interface.IDownstreamHealthStore, Ce.Gateway.Api.Repositories.DownstreamHealthStore>();
+            services.AddSingleton<IDownstreamHealthStore, DownstreamHealthStore>();
 
             #region đăng ký DownstreamHealthMonitorService để dùng cho cả IHostedService và IDownstreamHealthMonitorService
             // Tạo một singleton duy nhất => để đảm bảo có 1 instance duy nhất

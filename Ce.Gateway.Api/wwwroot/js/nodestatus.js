@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const nodeHealthTableBody = document.getElementById('nodeHealthTableBody');
+    const nodeStatusTableBody = document.getElementById('nodeHealthTableBody');
     const refreshIntervalDisplay = document.getElementById('refreshIntervalDisplay');
     const nextCheckDisplay = document.getElementById('nextCheckDisplay');
     const evaluationTimeInSeconds = parseInt(document.getElementById('evaluationTimeInSeconds').value || '60');
@@ -51,10 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
     }
 
-    async function fetchNodeHealth() {
+    async function fetchNodeStatus() {
         startCountdown(); // Reset and start countdown on each fetch
         try {
-            const response = await fetch('/api/nodehealth');
+            const response = await fetch('/api/nodestatus');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -76,8 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
         healthData.forEach((service, i) => {
             const mainRow = nodeHealthTableBody.insertRow();
             mainRow.className = 'main-row';
-            mainRow.setAttribute('data-bs-toggle', 'collapse');
-            mainRow.setAttribute('data-bs-target', `#collapse-${i}`);
+            mainRow.setAttribute('data-toggle', 'collapse');
+            mainRow.setAttribute('data-target', `#collapse-${i}`);
             mainRow.setAttribute('aria-expanded', 'false');
             mainRow.setAttribute('aria-controls', `collapse-${i}`);
 
@@ -98,25 +98,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${service.totalDuration || '-'}</td>
             `;
 
-            // Event listener for expand/collapse icon and row highlighting
-            mainRow.addEventListener('click', function() {
-                const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                const icon = this.querySelector('.expand-collapse-icon');
-                if (isExpanded) {
-                    icon.classList.remove('fa-minus-circle');
-                    icon.classList.add('fa-plus-circle');
-                    this.classList.remove('expanded');
-                } else {
-                    icon.classList.remove('fa-plus-circle');
-                    icon.classList.add('fa-minus-circle');
-                    this.classList.add('expanded');
-                }
-            });
+            // The expand/collapse functionality is handled by Bootstrap's collapse.js
+            // The icon and row highlighting are updated by Bootstrap's events or CSS.
+            // No custom click listener is needed here.
 
             // Collapsible detail row
-            const detailRow = nodeHealthTableBody.insertRow();
+            const detailRow = nodeStatusTableBody.insertRow();
             detailRow.className = 'detail-row collapse';
             detailRow.id = `collapse-${i}`;
+
+            // Add event listeners for Bootstrap collapse events to change the icon
+            $(detailRow).on('shown.bs.collapse', function () {
+                $(mainRow).find('.expand-collapse-icon').removeClass('fa-plus-circle').addClass('fa-minus-circle');
+            });
+
+            $(detailRow).on('hidden.bs.collapse', function () {
+                $(mainRow).find('.expand-collapse-icon').removeClass('fa-minus-circle').addClass('fa-plus-circle');
+            });
             detailRow.innerHTML = `
                 <td colspan="6">
                     <div class="detail-content">
@@ -160,8 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial fetch
-    fetchNodeHealth();
+    fetchNodeStatus();
 
     // Set up polling
-    setInterval(fetchNodeHealth, evaluationTimeInSeconds * 1000);
+    setInterval(fetchNodeStatus, evaluationTimeInSeconds * 1000);
 });
+

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Services
 {
-    public class MonitoringService : IMonitoringService
+    public class RequestLogService : IRequestLogService
     {
         private readonly ILogRepository _logRepository;
 
-        public MonitoringService(ILogRepository logRepository)
+        public RequestLogService(ILogRepository logRepository)
         {
             _logRepository = logRepository;
         }

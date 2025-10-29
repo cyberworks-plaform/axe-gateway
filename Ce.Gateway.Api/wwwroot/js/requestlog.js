@@ -5,11 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorRateElem = document.getElementById('errorRate');
     const avgLatencyElem = document.getElementById('avgLatency');
 
-    const nodesStatusElem = document.getElementById('nodesStatus');
-    const nodesStatusTitleElem = document.getElementById('nodesStatusTitle');
-    const nodesStatusBox = nodesStatusElem.closest('.small-box');
-
-
     const filterDownstreamHost = document.getElementById('filterDownstreamHost');
     const filterDownstreamStatusCode = document.getElementById('filterDownstreamStatusCode');
     const filterUpstreamClientIp = document.getElementById('filterUpstreamClientIp');
@@ -45,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`/api/monitor/logs?${queryParams.toString()}`);
+            const response = await fetch(`/api/requestlog/logs?${queryParams.toString()}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -59,39 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSummary({ totalCount: 0, data: [] }); // Pass empty data array to avoid errors
         }
     }
-
-    async function fetchNodeStatusSummary() {
-        try {
-            const response = await fetch('/api/monitor/nodestatus/summary');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const summaryData = await response.json();
-            
-            const totalNodes = summaryData.totalNodes;
-            const nodesDown = summaryData.nodesDown;
-
-            if (nodesDown === 0) {
-                nodesStatusElem.textContent = totalNodes;
-                nodesStatusTitleElem.textContent = 'All nodes Up';
-                nodesStatusBox.classList.remove('bg-danger');
-                nodesStatusBox.classList.add('bg-info');
-            } else {
-                nodesStatusElem.textContent = `${nodesDown} / ${totalNodes}`;
-                nodesStatusTitleElem.textContent = 'Nodes Down / Total';
-                nodesStatusBox.classList.remove('bg-info');
-                nodesStatusBox.classList.add('bg-danger');
-            }
-
-        } catch (error) {
-            console.error('Error fetching node status summary:', error);
-            nodesStatusElem.textContent = 'Error';
-            nodesStatusTitleElem.textContent = 'Error';
-            nodesStatusBox.classList.remove('bg-info', 'bg-danger');
-            nodesStatusBox.classList.add('bg-secondary'); // Indicate error state
-        }
-    }
-
 
 
     function formatUtcDate(dateString) {
@@ -239,6 +201,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial fetches and start auto-refresh
     fetchLogs();
-    fetchNodeStatusSummary();
     startAutoRefreshLogs();
 });
