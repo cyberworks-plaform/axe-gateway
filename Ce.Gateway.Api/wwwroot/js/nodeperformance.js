@@ -1,14 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
     const timeFilter = document.getElementById('timeFilter');
+    const refreshIntervalSelect = document.getElementById('refreshInterval');
+    const manualRefreshBtn = document.getElementById('manualRefreshBtn');
     const nodePerformanceSummaryTableBody = document.getElementById('nodePerformanceSummaryTableBody');
     const topSlowestErrorsTableBody = document.getElementById('topSlowestErrorsTableBody');
 
     let requestsPerNodeChart, avgLatencyPerNodeChart, errorRatePerNodeChart;
+    let autoRefreshTimer;
 
     // Initialize Chart.js defaults
     Chart.defaults.font.family = 'Inter';
     Chart.defaults.font.size = 12;
     Chart.defaults.color = '#666';
+
+    // Load saved time filter from localStorage
+    let savedTimeFilter = localStorage.getItem('dashboardTimeFilter');
+    if (savedTimeFilter) {
+        timeFilter.value = savedTimeFilter;
+    }
+
+    // Load saved refresh interval from localStorage
+    let savedRefreshInterval = localStorage.getItem('refreshIntervalSelection');
+    if (savedRefreshInterval) {
+        refreshIntervalSelect.value = savedRefreshInterval;
+    }
+
+    function startAutoRefresh() {
+        if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+
+        const interval = refreshIntervalSelect.value;
+        let intervalMs = 0;
+
+        switch (interval) {
+            case '10s': intervalMs = 10 * 1000; break;
+            case '30s': intervalMs = 30 * 1000; break;
+            case '1m': intervalMs = 60 * 1000; break;
+            case 'off':
+            default: intervalMs = 0; break;
+        }
+
+        if (intervalMs > 0) {
+            autoRefreshTimer = setInterval(fetchDataAndRender, intervalMs);
+        }
+    }
 
     // Function to get time range from filter
     function getTimeRange() {
@@ -106,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${error.route}</td>
                 <td>${error.node}</td>
                 <td class="text-right">${error.gatewayLatencyMs}</td>
-                <td class="text-center">${error.statusCode || 'N/A'}</td>
+                <td class="text-center">${error.downstreamStatusCode || 'N/A'}</td>
                 <td>${error.errorMessage || 'N/A'}</td>
                 <td>${error.requestBody || 'N/A'}</td>
             `;
@@ -191,22 +225,28 @@ document.addEventListener('DOMContentLoaded', () => {
         errorRatePerNodeChart = createBarChart('errorRatePerNodeChart', data, 'Error Rate Per Node', 'Error Rate (%)');
     }
 
-    // Load saved time filter from localStorage
-    const savedTimeFilter = localStorage.getItem('dashboardTimeFilter');
-    if (savedTimeFilter) {
-        timeFilter.value = savedTimeFilter;
-    }
-
     // Event listener for time filter change
     timeFilter.addEventListener('change', (event) => {
-        // Save selected time filter to localStorage
         localStorage.setItem('dashboardTimeFilter', event.target.value);
         fetchDataAndRender();
+        startAutoRefresh();
+    });
+
+    // Event listener for refresh interval change
+    refreshIntervalSelect.addEventListener('change', (event) => {
+        localStorage.setItem('refreshIntervalSelection', event.target.value);
+        startAutoRefresh();
+    });
+
+    // Event listener for manual refresh button
+    manualRefreshBtn.addEventListener('click', () => {
+        fetchDataAndRender();
+        startAutoRefresh();
     });
 
     // Initial data fetch
     fetchDataAndRender();
 
-    // Auto-refresh every 10 seconds
-    setInterval(fetchDataAndRender, 10000);
+    // Start auto-refresh
+    startAutoRefresh();
 });

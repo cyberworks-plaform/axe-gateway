@@ -320,21 +320,59 @@ function updateRecentErrorsTable(data) {
 
 // Event listener for time filter change
     document.addEventListener('DOMContentLoaded', () => {
+    const timeFilter = document.getElementById('timeFilter');
+    const refreshIntervalSelect = document.getElementById('refreshInterval');
+    const manualRefreshBtn = document.getElementById('manualRefreshBtn');
+    let autoRefreshTimer;
+
     // Load saved time filter from localStorage
     const savedTimeFilter = localStorage.getItem('dashboardTimeFilter');
     if (savedTimeFilter) {
-        document.getElementById('timeFilter').value = savedTimeFilter;
+        timeFilter.value = savedTimeFilter;
     }
 
-    document.getElementById('timeFilter').addEventListener('change', (event) => {
-        // Save selected time filter to localStorage
+    // Load saved refresh interval from localStorage
+    const savedRefreshInterval = localStorage.getItem('refreshIntervalSelection');
+    if (savedRefreshInterval) {
+        refreshIntervalSelect.value = savedRefreshInterval;
+    }
+
+    function startAutoRefresh() {
+        if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+
+        const interval = refreshIntervalSelect.value;
+        let intervalMs = 0;
+
+        switch (interval) {
+            case '10s': intervalMs = 10 * 1000; break;
+            case '30s': intervalMs = 30 * 1000; break;
+            case '1m': intervalMs = 60 * 1000; break;
+            case 'off':
+            default: intervalMs = 0; break;
+        }
+
+        if (intervalMs > 0) {
+            autoRefreshTimer = setInterval(fetchDashboardData, intervalMs);
+        }
+    }
+
+    timeFilter.addEventListener('change', (event) => {
         localStorage.setItem('dashboardTimeFilter', event.target.value);
         fetchDashboardData();
+        startAutoRefresh(); // Restart timer with current settings
     });
 
-    // Initial data fetch
-    fetchDashboardData();
+    refreshIntervalSelect.addEventListener('change', (event) => {
+        localStorage.setItem('refreshIntervalSelection', event.target.value);
+        startAutoRefresh();
+    });
 
-    // Set up auto-reload
-    setInterval(fetchDashboardData, RELOAD_INTERVAL_MS);
+    manualRefreshBtn.addEventListener('click', () => {
+        fetchDashboardData();
+        startAutoRefresh(); // Restart timer with current settings
+    });
+
+    // Initial data fetch and start auto-refresh
+    fetchDashboardData();
+    startAutoRefresh();
 });
