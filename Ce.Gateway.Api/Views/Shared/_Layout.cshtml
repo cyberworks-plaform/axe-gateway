@@ -64,6 +64,12 @@
                                 <p>Node Status</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="/nodeperformance" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "NodePerformance" ? "active" : "")">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>Node Performance</p>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
