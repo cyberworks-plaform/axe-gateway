@@ -80,6 +80,22 @@ function initChart() {
     });
 }
 
+// Convert label to UTC+7 display format
+function convertLabelToUTC7(label, timeFormat) {
+    // For hour format (HH:00), add 7 hours
+    if (timeFormat === 'HH:00') {
+        const match = label.match(/(\d+):00/);
+        if (match) {
+            let hour = parseInt(match[1]);
+            hour = (hour + 7) % 24;
+            return hour.toString().padStart(2, '0') + ':00';
+        }
+    }
+    // For month format (MMM yyyy) and day format (MM/dd), no conversion needed
+    // as they represent date boundaries, not specific times
+    return label;
+}
+
 async function loadReportData() {
     const period = document.getElementById('periodFilter').value;
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -100,9 +116,12 @@ async function loadReportData() {
         document.getElementById('clientErrorRequests').textContent = data.clientErrorRequests.toLocaleString();
         document.getElementById('serverErrorRequests').textContent = data.serverErrorRequests.toLocaleString();
         
-        // Update chart
+        // Update chart with UTC+7 labels
         if (requestReportChart) {
-            const labels = data.timeSlots.map(slot => slot.label);
+            // Convert labels to UTC+7 if needed
+            const labels = data.timeSlots.map(slot => 
+                convertLabelToUTC7(slot.label, data.timeFormat)
+            );
             const successData = data.timeSlots.map(slot => slot.successCount);
             const clientErrorData = data.timeSlots.map(slot => slot.clientErrorCount);
             const serverErrorData = data.timeSlots.map(slot => slot.serverErrorCount);
