@@ -11,7 +11,15 @@ public class RequestLogGenerator
     private readonly string[] _upstreamPaths = { "/api/ocr/process", "/api/ocr/batch", "/api/ocr/status", "/api/documents/upload", "/api/documents/scan" };
     private readonly string[] _downstreamHosts = { "localhost", "ocr-node-1", "ocr-node-2", "ocr-node-3" };
     private readonly int[] _downstreamPorts = { 10501, 10502, 10503 };
-    private readonly int[] _statusCodes = { 200, 201, 400, 404, 500, 503 };
+    
+    // More diverse status codes: 70% success (2xx), 15% client error (4xx), 10% server error (5xx), 5% other
+    private readonly int[] _statusCodes = { 
+        200, 200, 200, 200, 200, 201, 201, 204,  // 2xx - 8/20
+        400, 401, 403, 404,                       // 4xx - 4/20
+        500, 502, 503,                            // 5xx - 3/20
+        200, 200, 200, 200, 200                   // More 2xx to reach 70%
+    };
+    
     private readonly string[] _clientIps = { "192.168.1.10", "192.168.1.20", "192.168.1.30", "10.0.0.15", "10.0.0.25" };
 
     public RequestLogGenerator()

@@ -1,0 +1,109 @@
+@{
+    ViewData["Title"] = "Request Report";
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12 d-flex justify-content-between align-items-center">
+                <h1 class="m-0">Request Report</h1>
+                <div class="ml-auto">
+                    <select id="periodFilter" class="form-control" style="width: 200px;">
+                        <option value="1d" selected>Last 1 Day</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="1m">Last 1 Month</option>
+                        <option value="3m">Last 3 Months</option>
+                        <option value="9m">Last 9 Months</option>
+                        <option value="12m">Last 12 Months</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.content-header -->
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <!-- Summary Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3 id="totalRequests">0</h3>
+                        <p>Total Requests</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3 id="successRequests">0</h3>
+                        <p>Success (2xx)</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3 id="clientErrorRequests">0</h3>
+                        <p>Client Error (4xx)</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3 id="serverErrorRequests">0</h3>
+                        <p>Server Error (5xx)</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Requests Over Time</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div style="position: relative; height: 400px;">
+                            <canvas id="requestReportChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="overlay" id="loadingOverlay" style="display: none;">
+                        <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Request Report Script -->
+    <script src="/js/requestreport.js"></script>
+}
