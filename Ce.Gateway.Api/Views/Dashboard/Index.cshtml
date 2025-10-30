@@ -9,7 +9,10 @@
             <div class="col-sm-12 d-flex justify-content-between align-items-center">
                 <h1 class="m-0">Dashboard</h1>
                 <div class="ml-auto d-flex align-items-center gap-2">
-                    <select id="timeFilter" class="form-control" style="width: 180px;">
+                    <button id="resetLayoutBtn" class="btn-reset-layout" data-toggle="tooltip" data-placement="bottom" title="Reset dashboard layout to default">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <select id="timeFilter" class="form-control" style="width: 180px;" data-toggle="tooltip" data-placement="bottom" title="Select time range for dashboard data">
                         <option value="5m">Last 5 minutes</option>
                         <option value="15m">Last 15 minutes</option>
                         <option value="30m">Last 30 minutes</option>
@@ -24,10 +27,10 @@
                         <option value="90d">Last 90 days</option>
                     </select>
                     <div class="refresh-control-group">
-                        <button id="manualRefreshBtn" class="btn-refresh-icon" title="Refresh dashboard">
+                        <button id="manualRefreshBtn" class="btn-refresh-icon" data-toggle="tooltip" data-placement="bottom" title="Refresh dashboard data manually">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <select id="refreshInterval" class="form-control-refresh">
+                        <select id="refreshInterval" class="form-control-refresh" data-toggle="tooltip" data-placement="bottom" title="Set auto-refresh interval">
                             <option value="off">Off</option>
                             <option value="10s">10s</option>
                             <option value="30s">30s</option>
@@ -43,62 +46,78 @@
 
 <!-- Main content -->
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid" id="sortable-widgets-container">
         <!-- Overview Section -->
-        <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3 id="totalRequests">0</h3>
-                        <p>Total Requests</p>
+        <div class="row" id="widget-overview-metrics">
+            <div class="col-md-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
+                        <h3 class="card-title">Overview Metrics</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3 id="errorRate">0<sup style="font-size: 20px">%</sup></h3>
-                        <p>Error Rate</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-bug"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-primary">
-                    <div class="inner">
-                        <h3 id="avgLatency">0<sup style="font-size: 20px">ms</sup></h3>
-                        <p>Avg Latency</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3 id="nodeStatusValue">0</h3>
-                        <p id="nodeStatusTitle"></p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-server"></i>
+                    <div class="card-body collapse show" id="overviewMetricsCollapse">
+                        <div class="row">
+                            <div class="col-lg-3 col-6" id="widget-total-requests" data-toggle="tooltip" data-placement="top" title="Total number of requests processed">
+                                <div class="small-box bg-success">
+                                    <div class="inner">
+                                        <h3 id="totalRequests">0</h3>
+                                        <p>Total Requests</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-6" id="widget-error-rate" data-toggle="tooltip" data-placement="top" title="Percentage of failed requests">
+                                <div class="small-box bg-warning">
+                                    <div class="inner">
+                                        <h3 id="errorRate">0<sup style="font-size: 20px">%</sup></h3>
+                                        <p>Error Rate</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-bug"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-6" id="widget-avg-latency" data-toggle="tooltip" data-placement="top" title="Average response time across all requests">
+                                <div class="small-box bg-primary">
+                                    <div class="inner">
+                                        <h3 id="avgLatency">0<sup style="font-size: 20px">ms</sup></h3>
+                                        <p>Avg Latency</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-6" id="widget-node-status" data-toggle="tooltip" data-placement="top" title="Current status of backend nodes">
+                                <div class="small-box bg-info">
+                                    <div class="inner">
+                                        <h3 id="nodeStatusValue">0</h3>
+                                        <p id="nodeStatusTitle"></p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="fas fa-server"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-lg-4">
+            <div class="col-lg-4" id="widget-request-timeline">
                 <div class="card card-primary card-outline">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">Request Timeline</h3>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
@@ -108,12 +127,12 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-4" id="widget-latency-timeline">
                 <div class="card card-primary card-outline">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">Latency Timeline</h3>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
@@ -123,12 +142,12 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-4" id="widget-http-status">
                 <div class="card card-primary card-outline">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">HTTP Status</h3>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
@@ -141,10 +160,10 @@
         </div>
 
         <!-- Current Node Network Section -->
-        <div class="row">
+        <div class="row" id="widget-current-node-network">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">
                             Current Node Network
                             <span class="node-status-summary">
@@ -159,7 +178,7 @@
                             </span>
                         </h3>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
@@ -224,10 +243,10 @@
         </div>
 
         <!-- Current Node Status Section -->
-        <div class="row">
+        <div class="row" id="widget-current-node-status">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">
                             Current Node Status
                             <span class="node-status-summary">
@@ -242,12 +261,12 @@
                             </span>
                         </h3>
                         <div class="card-tools d-flex align-items-center">
-                            <select id="nodeStatusFilter" class="form-control form-control-sm" style="width: 120px; margin-right: 10px;">
+                            <select id="nodeStatusFilter" class="form-control form-control-sm" style="width: 120px; margin-right: 10px;" data-toggle="tooltip" data-placement="left" title="Filter nodes by status">
                                 <option value="all">All Nodes</option>
                                 <option value="up">Up Only</option>
                                 <option value="down">Down Only</option>
                             </select>
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
@@ -256,7 +275,7 @@
                         <table id="currentNodeStatusTable" class="table table-hover node-status-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 30px;"></th>
+                                    <th style="width: 30px;" data-toggle="tooltip" title="Click row to expand details"></th>
                                     <th>Node</th>
                                     <th>Status</th>
                                     <th class="text-right">Total Requests</th>
@@ -275,13 +294,13 @@
         </div>
 
         <!-- Route Summary Section -->
-        <div class="row">
+        <div class="row" id="widget-route-summary">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">Route Summary</h3>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
@@ -307,13 +326,13 @@
         </div>
 
         <!-- Node Summary Section -->
-        <div class="row">
+        <div class="row" id="widget-node-summary">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">Node Summary</h3>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
@@ -339,13 +358,13 @@
         </div>
 
         <!-- Recent Errors Section -->
-        <div class="row">
+        <div class="row" id="widget-recent-errors">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header draggable-header" data-toggle="tooltip" data-placement="top" title="Drag to reorder widgets">
                         <h3 class="card-title">Recent Errors (Last 100)</h3>
                         <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" data-placement="left" title="Collapse/Expand">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>

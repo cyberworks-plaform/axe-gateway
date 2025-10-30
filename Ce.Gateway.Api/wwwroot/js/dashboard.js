@@ -510,9 +510,13 @@ function updateRecentErrorsTable(data) {
 
 // Event listener for time filter change
     document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Bootstrap tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+    
     const timeFilter = document.getElementById('timeFilter');
     const refreshIntervalSelect = document.getElementById('refreshInterval');
     const manualRefreshBtn = document.getElementById('manualRefreshBtn');
+    const resetLayoutBtn = document.getElementById('resetLayoutBtn');
     let autoRefreshTimer;
 
     // Load saved time filter from localStorage
@@ -562,6 +566,14 @@ function updateRecentErrorsTable(data) {
         startAutoRefresh(); // Restart timer with current settings
     });
 
+    // Reset layout button
+    resetLayoutBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to reset the dashboard layout to default?')) {
+            localStorage.removeItem('dashboardWidgetOrder');
+            location.reload();
+        }
+    });
+
     // Node status filter
     const nodeStatusFilter = document.getElementById('nodeStatusFilter');
     if (nodeStatusFilter) {
@@ -573,4 +585,39 @@ function updateRecentErrorsTable(data) {
     // Initial data fetch and start auto-refresh
     fetchDashboardData();
     startAutoRefresh();
+
+    // Initialize Sortable for dashboard widgets
+    $('#sortable-widgets-container').sortable({
+        items: '> .row',
+        handle: '.draggable-header',
+        placeholder: 'sortable-placeholder',
+        forcePlaceholderSize: true,
+        opacity: 0.8,
+        update: function(event, ui) {
+            const newOrder = $(this).children('.row').map(function() {
+                return this.id;
+            }).get();
+            localStorage.setItem('dashboardWidgetOrder', JSON.stringify(newOrder));
+        }
+    });
+
+    // Load saved widget order
+    const savedOrder = localStorage.getItem('dashboardWidgetOrder');
+    if (savedOrder) {
+        const widgetOrder = JSON.parse(savedOrder);
+        const container = $('#sortable-widgets-container');
+        const widgets = {};
+
+        // Store references to widgets by their ID
+        container.children('.row').each(function() {
+            widgets[this.id] = $(this);
+        });
+
+        // Append widgets in the saved order
+        widgetOrder.forEach(function(id) {
+            if (widgets[id]) {
+                container.append(widgets[id]);
+            }
+        });
+    }
 });
