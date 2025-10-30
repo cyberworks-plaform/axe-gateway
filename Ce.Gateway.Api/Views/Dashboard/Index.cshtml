@@ -140,6 +140,89 @@
             </div>
         </div>
 
+        <!-- Current Node Network Section -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Current Node Network
+                            <span class="node-status-summary">
+                                <span class="status-badge status-badge-healthy">
+                                    <span class="status-dot"></span>
+                                    <span id="networkHealthyNodeCount">0</span>
+                                </span>
+                                <span class="status-badge status-badge-unhealthy">
+                                    <span class="status-dot"></span>
+                                    <span id="networkUnhealthyNodeCount">0</span>
+                                </span>
+                            </span>
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body collapse show" id="currentNodeNetworkCollapse">
+                        <div class="network-stats-bar">
+                            <div class="network-stat-item">
+                                <div class="stat-icon-mini gateway-mini">
+                                    <i class="fas fa-network-wired"></i>
+                                </div>
+                                <div class="stat-info-mini">
+                                    <div class="stat-value-mini" id="totalNodesCount">0</div>
+                                    <div class="stat-label-mini">Total Nodes</div>
+                                </div>
+                            </div>
+                            <div class="network-stat-item">
+                                <div class="stat-icon-mini healthy-mini">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-info-mini">
+                                    <div class="stat-value-mini" id="healthyNodesCount">0</div>
+                                    <div class="stat-label-mini">Healthy</div>
+                                </div>
+                            </div>
+                            <div class="network-stat-item">
+                                <div class="stat-icon-mini unhealthy-mini">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                                <div class="stat-info-mini">
+                                    <div class="stat-value-mini" id="unhealthyNodesCount">0</div>
+                                    <div class="stat-label-mini">Unhealthy</div>
+                                </div>
+                            </div>
+                            <div class="network-stat-item">
+                                <div class="stat-icon-mini requests-mini">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="stat-info-mini">
+                                    <div class="stat-value-mini" id="totalRequestsAll">0</div>
+                                    <div class="stat-label-mini">Total Requests</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="nodeNetworkGraph" class="node-network-container"></div>
+                        <div class="network-legend">
+                            <div class="network-legend-item">
+                                <div class="network-legend-icon gateway"></div>
+                                <span>Gateway</span>
+                            </div>
+                            <div class="network-legend-item">
+                                <div class="network-legend-icon healthy"></div>
+                                <span>Healthy Connection</span>
+                            </div>
+                            <div class="network-legend-item">
+                                <div class="network-legend-icon unhealthy"></div>
+                                <span>Unhealthy Connection</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Current Node Status Section -->
         <div class="row">
             <div class="col-md-12">
@@ -297,6 +380,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Chart.js Datalabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Vis.js Network -->
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
+    <!-- Node Network Graph Component -->
+    <link href="/css/node-network-graph.css" rel="stylesheet" />
+    <script src="/js/node-network-graph.js"></script>
     <!-- Dashboard Script -->
     <script src="/js/dashboard.js"></script>
 }

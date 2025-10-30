@@ -301,10 +301,39 @@ function renderHttpStatusDonutChart(data) {
 }
 
 let allNodeStatusData = [];
+let nodeNetworkGraph = null;
+
+// Initialize network graph on page load
+document.addEventListener('DOMContentLoaded', () => {
+    nodeNetworkGraph = new NodeNetworkGraph('nodeNetworkGraph', {
+        showInfoPanel: true
+    });
+});
 
 function updateCurrentNodeStatusTable(data) {
     allNodeStatusData = data;
     applyNodeStatusFilter();
+    updateNodeNetworkGraph(data);
+}
+
+function updateNodeNetworkGraph(data) {
+    if (nodeNetworkGraph) {
+        nodeNetworkGraph.updateData(data);
+        
+        // Update counters
+        const healthyCount = data.filter(item => item.isHealthy).length;
+        const unhealthyCount = data.filter(item => !item.isHealthy).length;
+        const totalRequests = data.reduce((sum, item) => sum + (item.totalRequests || 0), 0);
+        
+        document.getElementById('networkHealthyNodeCount').textContent = healthyCount;
+        document.getElementById('networkUnhealthyNodeCount').textContent = unhealthyCount;
+        
+        // Update stats bar
+        document.getElementById('totalNodesCount').textContent = data.length;
+        document.getElementById('healthyNodesCount').textContent = healthyCount;
+        document.getElementById('unhealthyNodesCount').textContent = unhealthyCount;
+        document.getElementById('totalRequestsAll').textContent = totalRequests.toLocaleString();
+    }
 }
 
 function applyNodeStatusFilter() {
