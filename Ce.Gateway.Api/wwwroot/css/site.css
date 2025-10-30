@@ -331,6 +331,108 @@ body {
 }
 
 /* ========================================
+   Dashboard Node Status Styles
+   ======================================== */
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-indicator.healthy {
+    background-color: #28a745;
+}
+
+.status-indicator.unhealthy {
+    background-color: #dc3545;
+}
+
+.node-status-summary {
+    margin-left: 15px;
+    display: inline-flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-badge-healthy {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.status-badge-unhealthy {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.status-badge .status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-badge-healthy .status-dot {
+    background-color: #28a745;
+}
+
+.status-badge-unhealthy .status-dot {
+    background-color: #dc3545;
+}
+
+.node-status-table tbody tr.main-node-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.node-status-table tbody tr.main-node-row:hover {
+    background-color: #f8f9fa;
+}
+
+.node-status-table tbody tr.main-node-row.expanded {
+    background-color: #e9ecef;
+}
+
+.node-status-table .expand-icon {
+    transition: transform 0.2s ease-in-out;
+    color: #6c757d;
+}
+
+.node-status-table tbody tr.detail-row {
+    background-color: #f8f9fa;
+}
+
+.node-health-detail {
+    font-size: 0.9rem;
+}
+
+.node-health-detail p {
+    margin-bottom: 8px;
+}
+
+.health-check-entries {
+    margin-top: 15px;
+}
+
+.health-check-entries h6 {
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* ========================================
    Pagination
    ======================================== */
 

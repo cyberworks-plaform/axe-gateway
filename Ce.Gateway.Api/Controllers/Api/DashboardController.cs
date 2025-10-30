@@ -49,5 +49,13 @@ namespace Ce.Gateway.Api.Controllers.Api
             var errors = await _dashboardService.GetRecentErrorsAsync(startTime.ToUniversalTime(), endTime.ToUniversalTime(), limit);
             return Ok(errors);
         }
+
+        [HttpGet("nodestatuswithmetrics")]
+        public async Task<ActionResult<List<NodeStatusWithMetricsDto>>> GetNodeStatusWithMetrics(
+            [FromQuery] DateTime startTime, [FromQuery] DateTime endTime)
+        {
+            var nodeStatus = await _dashboardService.GetNodeStatusWithMetricsAsync(startTime.ToUniversalTime(), endTime.ToUniversalTime());
+            return Ok(nodeStatus);
+        }
     }
 }

@@ -12,5 +12,6 @@ namespace Ce.Gateway.Api.Services.Interface
         Task<List<NodeSummaryDto>> GetNodeSummaryAsync(DateTime startTime, DateTime endTime);
         Task<List<ErrorLogDto>> GetRecentErrorsAsync(DateTime startTime, DateTime endTime, int limit = 20);
         Task<(int totalNodes, int nodesDown)> GetNodeHealthStatsAsync();
+        Task<List<NodeStatusWithMetricsDto>> GetNodeStatusWithMetricsAsync(DateTime startTime, DateTime endTime);
     }
 }

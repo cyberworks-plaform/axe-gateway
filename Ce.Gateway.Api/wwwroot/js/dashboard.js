@@ -52,22 +52,55 @@ function formatUtcDate(dateString) {
     });
 }
 
+// Helper to format datetime for node last checked (UTC+7) - Full date and time
+function formatNodeLastChecked(dateTimeString) {
+    if (!dateTimeString) return 'N/A';
+    const date = new Date(dateTimeString);
+    if (isNaN(date.getTime())) return 'N/A';
+    
+    // Get UTC components and add 7 hours manually for UTC+7
+    const utcYear = date.getUTCFullYear();
+    const utcMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const utcDay = String(date.getUTCDate()).padStart(2, '0');
+    let utcHours = date.getUTCHours() + 7;
+    const utcMinutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const utcSeconds = String(date.getUTCSeconds()).padStart(2, '0');
+    
+    // Handle day overflow when adding 7 hours
+    let adjustedDay = utcDay;
+    if (utcHours >= 24) {
+        utcHours -= 24;
+        adjustedDay = String(parseInt(utcDay) + 1).padStart(2, '0');
+    }
+    const formattedHours = String(utcHours).padStart(2, '0');
+    
+    return `${formattedHours}:${utcMinutes}:${utcSeconds}`;
+}
+
 // Fetch and update all dashboard data
 async function fetchDashboardData() {
     const { startTime, endTime } = getTimeRange();
 
     try {
-        const [overview, routeSummary, nodeSummary, recentErrors] = await Promise.all([
+        const [overview, routeSummary, nodeSummary, recentErrors, nodeStatusWithMetrics] = await Promise.all([
             fetch(`${API_BASE_URL}/overview?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
             fetch(`${API_BASE_URL}/routesummary?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
             fetch(`${API_BASE_URL}/nodesummary?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
-            fetch(`${API_BASE_URL}/recenterrors?startTime=${startTime}&endTime=${endTime}`).then(res => res.json())
+            fetch(`${API_BASE_URL}/recenterrors?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
+            fetch(`${API_BASE_URL}/nodestatuswithmetrics?startTime=${startTime}&endTime=${endTime}`).then(res => {
+                if (!res.ok) {
+                    console.error('Failed to fetch node status:', res.status, res.statusText);
+                    return [];
+                }
+                return res.json();
+            })
         ]);
 
         updateOverview(overview);
         renderRequestTimelineChart(overview.requestTimeline);
         renderLatencyTimelineChart(overview.latencyTimeline);
         renderHttpStatusDonutChart(overview.httpStatusDistribution);
+        updateCurrentNodeStatusTable(nodeStatusWithMetrics || []);
         updateRouteSummaryTable(routeSummary);
         updateNodeSummaryTable(nodeSummary);
         updateRecentErrorsTable(recentErrors);
@@ -267,6 +300,134 @@ function renderHttpStatusDonutChart(data) {
     }
 }
 
+let allNodeStatusData = [];
+
+function updateCurrentNodeStatusTable(data) {
+    allNodeStatusData = data;
+    applyNodeStatusFilter();
+}
+
+function applyNodeStatusFilter() {
+    const filter = document.getElementById('nodeStatusFilter').value;
+    const tableBody = document.querySelector('#currentNodeStatusTable tbody');
+    tableBody.innerHTML = '';
+    
+    let filteredData = allNodeStatusData;
+    if (filter === 'up') {
+        filteredData = allNodeStatusData.filter(item => item.isHealthy);
+    } else if (filter === 'down') {
+        filteredData = allNodeStatusData.filter(item => !item.isHealthy);
+    }
+    
+    let healthyCount = allNodeStatusData.filter(item => item.isHealthy).length;
+    let unhealthyCount = allNodeStatusData.filter(item => !item.isHealthy).length;
+    
+    filteredData.forEach((item, index) => {
+        const row = tableBody.insertRow();
+        row.className = 'main-node-row';
+        row.dataset.index = index;
+        row.dataset.nodeData = JSON.stringify(item);
+        
+        const expandCell = row.insertCell();
+        expandCell.innerHTML = '<i class="fas fa-chevron-right expand-icon"></i>';
+        expandCell.style.cursor = 'pointer';
+        expandCell.style.textAlign = 'center';
+        
+        row.insertCell().textContent = item.node || 'N/A';
+        
+        const statusCell = row.insertCell();
+        const statusIndicator = document.createElement('span');
+        statusIndicator.className = 'status-indicator';
+        statusIndicator.style.display = 'inline-block';
+        statusIndicator.style.width = '12px';
+        statusIndicator.style.height = '12px';
+        statusIndicator.style.borderRadius = '50%';
+        statusIndicator.style.backgroundColor = item.isHealthy ? '#28a745' : '#dc3545';
+        statusIndicator.title = item.isHealthy ? 'Healthy' : 'Unhealthy';
+        statusCell.appendChild(statusIndicator);
+        
+        const totalRequestsCell = row.insertCell();
+        totalRequestsCell.classList.add('text-right');
+        totalRequestsCell.textContent = item.totalRequests || 0;
+        
+        const avgLatencyCell = row.insertCell();
+        avgLatencyCell.classList.add('text-right');
+        avgLatencyCell.textContent = item.avgLatencyMs || 0;
+        
+        const minLatencyCell = row.insertCell();
+        minLatencyCell.classList.add('text-right');
+        minLatencyCell.textContent = item.minLatencyMs || 0;
+        
+        const maxLatencyCell = row.insertCell();
+        maxLatencyCell.classList.add('text-right');
+        maxLatencyCell.textContent = item.maxLatencyMs || 0;
+        
+        row.onclick = function() {
+            toggleNodeDetails(this);
+        };
+    });
+    
+    document.getElementById('healthyNodeCount').textContent = healthyCount;
+    document.getElementById('unhealthyNodeCount').textContent = unhealthyCount;
+}
+
+function toggleNodeDetails(row) {
+    const expandIcon = row.querySelector('.expand-icon');
+    const nextRow = row.nextElementSibling;
+    
+    if (nextRow && nextRow.classList.contains('detail-row')) {
+        nextRow.remove();
+        expandIcon.className = 'fas fa-chevron-right expand-icon';
+        row.classList.remove('expanded');
+    } else {
+        const nodeData = JSON.parse(row.dataset.nodeData);
+        const detailRow = document.createElement('tr');
+        detailRow.className = 'detail-row';
+        
+        const detailCell = document.createElement('td');
+        detailCell.colSpan = 7;
+        detailCell.style.backgroundColor = '#f8f9fa';
+        detailCell.style.padding = '15px';
+        
+        let entriesHtml = '';
+        if (nodeData.entries && Object.keys(nodeData.entries).length > 0) {
+            entriesHtml = '<div class="health-check-entries"><h6>Health Check Details:</h6><table class="table table-sm table-bordered">';
+            entriesHtml += '<thead><tr><th>Check Name</th><th>Status</th><th>Description</th><th>Duration</th></tr></thead><tbody>';
+            for (const [key, entry] of Object.entries(nodeData.entries)) {
+                const statusColor = entry.status === 'Healthy' ? '#28a745' : '#dc3545';
+                entriesHtml += `<tr>
+                    <td>${key}</td>
+                    <td><span style="color: ${statusColor}; font-weight: bold;">${entry.status}</span></td>
+                    <td>${entry.description || '-'}</td>
+                    <td>${entry.duration || '-'}</td>
+                </tr>`;
+            }
+            entriesHtml += '</tbody></table></div>';
+        }
+        
+        detailCell.innerHTML = `
+            <div class="node-health-detail">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Overall Status:</strong> <span style="color: ${nodeData.isHealthy ? '#28a745' : '#dc3545'}; font-weight: bold;">${nodeData.status || (nodeData.isHealthy ? 'Healthy' : 'Unhealthy')}</span></p>
+                        <p><strong>Last Checked:</strong> ${formatNodeLastChecked(nodeData.lastChecked)}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Status Message:</strong> ${nodeData.statusMessage || 'N/A'}</p>
+                        <p><strong>Total Duration:</strong> ${nodeData.totalDuration || 'N/A'}</p>
+                    </div>
+                </div>
+                ${entriesHtml}
+            </div>
+        `;
+        
+        detailRow.appendChild(detailCell);
+        row.parentNode.insertBefore(detailRow, row.nextSibling);
+        expandIcon.className = 'fas fa-chevron-down expand-icon';
+        row.classList.add('expanded');
+    }
+}
+
 function updateRouteSummaryTable(data) {
     const tableBody = document.querySelector('#routeSummaryTable tbody');
     tableBody.innerHTML = ''; // Clear existing rows
@@ -371,6 +532,14 @@ function updateRecentErrorsTable(data) {
         fetchDashboardData();
         startAutoRefresh(); // Restart timer with current settings
     });
+
+    // Node status filter
+    const nodeStatusFilter = document.getElementById('nodeStatusFilter');
+    if (nodeStatusFilter) {
+        nodeStatusFilter.addEventListener('change', () => {
+            applyNodeStatusFilter();
+        });
+    }
 
     // Initial data fetch and start auto-refresh
     fetchDashboardData();

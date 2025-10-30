@@ -7,7 +7,7 @@ export const options = {
 };
 
 export default function () {
-  const url = 'http://localhost:5000/gateway/axsdk-api/auto/ocr/cccd';
+  const url = 'http://localhost:5000/gateway/axsdk-api/ocr/cccd';
   const res = http.get(url);
 
   check(res, {

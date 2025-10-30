@@ -140,6 +140,57 @@
             </div>
         </div>
 
+        <!-- Current Node Status Section -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            Current Node Status
+                            <span class="node-status-summary">
+                                <span class="status-badge status-badge-healthy">
+                                    <span class="status-dot"></span>
+                                    <span id="healthyNodeCount">0</span>
+                                </span>
+                                <span class="status-badge status-badge-unhealthy">
+                                    <span class="status-dot"></span>
+                                    <span id="unhealthyNodeCount">0</span>
+                                </span>
+                            </span>
+                        </h3>
+                        <div class="card-tools d-flex align-items-center">
+                            <select id="nodeStatusFilter" class="form-control form-control-sm" style="width: 120px; margin-right: 10px;">
+                                <option value="all">All Nodes</option>
+                                <option value="up">Up Only</option>
+                                <option value="down">Down Only</option>
+                            </select>
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body collapse show" id="currentNodeStatusCollapse">
+                        <table id="currentNodeStatusTable" class="table table-hover node-status-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;"></th>
+                                    <th>Node</th>
+                                    <th>Status</th>
+                                    <th class="text-right">Total Requests</th>
+                                    <th class="text-right">Avg Latency (ms)</th>
+                                    <th class="text-right">Min Latency (ms)</th>
+                                    <th class="text-right">Max Latency (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Route Summary Section -->
         <div class="row">
             <div class="col-md-12">

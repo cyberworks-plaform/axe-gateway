@@ -48,7 +48,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatTime(dateTimeString) {
         if (!dateTimeString) return '-';
         const date = new Date(dateTimeString);
-        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        
+        // Get UTC time components and add 7 hours for UTC+7
+        let utcHours = date.getUTCHours() + 7;
+        const utcMinutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const utcSeconds = String(date.getUTCSeconds()).padStart(2, '0');
+        
+        // Handle hour overflow (if >= 24, wrap around)
+        if (utcHours >= 24) {
+            utcHours -= 24;
+        }
+        const formattedHours = String(utcHours).padStart(2, '0');
+        
+        return `${formattedHours}:${utcMinutes}:${utcSeconds}`;
     }
 
     async function fetchNodeStatus() {

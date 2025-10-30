@@ -246,5 +246,64 @@ namespace Ce.Gateway.Api.Services
                         .OrderBy(d => d.Label)
                         .ToList();
         }
+
+        public async Task<List<NodeStatusWithMetricsDto>> GetNodeStatusWithMetricsAsync(DateTime startTime, DateTime endTime)
+        {
+            var allHealths = await _downstreamHealthStore.GetAllHealthAsync();
+
+            var filter = new LogFilter { From = startTime, To = endTime };
+            var allLogs = await _logRepository.GetLogsAsync(filter, 1, int.MaxValue);
+            var logs = allLogs.Data.ToList();
+
+            var logsByNode = logs
+                .Where(l => !string.IsNullOrEmpty(l.DownstreamHost) && l.DownstreamPort.HasValue)
+                .GroupBy(l => $"{l.DownstreamHost}:{l.DownstreamPort}")
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var result = new List<NodeStatusWithMetricsDto>();
+
+            foreach (var health in allHealths)
+            {
+                var nodeKey = $"{health.Host}:{health.Port}";
+                var hasLogs = logsByNode.TryGetValue(nodeKey, out var nodeLogs);
+
+                var nodeStatus = new NodeStatusWithMetricsDto
+                {
+                    Node = nodeKey,
+                    IsHealthy = health.Status == "Healthy",
+                    Status = health.Status,
+                    LastChecked = health.LastChecked,
+                    StatusMessage = health.StatusMessage,
+                    TotalDuration = health.TotalDuration,
+                    Entries = health.Entries?.ToDictionary(
+                        e => e.Key,
+                        e => new HealthCheckEntryDto
+                        {
+                            Status = e.Value.Status,
+                            Description = e.Value.Description,
+                            Duration = e.Value.Duration
+                        })
+                };
+
+                if (hasLogs && nodeLogs.Any())
+                {
+                    nodeStatus.MinLatencyMs = nodeLogs.Min(l => l.GatewayLatencyMs);
+                    nodeStatus.MaxLatencyMs = nodeLogs.Max(l => l.GatewayLatencyMs);
+                    nodeStatus.AvgLatencyMs = (long)Math.Round(nodeLogs.Average(l => l.GatewayLatencyMs));
+                    nodeStatus.TotalRequests = nodeLogs.Count;
+                }
+                else
+                {
+                    nodeStatus.MinLatencyMs = 0;
+                    nodeStatus.MaxLatencyMs = 0;
+                    nodeStatus.AvgLatencyMs = 0;
+                    nodeStatus.TotalRequests = 0;
+                }
+
+                result.Add(nodeStatus);
+            }
+
+            return result.OrderByDescending(n => n.TotalRequests).ToList();
+        }
     }
 }
