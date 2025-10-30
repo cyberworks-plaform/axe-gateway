@@ -2,8 +2,9 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export const options = {
-    
-  // No duration needed as iterations will control the test length
+  // 3 requests per second = 3 VUs with 1 second iteration
+  vus: 3,
+  duration: '5m', // Run for 5 minutes, adjust as needed
 };
 
 export default function () {
@@ -14,5 +15,7 @@ export default function () {
     'is status 200': (r) => r.status === 200,
   });
 
-  sleep(1); // Simulate some user think time
+  // Random sleep between 1-2 seconds
+  const randomSleep = Math.random() + 1; // Random value between 1.0 and 2.0
+  sleep(randomSleep);
 }
