@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Ocelot.Middleware;
 using Ce.Gateway.Api.Repositories.Interface; // Add this using statement
 using Ce.Gateway.Api.Utilities; // Added for BufferingStream
+using Microsoft.Extensions.Logging; // Added for ILogger
 
 namespace Ce.Gateway.Api.Middleware
 {
@@ -17,15 +18,18 @@ namespace Ce.Gateway.Api.Middleware
     {
         private readonly ILogWriter _logWriter;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<RequestLoggingDelegatingHandler> _logger; // Added ILogger
 
-        public RequestLoggingDelegatingHandler(ILogWriter logWriter, IHttpContextAccessor httpContextAccessor)
+        public RequestLoggingDelegatingHandler(ILogWriter logWriter, IHttpContextAccessor httpContextAccessor, ILogger<RequestLoggingDelegatingHandler> logger)
         {
             _logWriter = logWriter;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger; // Initialize logger
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+           
             var context = _httpContextAccessor.HttpContext;
 
             // Store original request content before it might be replaced
@@ -130,7 +134,14 @@ namespace Ce.Gateway.Api.Middleware
                 };
 
                 // Fire and forget
-                _ = _logWriter.WriteLogAsync(logEntry);
+                try
+                {
+                    _ = _logWriter.WriteLogAsync(logEntry);
+                }
+                catch (Exception logEx)
+                {
+                    _logger.LogError(logEx, "Error writing request log entry.");
+                }
             }
 
             return response;

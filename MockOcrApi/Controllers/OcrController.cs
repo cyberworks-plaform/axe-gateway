@@ -48,13 +48,8 @@ namespace MockOcrApi.Controllers
 
             var randomCase = _random.Next(1, 100);
            
-            if (randomCase == 1)
-            {
-                var errorMessage = "Mockup node return error when processing request";
-                _logger.LogInformation($"Route: /ocr/{route}, Delay: {delay}ms, Result: Error - {errorMessage}");
-                return StatusCode(500, errorMessage);
-            }
-            else if (randomCase == 2 )
+            
+            if (randomCase == 1 )
             {
                 var errorMessage = "Mockup ratelimit node return 423 code ";
                 _logger.LogInformation($"Route: /ocr/{route}, Delay: {delay}ms, Result: Error - {errorMessage}");
