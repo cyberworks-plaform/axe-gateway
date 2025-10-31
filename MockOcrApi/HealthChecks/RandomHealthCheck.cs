@@ -13,12 +13,12 @@ namespace MockOcrApi.HealthChecks
             HealthCheckContext context,
             CancellationToken cancellationToken = default)
         {
-            if (_random.Next(2) == 0)
+            if (_random.Next(1,100) == 1)
             {
-                return Task.FromResult(HealthCheckResult.Healthy("Mockup ocr service healthy."));
+                return Task.FromResult(HealthCheckResult.Degraded("Mockup ocr service degraded."));
             }
+            return Task.FromResult(HealthCheckResult.Healthy("Mockup ocr service healthy."));
 
-            return Task.FromResult(HealthCheckResult.Unhealthy("Mockup ocr service degraded."));
         }
     }
 }
