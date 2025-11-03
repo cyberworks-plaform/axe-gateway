@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Ce.Gateway.Api.Models;
 
@@ -15,6 +17,8 @@ public class RequestReportDto
 
 public class TimeSlotData
 {
+    [JsonIgnore]
+    public DateTime TimeValue { get; set; }
     public string Label { get; set; }
     public int SuccessCount { get; set; }
     public int ClientErrorCount { get; set; }

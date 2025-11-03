@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "agents", "agents", "{02EA68
 		agents\AGENTS.md = agents\AGENTS.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ce.Gateway.Api.Tests", "Ce.Gateway.Api.Tests\Ce.Gateway.Api.Tests.csproj", "{B6038255-7260-1F86-DA02-DE72244E8D66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,18 @@ Global
 		{8088F4C0-F990-409B-A487-84D80C6C893D}.Release|x64.Build.0 = Release|Any CPU
 		{8088F4C0-F990-409B-A487-84D80C6C893D}.Release|x86.ActiveCfg = Release|Any CPU
 		{8088F4C0-F990-409B-A487-84D80C6C893D}.Release|x86.Build.0 = Release|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Debug|x64.Build.0 = Debug|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Debug|x86.Build.0 = Debug|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Release|x64.ActiveCfg = Release|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Release|x64.Build.0 = Release|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Release|x86.ActiveCfg = Release|Any CPU
+		{B6038255-7260-1F86-DA02-DE72244E8D66}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

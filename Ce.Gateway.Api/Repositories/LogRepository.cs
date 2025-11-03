@@ -69,122 +69,102 @@ namespace Ce.Gateway.Api.Repositories
         public async Task<RequestReportDto> GetRequestReportAsync(DateTime from, DateTime to, string groupBy)
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-            
-            var logs = await dbContext.OcrGatewayLogEntries
-                .AsNoTracking()
-                .Where(l => l.CreatedAtUtc >= from && l.CreatedAtUtc <= to)
-                .Select(l => new 
-                { 
-                    l.CreatedAtUtc, 
-                    l.DownstreamStatusCode 
-                })
-                .ToListAsync();
+            string timeFormat;
+            string sqlFormat;
+
+            switch (groupBy)
+            {
+                case "hour":
+                    timeFormat = "HH:00";
+                    sqlFormat = "%Y-%m-%d %H:00:00";
+                    break;
+                case "month":
+                    timeFormat = "yyyy-MM";
+                    sqlFormat = "%Y-%m-01 00:00:00";
+                    break;
+                default: // day
+                    timeFormat = "yyyy-MM-dd";
+                    sqlFormat = "%Y-%m-%d 00:00:00";
+                    break;
+            }
+
+            var sql = string.Format("""
+                SELECT
+                    strftime('{0}', CreatedAtUtc) as TimeValue,
+                    '' as Label,
+                    SUM(CASE WHEN DownstreamStatusCode >= 200 AND DownstreamStatusCode < 300 THEN 1 ELSE 0 END) as SuccessCount,
+                    SUM(CASE WHEN DownstreamStatusCode >= 400 AND DownstreamStatusCode < 500 THEN 1 ELSE 0 END) as ClientErrorCount,
+                    SUM(CASE WHEN DownstreamStatusCode >= 500 AND DownstreamStatusCode < 600 THEN 1 ELSE 0 END) as ServerErrorCount,
+                    SUM(CASE WHEN DownstreamStatusCode < 200 OR (DownstreamStatusCode >= 300 AND DownstreamStatusCode < 400) OR DownstreamStatusCode >= 600 THEN 1 ELSE 0 END) as OtherCount
+                FROM OcrGatewayLogEntries
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1
+                GROUP BY TimeValue
+                ORDER BY TimeValue
+            """, sqlFormat);
+
+            var dbResults = await dbContext.Database.SqlQueryRaw<TimeSlotData>(sql, from, to).ToListAsync();
 
             var timeSlots = new List<TimeSlotData>();
-            string timeFormat;
+            var dbResultsDict = dbResults.ToDictionary(r => r.TimeValue);
+
+            var loopTo = to;
+            var loopFrom = from;
 
             if (groupBy == "hour")
             {
-                timeFormat = "HH:00";
-                var grouped = logs.GroupBy(l => new DateTime(l.CreatedAtUtc.Year, l.CreatedAtUtc.Month, l.CreatedAtUtc.Day, l.CreatedAtUtc.Hour, 0, 0));
-                
-                for (var dt = new DateTime(from.Year, from.Month, from.Day, from.Hour, 0, 0); 
-                     dt <= to; 
-                     dt = dt.AddHours(1))
-                {
-                    var group = grouped.FirstOrDefault(g => g.Key == dt);
-                    if (group == null)
-                    {
-                        timeSlots.Add(new TimeSlotData
-                        {
-                            Label = dt.ToString("HH:00"),
-                            SuccessCount = 0,
-                            ClientErrorCount = 0,
-                            ServerErrorCount = 0,
-                            OtherCount = 0
-                        });
-                    }
-                    else
-                    {
-                        var groupList = group.ToList();
-                        timeSlots.Add(new TimeSlotData
-                        {
-                            Label = dt.ToString("HH:00"),
-                            SuccessCount = groupList.Count(l => l.DownstreamStatusCode >= 200 && l.DownstreamStatusCode < 300),
-                            ClientErrorCount = groupList.Count(l => l.DownstreamStatusCode >= 400 && l.DownstreamStatusCode < 500),
-                            ServerErrorCount = groupList.Count(l => l.DownstreamStatusCode >= 500 && l.DownstreamStatusCode < 600),
-                            OtherCount = groupList.Count(l => l.DownstreamStatusCode < 200 || (l.DownstreamStatusCode >= 300 && l.DownstreamStatusCode < 400) || l.DownstreamStatusCode >= 600)
-                        });
-                    }
-                }
+                loopFrom = new DateTime(from.Year, from.Month, from.Day, from.Hour, 0, 0);
+            }
+            else if (groupBy == "day")
+            {
+                loopFrom = from.Date;
+                loopTo = to.Date.AddDays(1).AddTicks(-1);
             }
             else if (groupBy == "month")
             {
-                timeFormat = "yyyy-MM";
-                var grouped = logs.GroupBy(l => new DateTime(l.CreatedAtUtc.Year, l.CreatedAtUtc.Month, 1));
-                
-                for (var dt = new DateTime(from.Year, from.Month, 1); 
-                     dt <= new DateTime(to.Year, to.Month, 1); 
-                     dt = dt.AddMonths(1))
-                {
-                    var group = grouped.FirstOrDefault(g => g.Key == dt);
-                    if (group == null)
-                    {
-                        timeSlots.Add(new TimeSlotData
-                        {
-                            Label = dt.ToString("MMM yyyy"),
-                            SuccessCount = 0,
-                            ClientErrorCount = 0,
-                            ServerErrorCount = 0,
-                            OtherCount = 0
-                        });
-                    }
-                    else
-                    {
-                        var groupList = group.ToList();
-                        timeSlots.Add(new TimeSlotData
-                        {
-                            Label = dt.ToString("MMM yyyy"),
-                            SuccessCount = groupList.Count(l => l.DownstreamStatusCode >= 200 && l.DownstreamStatusCode < 300),
-                            ClientErrorCount = groupList.Count(l => l.DownstreamStatusCode >= 400 && l.DownstreamStatusCode < 500),
-                            ServerErrorCount = groupList.Count(l => l.DownstreamStatusCode >= 500 && l.DownstreamStatusCode < 600),
-                            OtherCount = groupList.Count(l => l.DownstreamStatusCode < 200 || (l.DownstreamStatusCode >= 300 && l.DownstreamStatusCode < 400) || l.DownstreamStatusCode >= 600)
-                        });
-                    }
-                }
+                loopFrom = new DateTime(from.Year, from.Month, 1);
             }
-            else // day
+
+            for (var dt = loopFrom; dt <= loopTo; )
             {
-                timeFormat = "yyyy-MM-dd";
-                var grouped = logs.GroupBy(l => l.CreatedAtUtc.Date);
-                
-                for (var dt = from.Date; dt <= to.Date; dt = dt.AddDays(1))
+                DateTime key;
+                string label;
+                if (groupBy == "hour")
                 {
-                    var group = grouped.FirstOrDefault(g => g.Key == dt);
-                    if (group == null)
-                    {
-                        timeSlots.Add(new TimeSlotData
-                        {
-                            Label = dt.ToString("MM/dd"),
-                            SuccessCount = 0,
-                            ClientErrorCount = 0,
-                            ServerErrorCount = 0,
-                            OtherCount = 0
-                        });
-                    }
-                    else
-                    {
-                        var groupList = group.ToList();
-                        timeSlots.Add(new TimeSlotData
-                        {
-                            Label = dt.ToString("MM/dd"),
-                            SuccessCount = groupList.Count(l => l.DownstreamStatusCode >= 200 && l.DownstreamStatusCode < 300),
-                            ClientErrorCount = groupList.Count(l => l.DownstreamStatusCode >= 400 && l.DownstreamStatusCode < 500),
-                            ServerErrorCount = groupList.Count(l => l.DownstreamStatusCode >= 500 && l.DownstreamStatusCode < 600),
-                            OtherCount = groupList.Count(l => l.DownstreamStatusCode < 200 || (l.DownstreamStatusCode >= 300 && l.DownstreamStatusCode < 400) || l.DownstreamStatusCode >= 600)
-                        });
-                    }
+                    key = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
+                    label = key.ToString("HH:00");
                 }
+                else if (groupBy == "day")
+                {
+                    key = dt.Date;
+                    label = key.ToString("MM/dd");
+                }
+                else // month
+                {
+                    key = new DateTime(dt.Year, dt.Month, 1);
+                    label = key.ToString("MMM yyyy");
+                }
+
+                if (dbResultsDict.TryGetValue(key, out var value))
+                {
+                    value.Label = label;
+                    timeSlots.Add(value);
+                }
+                else
+                {
+                    timeSlots.Add(new TimeSlotData
+                    {
+                        TimeValue = key,
+                        Label = label,
+                        SuccessCount = 0,
+                        ClientErrorCount = 0,
+                        ServerErrorCount = 0,
+                        OtherCount = 0
+                    });
+                }
+
+                if (groupBy == "hour") dt = dt.AddHours(1);
+                else if (groupBy == "month") dt = dt.AddMonths(1);
+                else dt = dt.AddDays(1);
             }
 
             var totalSuccess = timeSlots.Sum(t => t.SuccessCount);
