@@ -97,10 +97,18 @@ function convertLabelToUTC7(label, timeFormat) {
 }
 
 async function loadReportData() {
+    const reportGeneratedInfo = $('#generated-time-info');
     const period = document.getElementById('periodFilter').value;
     const loadingOverlay = document.getElementById('loadingOverlay');
-    
+    const startTime = performance.now(); // Record start time
+    const startGeneratedDateTime = new Date();
     try {
+        reportGeneratedInfo.text('Generating...');
+        document.getElementById('totalRequests').textContent = '...';
+        document.getElementById('successRequests').textContent = '...';
+        document.getElementById('clientErrorRequests').textContent = '...';
+        document.getElementById('serverErrorRequests').textContent = '...';
+
         loadingOverlay.style.display = 'flex';
         
         const response = await fetch(`/api/requestreport/data?period=${period}`);
@@ -140,6 +148,17 @@ async function loadReportData() {
         alert('Failed to load report data. Please try again.');
     } finally {
         loadingOverlay.style.display = 'none';
+
+        const endTime = performance.now(); // Record start time
+        var totalTimeInMs = endTime - startTime;
+        var generateTimeText = "";
+        if (totalTimeInMs < 1000) {
+            generateTimeText = " (Generated in " + totalTimeInMs.toFixed(0) + " ms)"
+        }
+        else {
+            generateTimeText = " (Generated in " + (totalTimeInMs/1000).toFixed(0) + " s)"
+        }
+        reportGeneratedInfo.text("Report at " + startGeneratedDateTime.toISOString() + generateTimeText)
     }
 }
 
