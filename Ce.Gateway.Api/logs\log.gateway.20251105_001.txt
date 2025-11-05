@@ -1,0 +1,458 @@
+2025-11-05 16:41:59.297 +00:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2025-11-05 16:41:59.323 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsLock' AND "type" = 'table';
+2025-11-05 16:41:59.327 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT OR IGNORE INTO "__EFMigrationsLock"("Id", "Timestamp") VALUES(1, '2025-11-05 16:41:59.3257204+00:00');
+SELECT changes();
+2025-11-05 16:41:59.370 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY,
+    "ProductVersion" TEXT NOT NULL
+);
+2025-11-05 16:41:59.376 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2025-11-05 16:41:59.378 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2025-11-05 16:41:59.386 +00:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-05 16:41:59.388 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DELETE FROM "__EFMigrationsLock";
+2025-11-05 16:41:59.532 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@__normalizedName_0='?' (Size = 13)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."ConcurrencyStamp", "a"."Name", "a"."NormalizedName"
+FROM "AspNetRoles" AS "a"
+WHERE "a"."NormalizedName" = @__normalizedName_0
+LIMIT 1
+2025-11-05 16:41:59.551 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__normalizedName_0='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."ConcurrencyStamp", "a"."Name", "a"."NormalizedName"
+FROM "AspNetRoles" AS "a"
+WHERE "a"."NormalizedName" = @__normalizedName_0
+LIMIT 1
+2025-11-05 16:41:59.551 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__normalizedName_0='?' (Size = 7)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."ConcurrencyStamp", "a"."Name", "a"."NormalizedName"
+FROM "AspNetRoles" AS "a"
+WHERE "a"."NormalizedName" = @__normalizedName_0
+LIMIT 1
+2025-11-05 16:41:59.558 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__normalizedUserName_0='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LastLoginAt", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UpdatedAt", "a"."UserName"
+FROM "AspNetUsers" AS "a"
+WHERE "a"."NormalizedUserName" = @__normalizedUserName_0
+LIMIT 1
+2025-11-05 16:41:59.591 +00:00 [INF] Admin user already exists. Skipping seed.
+2025-11-05 16:41:59.693 +00:00 [INF] Service is running
+2025-11-05 16:41:59.799 +00:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert
+2025-11-05 16:41:59.806 +00:00 [INF] Now listening on: https://localhost:5001
+2025-11-05 16:41:59.806 +00:00 [INF] Now listening on: http://localhost:5000
+2025-11-05 16:41:59.829 +00:00 [INF] Start processing HTTP request GET http://localhost:10501/health
+2025-11-05 16:41:59.829 +00:00 [INF] Sending HTTP request GET http://localhost:10501/health
+2025-11-05 16:41:59.831 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10501/health configured with name Fake OCR node 1.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10501)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:41:59.832 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-05 16:41:59.834 +00:00 [INF] Hosting environment: Development
+2025-11-05 16:41:59.834 +00:00 [INF] Content root path: /home/runner/work/axe-gateway/axe-gateway/Ce.Gateway.Api
+2025-11-05 16:41:59.870 +00:00 [INF] Saved 1 entities to in-memory store.
+2025-11-05 16:41:59.945 +00:00 [INF] Saved 2 entities to in-memory store.
+2025-11-05 16:41:59.946 +00:00 [INF] Start processing HTTP request GET http://localhost:10502/health
+2025-11-05 16:41:59.946 +00:00 [INF] Sending HTTP request GET http://localhost:10502/health
+2025-11-05 16:41:59.947 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10502/health configured with name Fake OCR node 2.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10502)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:41:59.950 +00:00 [INF] Saved 1 entities to in-memory store.
+2025-11-05 16:41:59.953 +00:00 [INF] Saved 2 entities to in-memory store.
+2025-11-05 16:42:58.116 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/account/login - null null
+2025-11-05 16:42:58.148 +00:00 [INF] Executing endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:42:58.168 +00:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Login(System.String) on controller Ce.Gateway.Api.Controllers.Pages.AccountController (Ce.Gateway.Api).
+2025-11-05 16:42:58.180 +00:00 [INF] Executing action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) - Validation state: "Valid"
+2025-11-05 16:42:58.183 +00:00 [INF] Executed action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api), returned result Microsoft.AspNetCore.Mvc.ViewResult in 0.3742ms.
+2025-11-05 16:42:58.194 +00:00 [INF] Executing ViewResult, running view Login.
+2025-11-05 16:42:58.247 +00:00 [INF] Executed ViewResult - view Login executed in 53.6342ms.
+2025-11-05 16:42:58.248 +00:00 [INF] Executed action Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) in 78.7748ms
+2025-11-05 16:42:58.248 +00:00 [INF] Executed endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:42:58.251 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/account/login - 200 null text/html; charset=utf-8 136.8109ms
+2025-11-05 16:42:58.917 +00:00 [INF] Downstream Health Monitor Service is checking health.
+2025-11-05 16:42:58.918 +00:00 [INF] Start processing HTTP request GET http://localhost:10502/health
+2025-11-05 16:42:58.918 +00:00 [INF] Start processing HTTP request GET http://localhost:10501/health
+2025-11-05 16:42:58.918 +00:00 [INF] Sending HTTP request GET http://localhost:10502/health
+2025-11-05 16:42:58.919 +00:00 [INF] Sending HTTP request GET http://localhost:10501/health
+2025-11-05 16:42:58.920 +00:00 [ERR] Error checking health for http://localhost:10502/health: Connection refused (localhost:10502)
+System.Net.Http.HttpRequestException: Connection refused (localhost:10502)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Ce.Gateway.Api.Services.DownstreamHealthMonitorService.<>c__DisplayClass10_0.<<CheckAllDownstreamServicesHealth>b__0>d.MoveNext() in /home/runner/work/axe-gateway/axe-gateway/Ce.Gateway.Api/Services/DownstreamHealthMonitorService.cs:line 91
+2025-11-05 16:42:58.920 +00:00 [ERR] Error checking health for http://localhost:10501/health: Connection refused (localhost:10501)
+System.Net.Http.HttpRequestException: Connection refused (localhost:10501)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Ce.Gateway.Api.Services.DownstreamHealthMonitorService.<>c__DisplayClass10_0.<<CheckAllDownstreamServicesHealth>b__0>d.MoveNext() in /home/runner/work/axe-gateway/axe-gateway/Ce.Gateway.Api/Services/DownstreamHealthMonitorService.cs:line 91
+2025-11-05 16:42:59.982 +00:00 [INF] Start processing HTTP request GET http://localhost:10501/health
+2025-11-05 16:42:59.983 +00:00 [INF] Sending HTTP request GET http://localhost:10501/health
+2025-11-05 16:42:59.984 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10501/health configured with name Fake OCR node 1.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10501)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:42:59.987 +00:00 [INF] Notification is sent on same window time.
+2025-11-05 16:42:59.995 +00:00 [INF] Saved 1 entities to in-memory store.
+2025-11-05 16:42:59.995 +00:00 [INF] Start processing HTTP request GET http://localhost:10502/health
+2025-11-05 16:42:59.995 +00:00 [INF] Sending HTTP request GET http://localhost:10502/health
+2025-11-05 16:42:59.996 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10502/health configured with name Fake OCR node 2.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10502)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:42:59.998 +00:00 [INF] Notification is sent on same window time.
+2025-11-05 16:42:59.998 +00:00 [INF] Saved 1 entities to in-memory store.
+2025-11-05 16:43:09.183 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/account/login - null null
+2025-11-05 16:43:09.187 +00:00 [INF] Executing endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:43:09.187 +00:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Login(System.String) on controller Ce.Gateway.Api.Controllers.Pages.AccountController (Ce.Gateway.Api).
+2025-11-05 16:43:09.189 +00:00 [INF] Executing action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) - Validation state: "Valid"
+2025-11-05 16:43:09.189 +00:00 [INF] Executed action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api), returned result Microsoft.AspNetCore.Mvc.ViewResult in 0.0279ms.
+2025-11-05 16:43:09.189 +00:00 [INF] Executing ViewResult, running view Login.
+2025-11-05 16:43:09.194 +00:00 [INF] Executed ViewResult - view Login executed in 4.7214ms.
+2025-11-05 16:43:09.194 +00:00 [INF] Executed action Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) in 7.1575ms
+2025-11-05 16:43:09.195 +00:00 [INF] Executed endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:43:09.195 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/account/login - 200 null text/html; charset=utf-8 12.0134ms
+2025-11-05 16:43:20.854 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/account/login - null null
+2025-11-05 16:43:20.856 +00:00 [INF] Executing endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:43:20.856 +00:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Login(System.String) on controller Ce.Gateway.Api.Controllers.Pages.AccountController (Ce.Gateway.Api).
+2025-11-05 16:43:20.864 +00:00 [INF] Executing action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) - Validation state: "Valid"
+2025-11-05 16:43:20.864 +00:00 [INF] Executed action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api), returned result Microsoft.AspNetCore.Mvc.ViewResult in 0.0143ms.
+2025-11-05 16:43:20.864 +00:00 [INF] Executing ViewResult, running view Login.
+2025-11-05 16:43:20.866 +00:00 [INF] Executed ViewResult - view Login executed in 1.8944ms.
+2025-11-05 16:43:20.867 +00:00 [INF] Executed action Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) in 10.4227ms
+2025-11-05 16:43:20.867 +00:00 [INF] Executed endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:43:20.867 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/account/login - 200 null text/html; charset=utf-8 13.4086ms
+2025-11-05 16:43:58.917 +00:00 [INF] Downstream Health Monitor Service is checking health.
+2025-11-05 16:43:58.918 +00:00 [INF] Start processing HTTP request GET http://localhost:10501/health
+2025-11-05 16:43:58.918 +00:00 [INF] Start processing HTTP request GET http://localhost:10502/health
+2025-11-05 16:43:58.918 +00:00 [INF] Sending HTTP request GET http://localhost:10501/health
+2025-11-05 16:43:58.918 +00:00 [INF] Sending HTTP request GET http://localhost:10502/health
+2025-11-05 16:43:58.919 +00:00 [ERR] Error checking health for http://localhost:10502/health: Connection refused (localhost:10502)
+System.Net.Http.HttpRequestException: Connection refused (localhost:10502)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Ce.Gateway.Api.Services.DownstreamHealthMonitorService.<>c__DisplayClass10_0.<<CheckAllDownstreamServicesHealth>b__0>d.MoveNext() in /home/runner/work/axe-gateway/axe-gateway/Ce.Gateway.Api/Services/DownstreamHealthMonitorService.cs:line 91
+2025-11-05 16:43:58.919 +00:00 [ERR] Error checking health for http://localhost:10501/health: Connection refused (localhost:10501)
+System.Net.Http.HttpRequestException: Connection refused (localhost:10501)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Ce.Gateway.Api.Services.DownstreamHealthMonitorService.<>c__DisplayClass10_0.<<CheckAllDownstreamServicesHealth>b__0>d.MoveNext() in /home/runner/work/axe-gateway/axe-gateway/Ce.Gateway.Api/Services/DownstreamHealthMonitorService.cs:line 91
+2025-11-05 16:44:00.000 +00:00 [INF] Start processing HTTP request GET http://localhost:10501/health
+2025-11-05 16:44:00.001 +00:00 [INF] Sending HTTP request GET http://localhost:10501/health
+2025-11-05 16:44:00.002 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10501/health configured with name Fake OCR node 1.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10501)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:44:00.004 +00:00 [INF] Notification is sent on same window time.
+2025-11-05 16:44:00.005 +00:00 [INF] Saved 1 entities to in-memory store.
+2025-11-05 16:44:00.005 +00:00 [INF] Start processing HTTP request GET http://localhost:10502/health
+2025-11-05 16:44:00.005 +00:00 [INF] Sending HTTP request GET http://localhost:10502/health
+2025-11-05 16:44:00.006 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10502/health configured with name Fake OCR node 2.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10502)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:44:00.007 +00:00 [INF] Notification is sent on same window time.
+2025-11-05 16:44:00.008 +00:00 [INF] Saved 1 entities to in-memory store.
+2025-11-05 16:44:18.171 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/account/login - null null
+2025-11-05 16:44:18.172 +00:00 [INF] Executing endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:44:18.172 +00:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Login(System.String) on controller Ce.Gateway.Api.Controllers.Pages.AccountController (Ce.Gateway.Api).
+2025-11-05 16:44:18.172 +00:00 [INF] Executing action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) - Validation state: "Valid"
+2025-11-05 16:44:18.173 +00:00 [INF] Executed action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api), returned result Microsoft.AspNetCore.Mvc.ViewResult in 0.0115ms.
+2025-11-05 16:44:18.173 +00:00 [INF] Executing ViewResult, running view Login.
+2025-11-05 16:44:18.174 +00:00 [INF] Executed ViewResult - view Login executed in 1.1829ms.
+2025-11-05 16:44:18.174 +00:00 [INF] Executed action Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) in 2.1326ms
+2025-11-05 16:44:18.174 +00:00 [INF] Executed endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:44:18.175 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/account/login - 200 null text/html; charset=utf-8 3.8046ms
+2025-11-05 16:44:45.225 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/account/login - null null
+2025-11-05 16:44:45.226 +00:00 [INF] Executing endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:44:45.226 +00:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Login(System.String) on controller Ce.Gateway.Api.Controllers.Pages.AccountController (Ce.Gateway.Api).
+2025-11-05 16:44:45.226 +00:00 [INF] Executing action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) - Validation state: "Valid"
+2025-11-05 16:44:45.227 +00:00 [INF] Executed action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api), returned result Microsoft.AspNetCore.Mvc.ViewResult in 0.013ms.
+2025-11-05 16:44:45.227 +00:00 [INF] Executing ViewResult, running view Login.
+2025-11-05 16:44:45.228 +00:00 [INF] Executed ViewResult - view Login executed in 0.9879ms.
+2025-11-05 16:44:45.228 +00:00 [INF] Executed action Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) in 1.8994ms
+2025-11-05 16:44:45.228 +00:00 [INF] Executed endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:44:45.228 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/account/login - 200 null text/html; charset=utf-8 3.2883ms
+2025-11-05 16:44:45.248 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/account/login - application/x-www-form-urlencoded 215
+2025-11-05 16:44:45.249 +00:00 [INF] Executing endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:44:45.254 +00:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(Ce.Gateway.Api.Models.Auth.LoginRequest, System.String) on controller Ce.Gateway.Api.Controllers.Pages.AccountController (Ce.Gateway.Api).
+2025-11-05 16:44:45.266 +00:00 [INF] Executing action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) - Validation state: "Valid"
+2025-11-05 16:44:45.301 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__normalizedUserName_0='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LastLoginAt", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UpdatedAt", "a"."UserName"
+FROM "AspNetUsers" AS "a"
+WHERE "a"."NormalizedUserName" = @__normalizedUserName_0
+LIMIT 1
+2025-11-05 16:44:45.302 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__normalizedUserName_0='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LastLoginAt", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UpdatedAt", "a"."UserName"
+FROM "AspNetUsers" AS "a"
+WHERE "a"."NormalizedUserName" = @__normalizedUserName_0
+LIMIT 1
+2025-11-05 16:44:45.402 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (Size = 36)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."ClaimType", "a"."ClaimValue", "a"."UserId"
+FROM "AspNetUserClaims" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+2025-11-05 16:44:45.415 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a0"."Name"
+FROM "AspNetUserRoles" AS "a"
+INNER JOIN "AspNetRoles" AS "a0" ON "a"."RoleId" = "a0"."Id"
+WHERE "a"."UserId" = @__userId_0
+2025-11-05 16:44:45.416 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__normalizedName_0='?' (Size = 13)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."ConcurrencyStamp", "a"."Name", "a"."NormalizedName"
+FROM "AspNetRoles" AS "a"
+WHERE "a"."NormalizedName" = @__normalizedName_0
+LIMIT 1
+2025-11-05 16:44:45.420 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__role_Id_0='?' (Size = 36)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."ClaimType", "a"."ClaimValue"
+FROM "AspNetRoleClaims" AS "a"
+WHERE "a"."RoleId" = @__role_Id_0
+2025-11-05 16:44:45.422 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-11-05 16:44:45.424 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__normalizedUserName_0='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccessFailedCount", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LastLoginAt", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UpdatedAt", "a"."UserName"
+FROM "AspNetUsers" AS "a"
+WHERE "a"."NormalizedUserName" = @__normalizedUserName_0
+LIMIT 1
+2025-11-05 16:44:45.480 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p19='?' (Size = 36), @p0='?' (DbType = Int32), @p1='?' (Size = 36), @p20='?' (Size = 36), @p2='?' (DbType = DateTime), @p3='?' (Size = 19), @p4='?' (DbType = Boolean), @p5='?' (Size = 20), @p6='?' (DbType = Boolean), @p7='?' (DbType = DateTime), @p8='?' (DbType = Boolean), @p9='?' (DbType = DateTimeOffset), @p10='?' (Size = 19), @p11='?' (Size = 5), @p12='?' (Size = 84), @p13='?', @p14='?' (DbType = Boolean), @p15='?' (Size = 32), @p16='?' (DbType = Boolean), @p17='?' (DbType = DateTime), @p18='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "AspNetUsers" SET "AccessFailedCount" = @p0, "ConcurrencyStamp" = @p1, "CreatedAt" = @p2, "Email" = @p3, "EmailConfirmed" = @p4, "FullName" = @p5, "IsActive" = @p6, "LastLoginAt" = @p7, "LockoutEnabled" = @p8, "LockoutEnd" = @p9, "NormalizedEmail" = @p10, "NormalizedUserName" = @p11, "PasswordHash" = @p12, "PhoneNumber" = @p13, "PhoneNumberConfirmed" = @p14, "SecurityStamp" = @p15, "TwoFactorEnabled" = @p16, "UpdatedAt" = @p17, "UserName" = @p18
+WHERE "Id" = @p19 AND "ConcurrencyStamp" = @p20
+RETURNING 1;
+2025-11-05 16:44:45.491 +00:00 [INF] Executed action method Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api), returned result Microsoft.AspNetCore.Mvc.RedirectToActionResult in 224.9866ms.
+2025-11-05 16:44:45.493 +00:00 [INF] Executing RedirectResult, redirecting to /dashboard.
+2025-11-05 16:44:45.493 +00:00 [INF] Executed action Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api) in 238.4646ms
+2025-11-05 16:44:45.493 +00:00 [INF] Executed endpoint 'Ce.Gateway.Api.Controllers.Pages.AccountController.Login (Ce.Gateway.Api)'
+2025-11-05 16:44:45.495 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/account/login - 302 0 null 247.8609ms
+2025-11-05 16:44:58.917 +00:00 [INF] Downstream Health Monitor Service is checking health.
+2025-11-05 16:44:58.917 +00:00 [INF] Start processing HTTP request GET http://localhost:10502/health
+2025-11-05 16:44:58.917 +00:00 [INF] Start processing HTTP request GET http://localhost:10501/health
+2025-11-05 16:44:58.918 +00:00 [INF] Sending HTTP request GET http://localhost:10502/health
+2025-11-05 16:44:58.918 +00:00 [INF] Sending HTTP request GET http://localhost:10501/health
+2025-11-05 16:44:58.919 +00:00 [ERR] Error checking health for http://localhost:10502/health: Connection refused (localhost:10502)
+System.Net.Http.HttpRequestException: Connection refused (localhost:10502)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Ce.Gateway.Api.Services.DownstreamHealthMonitorService.<>c__DisplayClass10_0.<<CheckAllDownstreamServicesHealth>b__0>d.MoveNext() in /home/runner/work/axe-gateway/axe-gateway/Ce.Gateway.Api/Services/DownstreamHealthMonitorService.cs:line 91
+2025-11-05 16:44:58.919 +00:00 [ERR] Error checking health for http://localhost:10501/health: Connection refused (localhost:10501)
+System.Net.Http.HttpRequestException: Connection refused (localhost:10501)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at Ce.Gateway.Api.Services.DownstreamHealthMonitorService.<>c__DisplayClass10_0.<<CheckAllDownstreamServicesHealth>b__0>d.MoveNext() in /home/runner/work/axe-gateway/axe-gateway/Ce.Gateway.Api/Services/DownstreamHealthMonitorService.cs:line 91
+2025-11-05 16:45:00.010 +00:00 [INF] Start processing HTTP request GET http://localhost:10501/health
+2025-11-05 16:45:00.010 +00:00 [INF] Sending HTTP request GET http://localhost:10501/health
+2025-11-05 16:45:00.011 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10501/health configured with name Fake OCR node 1.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10501)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:45:00.013 +00:00 [INF] Notification is sent on same window time.
+2025-11-05 16:45:00.014 +00:00 [INF] Saved 1 entities to in-memory store.
+2025-11-05 16:45:00.015 +00:00 [INF] Start processing HTTP request GET http://localhost:10502/health
+2025-11-05 16:45:00.015 +00:00 [INF] Sending HTTP request GET http://localhost:10502/health
+2025-11-05 16:45:00.016 +00:00 [ERR] GetHealthReport threw an exception when trying to get report from http://localhost:10502/health configured with name Fake OCR node 2.
+System.Net.Http.HttpRequestException: Connection refused (localhost:10502)
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at HealthChecks.UI.Core.HostedService.HealthCheckReportCollector.GetHealthReportAsync(HealthCheckConfiguration configuration) in /home/runner/work/AspNetCore.Diagnostics.HealthChecks/AspNetCore.Diagnostics.HealthChecks/src/HealthChecks.UI/Core/HostedService/HealthCheckReportCollector.cs:line 142
+2025-11-05 16:45:00.018 +00:00 [INF] Notification is sent on same window time.
+2025-11-05 16:45:00.018 +00:00 [INF] Saved 1 entities to in-memory store.
