@@ -347,3 +347,6 @@ ASALocalRun/
 
 Ce.Gateway.Api/Data/gateway.db-shm
 Ce.Gateway.Api/Data/gateway.db-wal
+/Ce.Gateway.Api/Data/gateway.development.db
+/Ce.Gateway.Api/Data/gateway.development.db-shm
+/Ce.Gateway.Api/Data/gateway.development.db-wal

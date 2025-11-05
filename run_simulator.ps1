@@ -5,7 +5,7 @@ Write-Host "=== Ce.Gateway Request Simulator ===" -ForegroundColor Cyan
 Write-Host ""
 
 $simulatorPath = "Ce.Gateway.Simulator"
-$gatewayDbPath = "Ce.Gateway.Api\data\gateway.db"
+$gatewayDbPath = "Ce.Gateway.Api\data\gateway.development.db"
 
 # Check if gateway database exists
 if (-not (Test-Path $gatewayDbPath)) {
