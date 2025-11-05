@@ -1,6 +1,6 @@
 using Ce.Gateway.Api.Entities;
-using Ce.Gateway.Api.Services.Auth;
-using Microsoft.EntityFrameworkCore;
+using Ce.Gateway.Api.Models.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
@@ -14,34 +14,49 @@ namespace Ce.Gateway.Api.Data
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
-            var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<GatewayDbContext>>();
-            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            using var context = dbContextFactory.CreateDbContext();
-
-            // Check if any users exist
-            if (await context.Users.AnyAsync())
+            // Create roles if they don't exist
+            string[] roleNames = { Roles.Administrator, Roles.Management, Roles.Monitor };
+            foreach (var roleName in roleNames)
             {
-                Log.Information("Users already exist in database. Skipping seed.");
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    Log.Information($"Role {roleName} created");
+                }
+            }
+
+            // Check if admin user already exists
+            var adminUser = await userManager.FindByNameAsync("admin");
+            if (adminUser != null)
+            {
+                Log.Information("Admin user already exists. Skipping seed.");
                 return;
             }
 
             // Create default admin user
-            var adminUser = new User
+            adminUser = new ApplicationUser
             {
-                Username = "admin",
-                PasswordHash = authService.HashPassword("admin123"),
-                FullName = "System Administrator",
+                UserName = "admin",
                 Email = "admin@gateway.local",
-                Role = "Administrator",
+                FullName = "System Administrator",
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                EmailConfirmed = true
             };
 
-            context.Users.Add(adminUser);
-            await context.SaveChangesAsync();
-
-            Log.Information("Default admin user created successfully. Username: admin, Password: admin123");
+            var result = await userManager.CreateAsync(adminUser, "admin123");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, Roles.Administrator);
+                Log.Information("Default admin user created successfully. Username: admin, Password: admin123");
+            }
+            else
+            {
+                Log.Error("Failed to create admin user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
         }
     }
 }

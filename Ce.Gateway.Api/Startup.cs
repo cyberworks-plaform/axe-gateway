@@ -5,7 +5,8 @@ using Ce.Gateway.Api.Repositories;
 using Ce.Gateway.Api.Repositories.Interface;
 using Ce.Gateway.Api.Services;
 using Ce.Gateway.Api.Services.Interface;
-using Ce.Gateway.Api.Services.Auth;
+using Microsoft.AspNetCore.Identity;
+using Ce.Gateway.Api.Entities;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -107,6 +108,30 @@ namespace Ce.Gateway.Api
             services.AddDbContextFactory<GatewayDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
 
+            // Configure Identity
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                // Password settings
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+
+                // Lockout settings
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings
+                options.User.RequireUniqueEmail = false;
+
+                // SignIn settings
+                options.SignIn.RequireConfirmedEmail = false;
+            })
+            .AddEntityFrameworkStores<GatewayDbContext>()
+            .AddDefaultTokenProviders();
+
             services.AddSingleton<ILogWriter, SqlLogWriter>();
             services.AddHttpContextAccessor();
 
@@ -120,10 +145,6 @@ namespace Ce.Gateway.Api
             
             // Register consolidated dashboard service with integrated caching
             services.AddScoped<IDashboardService, DashboardService>();
-
-            // Register authentication and user services
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IUserService, UserService>();
 
             services.AddSingleton<IDownstreamHealthStore, DownstreamHealthStore>();
 

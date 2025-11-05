@@ -1,17 +1,18 @@
 
 using Ce.Gateway.Api.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ce.Gateway.Api.Data
 {
-    public class GatewayDbContext : DbContext
+    public class GatewayDbContext : IdentityDbContext<ApplicationUser>
     {
         public GatewayDbContext(DbContextOptions<GatewayDbContext> options) : base(options)
         {
         }
 
         public DbSet<RequestLogEntry> OcrGatewayLogEntries { get; set; }
-        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,11 +28,7 @@ namespace Ce.Gateway.Api.Data
                 entity.HasIndex(e => new { e.CreatedAtUtc, e.DownstreamStatusCode });
             });
 
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasIndex(e => e.Username).IsUnique();
-                entity.HasIndex(e => e.Email);
-            });
+
         }
     }
 }
