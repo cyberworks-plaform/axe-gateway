@@ -358,3 +358,6 @@ Ce.Gateway.Api/Data/gateway.db-wal
 
 # Log files in subdirectories
 Ce.Gateway.Api/logs/
+
+# All log text files
+**/*log*.txt

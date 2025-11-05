@@ -132,6 +132,15 @@ namespace Ce.Gateway.Api
             .AddEntityFrameworkStores<GatewayDbContext>()
             .AddDefaultTokenProviders();
 
+            // Configure cookie authentication to redirect to login
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/account/login";
+                options.AccessDeniedPath = "/account/accessdenied";
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(24);
+            });
+
             services.AddSingleton<ILogWriter, SqlLogWriter>();
             services.AddHttpContextAccessor();
 

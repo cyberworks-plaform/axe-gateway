@@ -33,6 +33,32 @@
                     <a href="/dashboard" class="nav-link">Dashboard</a>
                 </li>
             </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
+                            <i class="far fa-user"></i>
+                            <span class="d-none d-md-inline ml-1">@User.Identity.Name</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                            <span class="dropdown-item dropdown-header">@User.Identity.Name</span>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-user mr-2"></i> Profile
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item p-0">
+                                <button type="submit" class="btn btn-link dropdown-item text-left" style="text-decoration: none;">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            </ul>
         </nav>
         <!-- /.navbar -->
 
@@ -45,6 +71,22 @@
 
             <!-- Sidebar -->
             <div class="sidebar">
+                <!-- Sidebar user panel -->
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                        <div class="image">
+                            <div class="img-circle elevation-2" style="width: 34px; height: 34px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">
+                                @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                            </div>
+                        </div>
+                        <div class="info">
+                            <a href="#" class="d-block">@User.Identity.Name</a>
+                            <small class="d-block text-muted">@(User.IsInRole("Administrator") ? "Administrator" : User.IsInRole("Management") ? "Management" : "Monitor")</small>
+                        </div>
+                    </div>
+                }
+
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
@@ -78,6 +120,20 @@
                                 <p>Node Performance</p>
                             </a>
                         </li>
+
+                        @if (User.IsInRole("Administrator") || User.IsInRole("Management"))
+                        {
+                            <li class="nav-header">QUẢN TRỊ HỆ THỐNG</li>
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <li class="nav-item">
+                                    <a href="/user" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
+                                        <i class="nav-icon fas fa-users"></i>
+                                        <p>Quản lý User</p>
+                                    </a>
+                                </li>
+                            }
+                        }
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
