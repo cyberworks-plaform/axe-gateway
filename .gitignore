@@ -350,3 +350,9 @@ Ce.Gateway.Api/Data/gateway.db-wal
 /Ce.Gateway.Api/Data/gateway.development.db
 /Ce.Gateway.Api/Data/gateway.development.db-shm
 /Ce.Gateway.Api/Data/gateway.development.db-wal
+
+# Test database files
+*.Tests/**/*.db
+*.Tests/**/*.db-shm
+*.Tests/**/*.db-wal
+performance_test_*.db
