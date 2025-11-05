@@ -31,6 +31,7 @@
 
 
 ## ✅ Permissions
+You are allowed to run bellow command in current directory with confirmation prompt to me:
 - ✅ All PowerShell commands in project directory
 - ✅ Create/Edit/Delete files
 - ✅ Build, run, refactor code
