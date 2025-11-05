@@ -350,3 +350,11 @@ Ce.Gateway.Api/Data/gateway.db-wal
 /Ce.Gateway.Api/Data/gateway.development.db
 /Ce.Gateway.Api/Data/gateway.development.db-shm
 /Ce.Gateway.Api/Data/gateway.development.db-wal
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+# Log files in subdirectories
+Ce.Gateway.Api/logs/
