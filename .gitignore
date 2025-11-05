@@ -344,9 +344,6 @@ ASALocalRun/
 # Including *.nupkg in folder
 !LibraryPackaged/*.nupkg
 
-Ce.Gateway.Api/Data/gateway.db
+
 Ce.Gateway.Api/Data/gateway.db-shm
 Ce.Gateway.Api/Data/gateway.db-wal
-/Ce.Gateway.Api/Data/gateway.db
-/Ce.Gateway.Api/Data/gateway.db-shm
-/Ce.Gateway.Api/Data/gateway.db-wal
