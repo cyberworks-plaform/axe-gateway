@@ -121,11 +121,4 @@ namespace Ce.Gateway.Api.Controllers.Auth
             return Ok(new { message = "Password changed successfully" });
         }
     }
-
-    public class ChangePasswordRequest
-    {
-        [System.ComponentModel.DataAnnotations.Required]
-        [System.ComponentModel.DataAnnotations.MinLength(6)]
-        public string NewPassword { get; set; }
-    }
 }

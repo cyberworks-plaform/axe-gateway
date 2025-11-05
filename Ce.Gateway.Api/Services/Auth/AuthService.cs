@@ -113,18 +113,20 @@ namespace Ce.Gateway.Api.Services.Auth
             return Convert.ToBase64String(hashBytes);
         }
 
+        private const int SaltLength = 128;
+
         public bool VerifyPassword(string password, string passwordHash)
         {
             var hashBytes = Convert.FromBase64String(passwordHash);
-            var salt = new byte[128];
-            Buffer.BlockCopy(hashBytes, 0, salt, 0, 128);
+            var salt = new byte[SaltLength];
+            Buffer.BlockCopy(hashBytes, 0, salt, 0, SaltLength);
             
             using var hmac = new HMACSHA512(salt);
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             
             for (int i = 0; i < computedHash.Length; i++)
             {
-                if (hashBytes[i + 128] != computedHash[i])
+                if (hashBytes[i + SaltLength] != computedHash[i])
                     return false;
             }
             

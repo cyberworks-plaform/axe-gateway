@@ -335,6 +335,15 @@
     <script>
         let currentEditingUserId = null;
 
+        function getRoleBadgeClass(role) {
+            switch(role) {
+                case 'Administrator': return 'admin';
+                case 'Management': return 'management';
+                case 'Monitor': return 'monitor';
+                default: return 'monitor';
+            }
+        }
+
         // Check authentication
         function checkAuth() {
             const token = localStorage.getItem('token');
@@ -404,7 +413,7 @@
                     <td>${user.username}</td>
                     <td>${user.fullName || '-'}</td>
                     <td>${user.email || '-'}</td>
-                    <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
+                    <td><span class="badge badge-${getRoleBadgeClass(user.role)}">${user.role}</span></td>
                     <td><span class="badge badge-${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td>${new Date(user.createdAt).toLocaleDateString()}</td>
                     <td class="actions">

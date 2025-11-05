@@ -71,7 +71,7 @@ namespace Ce.Gateway.Api.Services.Auth
             // Validate role
             if (!IsValidRole(request.Role))
             {
-                throw new InvalidOperationException("Invalid role. Must be Administrator, Management, or Monitor");
+                throw new InvalidOperationException($"Invalid role. Must be {Roles.Administrator}, {Roles.Management}, or {Roles.Monitor}");
             }
 
             var user = new User
@@ -108,7 +108,7 @@ namespace Ce.Gateway.Api.Services.Auth
             {
                 if (!IsValidRole(request.Role))
                 {
-                    throw new InvalidOperationException("Invalid role. Must be Administrator, Management, or Monitor");
+                    throw new InvalidOperationException($"Invalid role. Must be {Roles.Administrator}, {Roles.Management}, or {Roles.Monitor}");
                 }
                 user.Role = request.Role;
             }
@@ -154,7 +154,7 @@ namespace Ce.Gateway.Api.Services.Auth
 
         private bool IsValidRole(string role)
         {
-            return role == "Administrator" || role == "Management" || role == "Monitor";
+            return Roles.IsValid(role);
         }
 
         private UserDto MapToDto(User user)
