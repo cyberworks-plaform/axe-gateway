@@ -1,4 +1,5 @@
-using Ce.Gateway.Api.Repositories.Interface;
+using Ce.Gateway.Api.Models;
+using Ce.Gateway.Api.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -9,11 +10,11 @@ namespace Ce.Gateway.Api.Controllers.Api
     [Route("api/requestreport")]
     public class RequestReportController : ControllerBase
     {
-        private readonly ILogRepository _logRepository;
+        private readonly IRequestReportService _reportService;
 
-        public RequestReportController(ILogRepository logRepository)
+        public RequestReportController(IRequestReportService reportService)
         {
-            _logRepository = logRepository;
+            _reportService = reportService;
         }
 
         [HttpGet("data")]
@@ -21,41 +22,41 @@ namespace Ce.Gateway.Api.Controllers.Api
         {
             var to = DateTime.UtcNow;
             DateTime from;
-            string groupBy;
+            Granularity granularity;
 
             switch (period)
             {
                 case "1d":
                     from = to.AddDays(-1);
-                    groupBy = "hour";
+                    granularity = Granularity.Hour;
                     break;
                 case "7d":
                     from = to.AddDays(-7);
-                    groupBy = "day";
+                    granularity = Granularity.Day;
                     break;
                 case "1m":
                     from = to.AddMonths(-1);
-                    groupBy = "day";
+                    granularity = Granularity.Day;
                     break;
                 case "3m":
                     from = to.AddMonths(-3);
-                    groupBy = "month";
+                    granularity = Granularity.Month;
                     break;
                 case "9m":
                     from = to.AddMonths(-9);
-                    groupBy = "month";
+                    granularity = Granularity.Month;
                     break;
                 case "12m":
                     from = to.AddMonths(-12);
-                    groupBy = "month";
+                    granularity = Granularity.Month;
                     break;
                 default:
                     from = to.AddDays(-1);
-                    groupBy = "hour";
+                    granularity = Granularity.Hour;
                     break;
             }
 
-            var report = await _logRepository.GetRequestReportAsync(from, to, groupBy);
+            var report = await _reportService.GetReportAsync(from, to, granularity);
             return Ok(report);
         }
     }
