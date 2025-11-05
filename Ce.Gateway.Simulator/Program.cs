@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 Console.WriteLine("=== Ce.Gateway Request Simulator ===");
 Console.WriteLine();
 
-var dbPath = Path.Combine("..", "Ce.Gateway.Api", "data", "gateway.db");
+var dbPath = Path.Combine("..", "Ce.Gateway.Api", "data", "gateway.development.db");
 var fullDbPath = Path.GetFullPath(dbPath);
 
 if (!File.Exists(fullDbPath))
