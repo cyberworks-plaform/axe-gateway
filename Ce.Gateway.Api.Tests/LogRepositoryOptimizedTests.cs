@@ -21,7 +21,7 @@ namespace Ce.Gateway.Api.Tests
         public LogRepositoryOptimizedTests(ITestOutputHelper output)
         {
             _output = output;
-            var dbPath = Path.Combine("..", "..", "..", "..", "Ce.Gateway.Api", "Data", "gateway.db");
+            var dbPath = Path.Combine("..", "..", "..", "..", "Ce.Gateway.Api", "Data", "gateway.development.db");
             var connectionString = $"DataSource={dbPath}";
             var connection = new SqliteConnection(connectionString);
             connection.Open();
