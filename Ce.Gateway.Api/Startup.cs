@@ -5,6 +5,7 @@ using Ce.Gateway.Api.Repositories;
 using Ce.Gateway.Api.Repositories.Interface;
 using Ce.Gateway.Api.Services;
 using Ce.Gateway.Api.Services.Interface;
+using Ce.Gateway.Api.Services.Auth;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -120,6 +121,10 @@ namespace Ce.Gateway.Api
             // Register consolidated dashboard service with integrated caching
             services.AddScoped<IDashboardService, DashboardService>();
 
+            // Register authentication and user services
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
+
             services.AddSingleton<IDownstreamHealthStore, DownstreamHealthStore>();
 
             #region đăng ký DownstreamHealthMonitorService để dùng cho cả IHostedService và IDownstreamHealthMonitorService
@@ -144,8 +149,8 @@ namespace Ce.Gateway.Api
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            //app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -185,6 +190,9 @@ namespace Ce.Gateway.Api
                     dbContext.Database.Migrate();
                 }
             }
+
+            // Seed database
+            await DatabaseSeeder.SeedAsync(app.ApplicationServices);
 
             app.UseWebSockets();
 

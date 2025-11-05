@@ -11,6 +11,7 @@ namespace Ce.Gateway.Api.Data
         }
 
         public DbSet<RequestLogEntry> OcrGatewayLogEntries { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,12 @@ namespace Ce.Gateway.Api.Data
                 entity.HasIndex(e => e.UpstreamHost);
                 entity.HasIndex(e => new { e.CreatedAtUtc, e.IsError });
                 entity.HasIndex(e => new { e.CreatedAtUtc, e.DownstreamStatusCode });
+            });
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasIndex(e => e.Username).IsUnique();
+                entity.HasIndex(e => e.Email);
             });
         }
     }
