@@ -2,6 +2,7 @@ using Ce.Gateway.Api.Data;
 using Ce.Gateway.Api.Repositories;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace Ce.Gateway.Api.Tests
     {
         private readonly ITestOutputHelper _output;
         private readonly DbContextOptions<GatewayDbContext> _options;
+        private readonly IMemoryCache _memoryCache;
 
         public LogRepositoryTests(ITestOutputHelper output)
         {
@@ -27,13 +29,14 @@ namespace Ce.Gateway.Api.Tests
             _options = new DbContextOptionsBuilder<GatewayDbContext>()
                 .UseSqlite(connection)
                 .Options;
+            _memoryCache = new MemoryCache(new MemoryCacheOptions());
         }
 
         [Fact]
         public async Task GetRequestReportAsync_ShouldReturnReport_For1Day()
         {
             var dbContextFactory = new TestDbContextFactory(_options);
-            var repository = new LogRepository(dbContextFactory);
+            var repository = new LogRepository(dbContextFactory, _memoryCache);
 
             var now = new DateTime(2025, 10, 31);
             var from = now.AddDays(-1);
@@ -53,7 +56,7 @@ namespace Ce.Gateway.Api.Tests
         public async Task GetRequestReportAsync_ShouldReturnReport_For7Days()
         {
             var dbContextFactory = new TestDbContextFactory(_options);
-            var repository = new LogRepository(dbContextFactory);
+            var repository = new LogRepository(dbContextFactory, _memoryCache);
 
             var now = new DateTime(2025, 10, 31);
             var from = now.AddDays(-7);
@@ -73,7 +76,7 @@ namespace Ce.Gateway.Api.Tests
         public async Task GetRequestReportAsync_ShouldReturnReport_For30Days()
         {
             var dbContextFactory = new TestDbContextFactory(_options);
-            var repository = new LogRepository(dbContextFactory);
+            var repository = new LogRepository(dbContextFactory, _memoryCache);
 
             var now = new DateTime(2025, 10, 31);
             var from = now.AddDays(-30);

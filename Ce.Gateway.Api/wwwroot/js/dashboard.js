@@ -77,37 +77,176 @@ function formatNodeLastChecked(dateTimeString) {
     return `${formattedHours}:${utcMinutes}:${utcSeconds}`;
 }
 
+// Show loading overlay for specific widget
+function showWidgetLoading(widgetId) {
+    const widget = document.getElementById(widgetId);
+    if (!widget) return;
+    
+    const cardBody = widget.querySelector('.card-body, .small-box');
+    if (!cardBody) return;
+    
+    const loadingId = `loading-${widgetId}`;
+    if (document.getElementById(loadingId)) return;
+    
+    const loadingHTML = `
+        <div id="${loadingId}" class="widget-loading-overlay">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>`;
+    
+    cardBody.style.position = 'relative';
+    cardBody.insertAdjacentHTML('beforeend', loadingHTML);
+}
+
+// Hide loading overlay for specific widget
+function hideWidgetLoading(widgetId) {
+    const loadingEl = document.getElementById(`loading-${widgetId}`);
+    if (loadingEl) {
+        loadingEl.remove();
+    }
+}
+
+// Show loading for all widgets
+function showAllWidgetsLoading() {
+    const widgetIds = [
+        'widget-overview-metrics',
+        'widget-request-timeline',
+        'widget-latency-timeline',
+        'widget-http-status',
+        'widget-current-node-network',
+        'widget-current-node-status',
+        'widget-route-summary',
+        'widget-node-summary',
+        'widget-recent-errors'
+    ];
+    
+    widgetIds.forEach(id => showWidgetLoading(id));
+}
+
+// Hide loading for all widgets
+function hideAllWidgetsLoading() {
+    const widgetIds = [
+        'widget-overview-metrics',
+        'widget-request-timeline',
+        'widget-latency-timeline',
+        'widget-http-status',
+        'widget-current-node-network',
+        'widget-current-node-status',
+        'widget-route-summary',
+        'widget-node-summary',
+        'widget-recent-errors'
+    ];
+    
+    widgetIds.forEach(id => hideWidgetLoading(id));
+}
+
 // Fetch and update all dashboard data
 async function fetchDashboardData() {
     const { startTime, endTime } = getTimeRange();
 
+    showAllWidgetsLoading();
+    
     try {
-        const [overview, routeSummary, nodeSummary, recentErrors, nodeStatusWithMetrics] = await Promise.all([
-            fetch(`${API_BASE_URL}/overview?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
-            fetch(`${API_BASE_URL}/routesummary?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
-            fetch(`${API_BASE_URL}/nodesummary?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
-            fetch(`${API_BASE_URL}/recenterrors?startTime=${startTime}&endTime=${endTime}`).then(res => res.json()),
-            fetch(`${API_BASE_URL}/nodestatuswithmetrics?startTime=${startTime}&endTime=${endTime}`).then(res => {
-                if (!res.ok) {
-                    console.error('Failed to fetch node status:', res.status, res.statusText);
-                    return [];
-                }
+        // Fetch overview data
+        const overviewPromise = fetch(`${API_BASE_URL}/overview?startTime=${startTime}&endTime=${endTime}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch overview');
                 return res.json();
             })
+            .then(overview => {
+                updateOverview(overview);
+                renderRequestTimelineChart(overview.requestTimeline);
+                renderLatencyTimelineChart(overview.latencyTimeline);
+                renderHttpStatusDonutChart(overview.httpStatusDistribution);
+                hideWidgetLoading('widget-overview-metrics');
+                hideWidgetLoading('widget-request-timeline');
+                hideWidgetLoading('widget-latency-timeline');
+                hideWidgetLoading('widget-http-status');
+            })
+            .catch(error => {
+                console.error('Error fetching overview:', error);
+                hideWidgetLoading('widget-overview-metrics');
+                hideWidgetLoading('widget-request-timeline');
+                hideWidgetLoading('widget-latency-timeline');
+                hideWidgetLoading('widget-http-status');
+            });
+
+        // Fetch route summary
+        const routeSummaryPromise = fetch(`${API_BASE_URL}/routesummary?startTime=${startTime}&endTime=${endTime}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch route summary');
+                return res.json();
+            })
+            .then(routeSummary => {
+                updateRouteSummaryTable(routeSummary);
+                hideWidgetLoading('widget-route-summary');
+            })
+            .catch(error => {
+                console.error('Error fetching route summary:', error);
+                hideWidgetLoading('widget-route-summary');
+            });
+
+        // Fetch node summary
+        const nodeSummaryPromise = fetch(`${API_BASE_URL}/nodesummary?startTime=${startTime}&endTime=${endTime}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch node summary');
+                return res.json();
+            })
+            .then(nodeSummary => {
+                updateNodeSummaryTable(nodeSummary);
+                hideWidgetLoading('widget-node-summary');
+            })
+            .catch(error => {
+                console.error('Error fetching node summary:', error);
+                hideWidgetLoading('widget-node-summary');
+            });
+
+        // Fetch recent errors
+        const recentErrorsPromise = fetch(`${API_BASE_URL}/recenterrors?startTime=${startTime}&endTime=${endTime}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch recent errors');
+                return res.json();
+            })
+            .then(recentErrors => {
+                updateRecentErrorsTable(recentErrors);
+                hideWidgetLoading('widget-recent-errors');
+            })
+            .catch(error => {
+                console.error('Error fetching recent errors:', error);
+                hideWidgetLoading('widget-recent-errors');
+            });
+
+        // Fetch node status with metrics
+        const nodeStatusPromise = fetch(`${API_BASE_URL}/nodestatuswithmetrics?startTime=${startTime}&endTime=${endTime}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch node status');
+                return res.json();
+            })
+            .then(nodeStatusWithMetrics => {
+                updateCurrentNodeStatusTable(nodeStatusWithMetrics || []);
+                hideWidgetLoading('widget-current-node-status');
+                hideWidgetLoading('widget-current-node-network');
+            })
+            .catch(error => {
+                console.error('Error fetching node status:', error);
+                updateCurrentNodeStatusTable([]);
+                hideWidgetLoading('widget-current-node-status');
+                hideWidgetLoading('widget-current-node-network');
+            });
+
+        // Wait for all promises to complete
+        await Promise.allSettled([
+            overviewPromise,
+            routeSummaryPromise,
+            nodeSummaryPromise,
+            recentErrorsPromise,
+            nodeStatusPromise
         ]);
 
-        updateOverview(overview);
-        renderRequestTimelineChart(overview.requestTimeline);
-        renderLatencyTimelineChart(overview.latencyTimeline);
-        renderHttpStatusDonutChart(overview.httpStatusDistribution);
-        updateCurrentNodeStatusTable(nodeStatusWithMetrics || []);
-        updateRouteSummaryTable(routeSummary);
-        updateNodeSummaryTable(nodeSummary);
-        updateRecentErrorsTable(recentErrors);
-
     } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        // Optionally display an error message on the dashboard
+        console.error('Error in fetchDashboardData:', error);
+        hideAllWidgetsLoading();
     }
 }
 
@@ -561,8 +700,11 @@ function updateRecentErrorsTable(data) {
         startAutoRefresh();
     });
 
-    manualRefreshBtn.addEventListener('click', () => {
-        fetchDashboardData();
+    manualRefreshBtn.addEventListener('click', async () => {
+        const icon = manualRefreshBtn.querySelector('i');
+        icon.classList.add('fa-spin');
+        await fetchDashboardData();
+        icon.classList.remove('fa-spin');
         startAutoRefresh(); // Restart timer with current settings
     });
 

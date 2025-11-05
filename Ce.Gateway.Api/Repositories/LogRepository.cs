@@ -3,6 +3,7 @@ using Ce.Gateway.Api.Entities;
 using Ce.Gateway.Api.Models;
 using Ce.Gateway.Api.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,12 @@ namespace Ce.Gateway.Api.Repositories
     public class LogRepository : ILogRepository
     {
         private readonly IDbContextFactory<GatewayDbContext> _dbContextFactory;
+        private readonly IMemoryCache _memoryCache;
 
-        public LogRepository(IDbContextFactory<GatewayDbContext> dbContextFactory)
+        public LogRepository(IDbContextFactory<GatewayDbContext> dbContextFactory, IMemoryCache memoryCache)
         {
             _dbContextFactory = dbContextFactory;
+            _memoryCache = memoryCache;
         }
 
         public async Task<PaginatedResult<RequestLogEntry>> GetLogsAsync(LogFilter filter, int page, int pageSize)
@@ -68,6 +71,15 @@ namespace Ce.Gateway.Api.Repositories
 
         public async Task<RequestReportDto> GetRequestReportAsync(DateTime from, DateTime to, string groupBy)
         {
+            // Create cache key based on parameters
+            var cacheKey = $"request-report-{from:yyyyMMddHHmmss}-{to:yyyyMMddHHmmss}-{groupBy}";
+            
+            // Try to get from cache
+            if (_memoryCache.TryGetValue(cacheKey, out RequestReportDto cachedResult))
+            {
+                return cachedResult;
+            }
+
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
             string timeFormat;
             string sqlFormat;
@@ -172,7 +184,7 @@ namespace Ce.Gateway.Api.Repositories
             var totalServerError = timeSlots.Sum(t => t.ServerErrorCount);
             var totalOther = timeSlots.Sum(t => t.OtherCount);
 
-            return new RequestReportDto
+            var result = new RequestReportDto
             {
                 TimeSlots = timeSlots,
                 TimeFormat = timeFormat,
@@ -182,6 +194,244 @@ namespace Ce.Gateway.Api.Repositories
                 ServerErrorRequests = totalServerError,
                 OtherRequests = totalOther
             };
+
+            // Calculate cache expiration based on date range
+            var duration = to - from;
+            TimeSpan cacheExpiration;
+            
+            if (duration.TotalDays <= 1)
+            {
+                // For 1 day or less: cache for 15 minutes
+                cacheExpiration = TimeSpan.FromMinutes(15);
+            }
+            else
+            {
+                // For more than 1 day: cache for 1 day
+                cacheExpiration = TimeSpan.FromDays(1);
+            }
+
+            // Store in cache with sliding expiration
+            _memoryCache.Set(cacheKey, result, new MemoryCacheEntryOptions
+            {
+                SlidingExpiration = cacheExpiration
+            });
+
+            return result;
         }
+
+        public async Task<Models.Dashboard.DashboardOverviewAggregateDto> GetDashboardOverviewAggregateAsync(DateTime startTime, DateTime endTime)
+        {
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            
+            var sql = @"
+                SELECT 
+                    COALESCE(COUNT(*), 0) as TotalRequests,
+                    COALESCE(SUM(CASE WHEN IsError = 1 THEN 1 ELSE 0 END), 0) as ErrorRequests,
+                    COALESCE(SUM(GatewayLatencyMs), 0) as TotalLatencyMs
+                FROM OcrGatewayLogEntries
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1";
+
+            var result = await dbContext.Database
+                .SqlQueryRaw<Models.Dashboard.DashboardOverviewAggregateDto>(sql, startTime, endTime)
+                .FirstOrDefaultAsync();
+
+            return result ?? new Models.Dashboard.DashboardOverviewAggregateDto();
+        }
+
+        public async Task<List<Models.Dashboard.RouteSummaryDto>> GetRouteSummaryAggregateAsync(DateTime startTime, DateTime endTime)
+        {
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            
+            var sql = @"
+                SELECT 
+                    UpstreamPath as Route,
+                    COALESCE(MIN(GatewayLatencyMs), 0) as MinLatencyMs,
+                    COALESCE(MAX(GatewayLatencyMs), 0) as MaxLatencyMs,
+                    COALESCE(CAST(AVG(GatewayLatencyMs) AS INTEGER), 0) as AvgLatencyMs,
+                    COUNT(*) as TotalRequests
+                FROM OcrGatewayLogEntries
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1
+                GROUP BY UpstreamPath
+                ORDER BY TotalRequests DESC";
+
+            return await dbContext.Database
+                .SqlQueryRaw<Models.Dashboard.RouteSummaryDto>(sql, startTime, endTime)
+                .ToListAsync();
+        }
+
+        public async Task<List<Models.Dashboard.NodeSummaryDto>> GetNodeSummaryAggregateAsync(DateTime startTime, DateTime endTime)
+        {
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            
+            var sql = @"
+                SELECT 
+                    (DownstreamHost || ':' || COALESCE(DownstreamPort, 0)) as Node,
+                    COALESCE(MIN(GatewayLatencyMs), 0) as MinLatencyMs,
+                    COALESCE(MAX(GatewayLatencyMs), 0) as MaxLatencyMs,
+                    COALESCE(CAST(AVG(GatewayLatencyMs) AS INTEGER), 0) as AvgLatencyMs,
+                    COUNT(*) as TotalRequests
+                FROM OcrGatewayLogEntries
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1
+                    AND DownstreamHost IS NOT NULL
+                GROUP BY DownstreamHost, DownstreamPort
+                ORDER BY TotalRequests DESC";
+
+            return await dbContext.Database
+                .SqlQueryRaw<Models.Dashboard.NodeSummaryDto>(sql, startTime, endTime)
+                .ToListAsync();
+        }
+
+        public async Task<List<Models.Dashboard.TimelineChartDataDto>> GetRequestTimelineAggregateAsync(DateTime startTime, DateTime endTime)
+        {
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            
+            TimeSpan duration = endTime - startTime;
+            string sqlFormat;
+            string displayFormat;
+            int maxDataPoints = 100;
+
+            if (duration.TotalHours <= 1)
+            {
+                sqlFormat = "%Y-%m-%d %H:%M:00";
+                displayFormat = "HH:mm";
+                maxDataPoints = 60;
+            }
+            else if (duration.TotalDays <= 1)
+            {
+                sqlFormat = "%Y-%m-%d %H:00:00";
+                displayFormat = "HH:00";
+                maxDataPoints = 24;
+            }
+            else
+            {
+                sqlFormat = "%Y-%m-%d 00:00:00";
+                displayFormat = "yyyy-MM-dd";
+                maxDataPoints = Math.Min((int)duration.TotalDays + 1, 100);
+            }
+
+            var sql = $@"
+                SELECT 
+                    strftime('{sqlFormat}', CreatedAtUtc) as TimeKey,
+                    COUNT(*) as RequestCount
+                FROM OcrGatewayLogEntries
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1
+                GROUP BY TimeKey
+                ORDER BY TimeKey
+                LIMIT {maxDataPoints}";
+
+            var results = await dbContext.Database
+                .SqlQueryRaw<TimelineAggregateResult>(sql, startTime, endTime)
+                .ToListAsync();
+
+            return results.Select(r => 
+            {
+                DateTime parsedTime;
+                if (DateTime.TryParse(r.TimeKey, out parsedTime))
+                {
+                    return new Models.Dashboard.TimelineChartDataDto
+                    {
+                        Timestamp = parsedTime.AddHours(7).ToString(displayFormat),
+                        RequestCount = r.RequestCount
+                    };
+                }
+                else
+                {
+                    return new Models.Dashboard.TimelineChartDataDto
+                    {
+                        Timestamp = r.TimeKey,
+                        RequestCount = r.RequestCount
+                    };
+                }
+            }).ToList();
+        }
+
+        public async Task<List<Models.Dashboard.TimelineChartDataDto>> GetLatencyTimelineAggregateAsync(DateTime startTime, DateTime endTime)
+        {
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            
+            TimeSpan duration = endTime - startTime;
+            string sqlFormat;
+            string displayFormat;
+            int maxDataPoints = 100;
+
+            if (duration.TotalHours <= 1)
+            {
+                sqlFormat = "%Y-%m-%d %H:%M:00";
+                displayFormat = "HH:mm";
+                maxDataPoints = 60;
+            }
+            else if (duration.TotalDays <= 1)
+            {
+                sqlFormat = "%Y-%m-%d %H:00:00";
+                displayFormat = "HH:00";
+                maxDataPoints = 24;
+            }
+            else
+            {
+                sqlFormat = "%Y-%m-%d 00:00:00";
+                displayFormat = "yyyy-MM-dd";
+                maxDataPoints = Math.Min((int)duration.TotalDays + 1, 100);
+            }
+
+            var sql = $@"
+                SELECT 
+                    strftime('{sqlFormat}', CreatedAtUtc) as TimeKey,
+                    COALESCE(CAST(AVG(GatewayLatencyMs) AS INTEGER), 0) as RequestCount
+                FROM OcrGatewayLogEntries
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1
+                GROUP BY TimeKey
+                ORDER BY TimeKey
+                LIMIT {maxDataPoints}";
+
+            var results = await dbContext.Database
+                .SqlQueryRaw<TimelineAggregateResult>(sql, startTime, endTime)
+                .ToListAsync();
+
+            return results.Select(r => 
+            {
+                DateTime parsedTime;
+                if (DateTime.TryParse(r.TimeKey, out parsedTime))
+                {
+                    return new Models.Dashboard.TimelineChartDataDto
+                    {
+                        Timestamp = parsedTime.AddHours(7).ToString(displayFormat),
+                        RequestCount = r.RequestCount
+                    };
+                }
+                else
+                {
+                    return new Models.Dashboard.TimelineChartDataDto
+                    {
+                        Timestamp = r.TimeKey,
+                        RequestCount = r.RequestCount
+                    };
+                }
+            }).ToList();
+        }
+
+        public async Task<List<Models.Dashboard.DonutChartDataDto>> GetHttpStatusDistributionAsync(DateTime startTime, DateTime endTime)
+        {
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            
+            var sql = @"
+                SELECT 
+                    (DownstreamStatusCode / 100) || 'xx' as Label,
+                    COUNT(*) as Count
+                FROM OcrGatewayLogEntries
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1 
+                    AND DownstreamStatusCode IS NOT NULL
+                GROUP BY DownstreamStatusCode / 100
+                ORDER BY Label";
+
+            return await dbContext.Database
+                .SqlQueryRaw<Models.Dashboard.DonutChartDataDto>(sql, startTime, endTime)
+                .ToListAsync();
+        }
+    }
+
+    public class TimelineAggregateResult
+    {
+        public string TimeKey { get; set; }
+        public long RequestCount { get; set; }
     }
 }

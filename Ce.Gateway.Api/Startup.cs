@@ -106,9 +106,15 @@ namespace Ce.Gateway.Api
             services.AddSingleton<ILogWriter, SqlLogWriter>();
             services.AddHttpContextAccessor();
 
+            // Add distributed cache (in-memory for now, can be swapped to Redis later)
+            // Add IMemoryCache for in-memory caching
+            services.AddMemoryCache();
+
             services.AddScoped<ILogRepository, LogRepository>();
             services.AddScoped<IRequestLogService, RequestLogService>();
             services.AddScoped<INodePerformanceService, NodePerformanceService>();
+            
+            // Register consolidated dashboard service with integrated caching
             services.AddScoped<IDashboardService, DashboardService>();
 
             services.AddSingleton<IDownstreamHealthStore, DownstreamHealthStore>();

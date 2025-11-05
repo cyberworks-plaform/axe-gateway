@@ -1,6 +1,8 @@
 using Ce.Gateway.Api.Models.Dashboard;
+using Ce.Gateway.Api.Services;
 using Ce.Gateway.Api.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -54,8 +56,17 @@ namespace Ce.Gateway.Api.Controllers.Api
         public async Task<ActionResult<List<NodeStatusWithMetricsDto>>> GetNodeStatusWithMetrics(
             [FromQuery] DateTime startTime, [FromQuery] DateTime endTime)
         {
-            var nodeStatus = await _dashboardService.GetNodeStatusWithMetricsAsync(startTime.ToUniversalTime(), endTime.ToUniversalTime());
+           var nodeStatus = await _dashboardService.GetNodeStatusWithMetricsAsync(startTime.ToUniversalTime(), endTime.ToUniversalTime());
             return Ok(nodeStatus);
+        }
+
+        [HttpPost("cache/invalidate")]
+        public ActionResult InvalidateCache([FromServices] IMemoryCache cache)
+        {
+            // Clear dashboard cache by removing entries with dashboard prefix
+            // Note: IMemoryCache doesn't have a built-in way to clear by prefix
+            // In production, consider using a cache key registry or distributed cache with pattern matching
+            return Ok(new { message = "Cache invalidation not fully implemented for IMemoryCache. Cache entries will expire based on their TTL." });
         }
     }
 }
