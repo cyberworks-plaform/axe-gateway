@@ -1,0 +1,13 @@
+using Ce.Gateway.Api.Entities;
+using Ce.Gateway.Api.Models;
+using System;
+using System.Threading.Tasks;
+
+namespace Ce.Gateway.Api.Repositories.Interface
+{
+    public interface ILogRepository_Improvement
+    {
+        Task<PaginatedResult<RequestLogEntry>> GetLogsAsync(LogFilter filter, int page, int pageSize);
+        Task<RequestReportDto> GetRequestReportAsync(DateTime from, DateTime to, string groupBy);
+    }
+}

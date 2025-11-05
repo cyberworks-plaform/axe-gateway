@@ -1,0 +1,594 @@
+/* Gateway Admin - Site CSS */
+/* Combined CSS for all pages */
+
+/* ========================================
+   General Styles
+   ======================================== */
+
+/* General Body and Font Enhancements */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    color: #212529;
+    background-color: #f8f9fa;
+}
+
+/* ========================================
+   Card Styles
+   ======================================== */
+
+.card {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 18px;
+}
+
+.card-header {
+    border-bottom: 1px solid #e9ecef;
+    background-color: #ffffff;
+    color: #343a40;
+    padding: 1rem 1.25rem;
+}
+
+.card-title {
+    font-weight: 700;
+    color: #343a40;
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   Small Box (Info Box) Styles
+   ======================================== */
+
+.small-box {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    color: #ffffff !important;
+    margin-bottom: 18px;
+}
+
+.small-box .inner h3 {
+    font-weight: 700;
+    font-size: 2.2rem;
+}
+
+.small-box .inner p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.small-box .icon {
+    color: rgba(0,0,0,.15);
+}
+
+/* ========================================
+   Table Styles
+   ======================================== */
+
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    background-color: #e9ecef;
+    color: #495057;
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+}
+
+.table tbody td {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem 1.25rem;
+    color: #495057;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.02);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.04);
+}
+
+/* ========================================
+   Chart Colors
+   ======================================== */
+
+.chart-color-primary { color: #007bff; }
+.chart-color-info { color: #17a2b8; }
+.chart-color-success { color: #28a745; }
+.chart-color-warning { color: #ffc107; }
+.chart-color-danger { color: #dc3545; }
+.chart-color-secondary { color: #6c757d; }
+
+/* ========================================
+   Header & Navigation
+   ======================================== */
+
+.main-header.navbar-white {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #495057;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #007bff;
+}
+
+.content-header h1 {
+    color: #343a40;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+/* ========================================
+   Forms & Controls
+   ======================================== */
+
+#timeFilter {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.375rem 0.75rem;
+    background-color: #ffffff;
+    color: #495057;
+}
+
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Gap between filter controls */
+.gap-2 {
+    gap: 0.5rem;
+}
+
+/* Reset Layout Button */
+.btn-reset-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem 0.75rem;
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    min-width: 38px;
+    height: 38px;
+}
+
+.btn-reset-layout:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    border-color: #adb5bd;
+}
+
+.btn-reset-layout:active {
+    background-color: #e9ecef;
+}
+
+.btn-reset-layout i {
+    font-size: 16px;
+}
+
+/* Refresh Control Group - Grafana-style */
+.refresh-control-group {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+.btn-refresh-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem 0.75rem;
+    background-color: #ffffff;
+    border: none;
+    border-right: 1px solid #ced4da;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    min-width: 38px;
+}
+
+.btn-refresh-icon:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.btn-refresh-icon:active {
+    background-color: #e9ecef;
+}
+
+.btn-refresh-icon i {
+    font-size: 14px;
+}
+
+.form-control-refresh {
+    border: none;
+    border-radius: 0;
+    padding: 0.375rem 0.75rem;
+    background-color: #ffffff;
+    color: #495057;
+    min-width: 80px;
+    outline: none;
+}
+
+.form-control-refresh:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.refresh-control-group:focus-within {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* ========================================
+   Layout
+   ======================================== */
+
+.content-wrapper {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.container-fluid {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* ========================================
+   Node Health Specific Styles
+   ======================================== */
+
+.health-table tbody tr.main-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.health-table tbody tr.main-row:hover {
+    background-color: #f8f9fa;
+}
+
+.health-table tbody tr.main-row.expanded {
+    background-color: #e6ffe6;
+}
+
+.health-table tbody tr.main-row td {
+    padding: 15px 15px;
+    border-top: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.health-table tbody tr.detail-row td {
+    padding: 0;
+    border-top: none;
+}
+
+.health-table .detail-content {
+    padding: 15px;
+    background-color: #fdfdfd;
+    border-top: 1px solid #e9ecef;
+}
+
+.health-table .sub-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.health-table .sub-table thead th {
+    background-color: #e9ecef;
+    font-weight: 500;
+    color: #6c757d;
+    padding: 8px 15px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.health-table .sub-table tbody td {
+    padding: 8px 15px;
+    border: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .35em .65em;
+    font-size: .75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+}
+
+.status-badge.healthy {
+    background-color: #28a745;
+}
+
+.status-badge.unhealthy {
+    background-color: #dc3545;
+}
+
+.status-badge.degraded {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-icon-fa {
+    margin-right: 5px;
+}
+
+.status-text {
+    font-weight: 500;
+}
+
+.expand-collapse-icon {
+    margin-right: 10px;
+    width: 1em;
+    text-align: center;
+}
+
+/* ========================================
+   Dashboard Node Status Styles
+   ======================================== */
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-indicator.healthy {
+    background-color: #28a745;
+}
+
+.status-indicator.unhealthy {
+    background-color: #dc3545;
+}
+
+.node-status-summary {
+    margin-left: 15px;
+    display: inline-flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-badge-healthy {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.status-badge-unhealthy {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.status-badge .status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-badge-healthy .status-dot {
+    background-color: #28a745;
+}
+
+.status-badge-unhealthy .status-dot {
+    background-color: #dc3545;
+}
+
+.node-status-table tbody tr.main-node-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.node-status-table tbody tr.main-node-row:hover {
+    background-color: #f8f9fa;
+}
+
+.node-status-table tbody tr.main-node-row.expanded {
+    background-color: #e9ecef;
+}
+
+.node-status-table .expand-icon {
+    transition: transform 0.2s ease-in-out;
+    color: #6c757d;
+}
+
+.node-status-table tbody tr.detail-row {
+    background-color: #f8f9fa;
+}
+
+.node-health-detail {
+    font-size: 0.9rem;
+}
+
+.node-health-detail p {
+    margin-bottom: 8px;
+}
+
+.health-check-entries {
+    margin-top: 15px;
+}
+
+.health-check-entries h6 {
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* ========================================
+   Pagination
+   ======================================== */
+
+.pagination {
+    margin-bottom: 0;
+}
+
+/* ========================================
+   Widget Loading Overlay
+   ======================================== */
+
+.widget-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 8px;
+}
+
+.widget-loading-overlay .spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+.pagination .page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    color: #007bff;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-tool {
+    padding: 0.25rem 0.5rem;
+}
+
+/* ========================================
+   Responsive Adjustments
+   ======================================== */
+
+@media (max-width: 768px) {
+    .content-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .small-box .inner h3 {
+        font-size: 1.8rem;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Sortable Placeholder */
+.sortable-placeholder {
+    border: 2px dashed #ccc;
+    background-color: #f0f0f0;
+    height: 100px; /* Adjust as needed */
+    margin-bottom: 18px; /* Match card margin */
+    box-sizing: border-box;
+}
+
+/* Draggable Header Cursor */
+.draggable-header {
+    cursor: move !important;
+    cursor: grab !important;
+}
+
+.draggable-header:active {
+    cursor: grabbing !important;
+}
+
+/* Small box draggable indicator */
+.small-box {
+    position: relative;
+}
+
+#sortable-widgets-container > .row:hover .small-box::before {
+    content: '\f0b2';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    z-index: 10;
+}

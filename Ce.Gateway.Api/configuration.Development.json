@@ -2,36 +2,17 @@
   "Routes": [
     {
       "DownstreamPathTemplate": "/{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 44335
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/test/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true,
-      "QoSOptions": {
-        "TimeoutValue": 300, // 300 mili giây
-        "ExceptionsAllowedBeforeBreaking": 2, // Sau 2 lỗi thì ngắt mạch
-        "DurationOfBreak": 5000 // Ngắt mạch 5s
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "10.1.80.34",
-          "Port": 8001
+          "Host": "localhost",
+          "Port": 10501
         },
         {
-          "Host": "10.1.80.35",
-          "Port": 8001
+          "Host": "localhost",
+          "Port": 10502
         }
       ],
-
       "UpstreamPathTemplate": "/gateway/axsdk-api/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
       "LoadBalancerOptions": {
@@ -43,195 +24,35 @@
         "ExceptionsAllowedBeforeBreaking": 2, // Sau 10 lỗi thì ngắt mạch
         "DurationOfBreak": 5000 // Ngắt mạch 5s
       }
-    },
-    {
-      "DownstreamPathTemplate": "/api/auth/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "auth.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/auth/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/file/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "file.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/file/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/ocr/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "ocr.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/ocr/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true,
-      "QoSOptions": {
-        "TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
-        "ExceptionsAllowedBeforeBreaking": 2, // Sau 2 lỗi thì ngắt mạch
-        "DurationOfBreak": 5000 // Ngắt mạch 5s
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/api/common-master-data/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "common-master-data.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/common-master-data/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/log/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "log.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/log/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/notification/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "notification.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/notification/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/schedule/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "schedule.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/schedule/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/workflow/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "workflow.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/workflow/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/axe-core/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "axe-core.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/axe-core/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/axe-task-management/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "axe-task-management.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/axe-task-management/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/axe-report/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "axe-report.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/axe-report/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/axe-payment/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "axe-payment.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway/axe-payment/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
+
     },
     {
       "DownstreamPathTemplate": "/{everything}",
-      "DownstreamScheme": "ws",
-      "ReRouteIsCaseSensitive": false,
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "axe-payment.dev.axe.vn",
-          "Port": 80
-        }
-      ],
-      "UpstreamPathTemplate": "/gateway-ws/axe-payment/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
-    },
-    {
-      "DownstreamPathTemplate": "/api/axe-distribution-job/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "axe-distribution-job.dev.axe.vn",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 10501
+        },
+        {
+          "Host": "localhost",
+          "Port": 10502
         }
       ],
-      "UpstreamPathTemplate": "/gateway/axe-distribution-job/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS" ],
-      "DangerousAcceptAnyServerCertificateValidator": true
+      "UpstreamPathTemplate": "/gateway/axsdk-api-background/{everything}", // route này dùng cho background chạy ocr
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "DELETE", "OPTIONS" ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      },
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "QoSOptions": {
+        "TimeoutValue": 300000, // tính bằng miliseconds ; 300 giây = 5 phút
+        "ExceptionsAllowedBeforeBreaking": 2, // Sau 10 lỗi thì ngắt mạch
+        "DurationOfBreak": 5000 // Ngắt mạch 5s
+      }
+
     }
+   
   ],
   "GlobalConfiguration": {
     "BaseUrl": "http://gateway.dev.axe.vn"
