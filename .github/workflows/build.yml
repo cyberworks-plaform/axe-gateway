@@ -38,8 +38,3 @@ jobs:
             echo "zip_path=$ZIP_FILE" >> $GITHUB_OUTPUT
             echo "zip_name=$(basename $ZIP_FILE)" >> $GITHUB_OUTPUT
 
-      - name: 📦 Upload ZIP as build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.get_zip_name.outputs.zip_name }}
-          path: ${{ steps.get_zip_name.outputs.zip_path }}
