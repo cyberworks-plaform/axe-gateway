@@ -142,6 +142,7 @@ async function loadReportData() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     const startTime = performance.now(); // Record start time
     const startGeneratedDateTime = new Date();
+    let fromCache = false; // Declare outside try block to be accessible in finally
     
     try {
         reportGeneratedInfo.text('Generating...');
@@ -155,7 +156,6 @@ async function loadReportData() {
         // Try to get from cache first
         const cacheKey = CACHE_KEY_PREFIX + period;
         let data = getCachedData(cacheKey);
-        let fromCache = false;
 
         if (!data) {
             // Fetch from server if not in cache
