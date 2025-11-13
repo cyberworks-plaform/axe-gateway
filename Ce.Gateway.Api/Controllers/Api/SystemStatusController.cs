@@ -1,7 +1,9 @@
+using Ce.Gateway.Api.Middleware;
 using Ce.Gateway.Api.Models.Common;
+using Ce.Gateway.Api.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Controllers.Api
 {
@@ -12,60 +14,42 @@ namespace Ce.Gateway.Api.Controllers.Api
     [Route("api/[controller]")]
     public class SystemStatusController : ControllerBase
     {
-        private static readonly DateTime _startTime = DateTime.UtcNow;
-        private static long _totalRequests = 0;
-        private static int _currentActiveRequests = 0;
+        private readonly IDashboardService _dashboardService;
+
+        public SystemStatusController(IDashboardService dashboardService)
+        {
+            _dashboardService = dashboardService;
+        }
 
         /// <summary>
-        /// Get system status including uptime and request metrics
+        /// Get system status including uptime, request metrics, and node health
         /// </summary>
         [HttpGet]
-        public ActionResult<ApiResponse<SystemStatusDto>> GetStatus()
+        public async Task<ActionResult<ApiResponse<SystemStatusDto>>> GetStatus()
         {
-            var uptime = DateTime.UtcNow - _startTime;
+            var metrics = RequestMetricsMiddleware.GetMetrics();
+            var uptime = TimeSpan.FromSeconds(metrics.UptimeSeconds);
+            
+            // Get node health from dashboard service
+            var (totalNodes, nodesDown) = await _dashboardService.GetNodeHealthStatsAsync();
             
             var status = new SystemStatusDto
             {
                 Status = "Running",
-                StartTime = _startTime,
+                StartTime = metrics.StartTime,
                 Uptime = FormatUptime(uptime),
-                UptimeSeconds = (long)uptime.TotalSeconds,
-                TotalRequests = _totalRequests,
-                ActiveRequests = _currentActiveRequests,
+                UptimeSeconds = metrics.UptimeSeconds,
+                TotalRequests = metrics.TotalRequests,
+                ActiveRequests = metrics.ActiveRequests,
+                TotalNodes = totalNodes,
+                NodesDown = nodesDown,
                 Timestamp = DateTime.UtcNow
             };
 
             return Ok(ApiResponse<SystemStatusDto>.SuccessResult(status));
         }
 
-        /// <summary>
-        /// Increment request counter (called by middleware)
-        /// </summary>
-        [NonAction]
-        public static void IncrementRequestCount()
-        {
-            System.Threading.Interlocked.Increment(ref _totalRequests);
-        }
-
-        /// <summary>
-        /// Increment active request counter
-        /// </summary>
-        [NonAction]
-        public static void IncrementActiveRequests()
-        {
-            System.Threading.Interlocked.Increment(ref _currentActiveRequests);
-        }
-
-        /// <summary>
-        /// Decrement active request counter
-        /// </summary>
-        [NonAction]
-        public static void DecrementActiveRequests()
-        {
-            System.Threading.Interlocked.Decrement(ref _currentActiveRequests);
-        }
-
-        private string FormatUptime(TimeSpan uptime)
+        private static string FormatUptime(TimeSpan uptime)
         {
             if (uptime.TotalDays >= 1)
                 return $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m";
@@ -86,6 +70,8 @@ namespace Ce.Gateway.Api.Controllers.Api
         public long UptimeSeconds { get; set; }
         public long TotalRequests { get; set; }
         public int ActiveRequests { get; set; }
+        public int TotalNodes { get; set; }
+        public int NodesDown { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

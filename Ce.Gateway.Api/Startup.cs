@@ -186,6 +186,9 @@ namespace Ce.Gateway.Api
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
+            // Add request metrics middleware before authentication
+            app.UseMiddleware<RequestMetricsMiddleware>();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
