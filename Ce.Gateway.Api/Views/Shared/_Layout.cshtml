@@ -126,13 +126,13 @@
 
                         @if (User.IsInRole("Administrator") || User.IsInRole("Management"))
                         {
-                            <li class="nav-header">QUẢN TRỊ HỆ THỐNG</li>
-                            @if (User.IsInRole("Administrator"))
+                            <li class="nav-header">SYSTEM MANAGEMENT</li>
+                            @if (User.IsInRole("Administrator") || User.IsInRole("Management"))
                             {
                                 <li class="nav-item">
                                     <a href="/user" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
                                         <i class="nav-icon fas fa-users"></i>
-                                        <p>Quản lý User</p>
+                                        <p>User Management</p>
                                     </a>
                                 </li>
                             }
