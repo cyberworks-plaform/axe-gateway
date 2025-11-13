@@ -32,5 +32,11 @@
     <Folder Include="logs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\readme.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 
 </Project>
