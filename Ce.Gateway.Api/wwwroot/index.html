@@ -231,7 +231,7 @@
                     <i class="fas fa-server icon-success" id="nodeIcon"></i>
                     <span>Node Status</span>
                 </div>
-                <div class="metric-value" id="nodeStatus" style="font-size: 1rem;">
+                <div class="metric-value" id="nodeStatus" style="font-size: 1.25rem;">
                     <span class="skeleton"></span>
                 </div>
             </div>
@@ -319,10 +319,10 @@
                         const iconEl = document.getElementById('nodeIcon');
                         
                         if (d.nodesDown === 0) {
-                            nodeEl.textContent = 'All Up';
+                            nodeEl.innerHTML = '<span style="color: #28a745; font-weight: 700;">' + d.totalNodes + ' / ' + d.totalNodes + '</span> <span style="font-size: 0.9rem; color: #6c757d;">All Up</span>';
                             iconEl.className = 'fas fa-server icon-success';
                         } else {
-                            nodeEl.textContent = d.nodesDown + ' Down';
+                            nodeEl.innerHTML = '<span style="color: #dc3545; font-weight: 700;">' + d.nodesDown + ' / ' + d.totalNodes + '</span> <span style="font-size: 0.9rem; color: #6c757d;">Down</span>';
                             iconEl.className = 'fas fa-server icon-danger';
                         }
                         
