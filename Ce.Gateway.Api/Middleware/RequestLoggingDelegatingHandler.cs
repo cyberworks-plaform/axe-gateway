@@ -18,17 +18,39 @@ namespace Ce.Gateway.Api.Middleware
     {
         private readonly ILogWriter _logWriter;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger<RequestLoggingDelegatingHandler> _logger; // Added ILogger
+        private readonly ILogger<RequestLoggingDelegatingHandler> _logger;
+        
+        // Gateway metrics tracking
+        private static long _totalGatewayRequests = 0;
+        private static int _activeGatewayRequests = 0;
+        private static readonly DateTime _startTime = DateTime.UtcNow;
 
         public RequestLoggingDelegatingHandler(ILogWriter logWriter, IHttpContextAccessor httpContextAccessor, ILogger<RequestLoggingDelegatingHandler> logger)
         {
             _logWriter = logWriter;
             _httpContextAccessor = httpContextAccessor;
-            _logger = logger; // Initialize logger
+            _logger = logger;
+        }
+        
+        /// <summary>
+        /// Get current gateway metrics
+        /// </summary>
+        public static GatewayMetrics GetMetrics()
+        {
+            return new GatewayMetrics
+            {
+                StartTime = _startTime,
+                TotalRequests = _totalGatewayRequests,
+                ActiveRequests = _activeGatewayRequests,
+                UptimeSeconds = (long)(DateTime.UtcNow - _startTime).TotalSeconds
+            };
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            // Track gateway metrics
+            Interlocked.Increment(ref _totalGatewayRequests);
+            Interlocked.Increment(ref _activeGatewayRequests);
            
             var context = _httpContextAccessor.HttpContext;
 
@@ -87,6 +109,9 @@ namespace Ce.Gateway.Api.Middleware
             }
             finally
             {
+                // Decrement active requests counter
+                Interlocked.Decrement(ref _activeGatewayRequests);
+                
                 stopwatch.Stop();
 
                 // Capture error from response body if not successful
@@ -146,5 +171,13 @@ namespace Ce.Gateway.Api.Middleware
 
             return response;
         }
+    }
+    
+    public class GatewayMetrics
+    {
+        public DateTime StartTime { get; set; }
+        public long TotalRequests { get; set; }
+        public int ActiveRequests { get; set; }
+        public long UptimeSeconds { get; set; }
     }
 }

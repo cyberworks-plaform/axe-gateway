@@ -27,7 +27,8 @@ namespace Ce.Gateway.Api.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<ApiResponse<SystemStatusDto>>> GetStatus()
         {
-            var metrics = RequestMetricsMiddleware.GetMetrics();
+            // Get metrics from RequestLoggingDelegatingHandler
+            var metrics = RequestLoggingDelegatingHandler.GetMetrics();
             var uptime = TimeSpan.FromSeconds(metrics.UptimeSeconds);
             
             // Get node health from dashboard service
