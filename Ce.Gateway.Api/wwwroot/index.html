@@ -1,11 +1,349 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Cyberwork Gateway</title>
-    <link rel="shortcut icon" href="#" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart API Gateway</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700&display=fallback">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: #f4f6f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+        .header h1 b {
+            font-weight: 700;
+            color: #007bff;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #28a745;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .status-badge.status-down {
+            background: #dc3545;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .status-badge i {
+            font-size: 0.75rem;
+        }
+        .metrics {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+        .metric-label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1rem;
+            color: #495057;
+            font-weight: 500;
+        }
+        .metric-label i {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 1.25rem;
+        }
+        .icon-success { background: #d4edda; color: #28a745; }
+        .icon-info { background: #d1ecf1; color: #17a2b8; }
+        .icon-primary { background: #cce5ff; color: #007bff; }
+        .icon-danger { background: #f8d7da; color: #dc3545; }
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #212529;
+        }
+        .skeleton {
+            background: #e9ecef;
+            border-radius: 4px;
+            height: 1.75rem;
+            width: 80px;
+            display: inline-block;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .btn-secondary {
+            background: white;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+        }
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 1rem;
+        }
+        .last-update {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        @media (max-width: 576px) {
+            .header h1 { font-size: 1.75rem; }
+            .actions { flex-direction: column; }
+            .metric-value { font-size: 1.25rem; }
+            .metric-label i { width: 40px; height: 40px; font-size: 1rem; }
+        }
+    </style>
 </head>
 <body>
-    Gateway work!
+    <div class="container">
+        <div class="header">
+            <h1><b>Smart</b> API Gateway</h1>
+            <div class="status-badge" id="statusBadge">
+                <i class="fas fa-circle"></i>
+                <span id="statusText">System Running</span>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Unable to connect to gateway. System may be down.</span>
+        </div>
+
+        <div class="metrics">
+            <div class="metric-row">
+                <div class="metric-label">
+                    <i class="far fa-clock icon-success"></i>
+                    <span>Uptime</span>
+                </div>
+                <div class="metric-value" id="uptime">
+                    <span class="skeleton"></span>
+                </div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">
+                    <i class="fas fa-tasks icon-info"></i>
+                    <span>Active Requests</span>
+                </div>
+                <div class="metric-value" id="activeRequests">
+                    <span class="skeleton"></span>
+                </div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">
+                    <i class="fas fa-chart-line icon-primary"></i>
+                    <span>Total Requests</span>
+                </div>
+                <div class="metric-value" id="totalRequests">
+                    <span class="skeleton"></span>
+                </div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">
+                    <i class="fas fa-server icon-success" id="nodeIcon"></i>
+                    <span>Node Status</span>
+                </div>
+                <div class="metric-value" id="nodeStatus" style="font-size: 1.25rem;">
+                    <span class="skeleton"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/dashboard" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="/account/login" class="btn btn-secondary">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+
+        <div class="last-update">
+            <i class="fas fa-sync-alt"></i> Updated: <span id="lastUpdate">Loading...</span>
+        </div>
+
+        <div class="footer">
+            &copy; 2025 Smart API Gateway
+        </div>
+    </div>
+
+    <script>
+        let consecutiveErrors = 0;
+        const MAX_ERRORS = 2;
+        
+        function setSystemDown() {
+            // Update status badge
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            statusBadge.classList.add('status-down');
+            statusText.textContent = 'System Down';
+            
+            // Show error message
+            document.getElementById('errorMessage').style.display = 'block';
+            
+            // Update metrics
+            document.getElementById('uptime').textContent = 'N/A';
+            document.getElementById('activeRequests').textContent = '0';
+            document.getElementById('totalRequests').textContent = '0';
+            document.getElementById('nodeStatus').textContent = 'Unknown';
+            document.getElementById('lastUpdate').textContent = 'Connection Lost';
+            
+            // Change node icon to danger
+            document.getElementById('nodeIcon').className = 'fas fa-server icon-danger';
+        }
+        
+        function setSystemUp() {
+            // Update status badge
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            statusBadge.classList.remove('status-down');
+            statusText.textContent = 'System Running';
+            
+            // Hide error message
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // Reset error counter
+            consecutiveErrors = 0;
+        }
+        
+        function updateStatus() {
+            fetch('/api/systemstatus', { 
+                method: 'GET',
+                cache: 'no-cache',
+                headers: { 'Cache-Control': 'no-cache' }
+            })
+                .then(r => {
+                    if (!r.ok) {
+                        throw new Error('HTTP ' + r.status);
+                    }
+                    return r.json();
+                })
+                .then(result => {
+                    if (result.success && result.data) {
+                        setSystemUp();
+                        
+                        const d = result.data;
+                        document.getElementById('uptime').textContent = d.uptime;
+                        document.getElementById('activeRequests').textContent = d.activeRequests.toLocaleString();
+                        document.getElementById('totalRequests').textContent = d.totalRequests.toLocaleString();
+                        
+                        const nodeEl = document.getElementById('nodeStatus');
+                        const iconEl = document.getElementById('nodeIcon');
+                        
+                        if (d.nodesDown === 0) {
+                            nodeEl.innerHTML = '<span style="color: #28a745; font-weight: 700;">' + d.totalNodes + ' / ' + d.totalNodes + '</span> <span style="font-size: 0.9rem; color: #6c757d;">All Up</span>';
+                            iconEl.className = 'fas fa-server icon-success';
+                        } else {
+                            nodeEl.innerHTML = '<span style="color: #dc3545; font-weight: 700;">' + d.nodesDown + ' / ' + d.totalNodes + '</span> <span style="font-size: 0.9rem; color: #6c757d;">Down</span>';
+                            iconEl.className = 'fas fa-server icon-danger';
+                        }
+                        
+                        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                    } else {
+                        throw new Error('Invalid response');
+                    }
+                })
+                .catch(err => {
+                    console.error('Status error:', err);
+                    consecutiveErrors++;
+                    
+                    // Only mark as down after consecutive errors
+                    if (consecutiveErrors >= MAX_ERRORS) {
+                        setSystemDown();
+                    }
+                });
+        }
+        
+        updateStatus();
+        setInterval(updateStatus, 5000);
+    </script>
 </body>
 </html>

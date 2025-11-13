@@ -5,6 +5,8 @@ using Ce.Gateway.Api.Repositories;
 using Ce.Gateway.Api.Repositories.Interface;
 using Ce.Gateway.Api.Services;
 using Ce.Gateway.Api.Services.Interface;
+using Microsoft.AspNetCore.Identity;
+using Ce.Gateway.Api.Entities;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -106,6 +108,42 @@ namespace Ce.Gateway.Api
             services.AddDbContextFactory<GatewayDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
 
+            // Configure Identity
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                // Password settings
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+
+                // Lockout settings - READ FROM CONFIG
+                var lockoutMinutes = Configuration.GetValue<int>("Identity:Lockout:LockoutDurationMinutes", 5);
+                var maxAttempts = Configuration.GetValue<int>("Identity:Lockout:MaxFailedAccessAttempts", 5);
+                
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(lockoutMinutes);
+                options.Lockout.MaxFailedAccessAttempts = maxAttempts;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings
+                options.User.RequireUniqueEmail = false;
+
+                // SignIn settings
+                options.SignIn.RequireConfirmedEmail = false;
+            })
+            .AddEntityFrameworkStores<GatewayDbContext>()
+            .AddDefaultTokenProviders();
+
+            // Configure cookie authentication to redirect to login
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/account/login";
+                options.AccessDeniedPath = "/account/accessdenied";
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(24);
+            });
+
             services.AddSingleton<ILogWriter, SqlLogWriter>();
             services.AddHttpContextAccessor();
 
@@ -124,6 +162,9 @@ namespace Ce.Gateway.Api
             services.AddScoped<IRequestReportRepository, Repositories.RequestReportRepository>();
             services.AddScoped<IRequestReportService, Services.RequestReportService>();
             services.AddHostedService<Workers.RequestReportAggregationWorker>();
+            // Register authentication and user management services
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
 
             services.AddSingleton<IDownstreamHealthStore, DownstreamHealthStore>();
 
@@ -149,8 +190,8 @@ namespace Ce.Gateway.Api
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            //app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -190,6 +231,9 @@ namespace Ce.Gateway.Api
                     dbContext.Database.Migrate();
                 }
             }
+
+            // Seed database
+            await DatabaseSeeder.SeedAsync(app.ApplicationServices);
 
             app.UseWebSockets();
 

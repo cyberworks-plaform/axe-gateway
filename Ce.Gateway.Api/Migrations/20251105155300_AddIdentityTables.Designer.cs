@@ -3,6 +3,7 @@ using System;
 using Ce.Gateway.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ce.Gateway.Api.Migrations
 {
     [DbContext(typeof(GatewayDbContext))]
-    partial class GatewayDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251105155300_AddIdentityTables")]
+    partial class AddIdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -185,31 +188,6 @@ namespace Ce.Gateway.Api.Migrations
                     b.ToTable("OcrGatewayLogEntries");
                 });
 
-            modelBuilder.Entity("Ce.Gateway.Api.Entities.RequestReportAggregate", b =>
-                {
-                    b.Property<DateTime>("PeriodStart")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Granularity")
-                        .HasMaxLength(16)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("StatusCategory")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("Count")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("PeriodStart", "Granularity", "StatusCategory");
-
-                    b.HasIndex("PeriodStart");
-
-                    b.HasIndex("PeriodStart", "Granularity");
-
-                    b.ToTable("RequestReportAggregates");
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
