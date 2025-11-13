@@ -64,7 +64,8 @@
 
                             <div class="form-group">
                                 <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="isActiveSwitch" checked="@(Model.IsActive ?? true)">
+                                    <input type="checkbox" class="custom-control-input" id="isActiveSwitch" name="IsActive" value="true" @(Model.IsActive ?? true ? "checked" : "")>
+                                    <input type="hidden" name="IsActive" value="false">
                                     <label class="custom-control-label" for="isActiveSwitch">Active</label>
                                 </div>
                             </div>

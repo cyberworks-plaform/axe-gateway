@@ -15,5 +15,6 @@ namespace Ce.Gateway.Api.Services.Interface
         Task<int> GetActiveUserCountAsync();
         Task<bool> IsRootAdminAsync(string userId);
         Task<bool> ChangePasswordAsync(string id, string newPassword, string changedBy);
+        Task<bool> UnlockUserAsync(string id, string unlockedBy);
     }
 }

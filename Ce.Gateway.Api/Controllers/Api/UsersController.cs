@@ -320,5 +320,51 @@ namespace Ce.Gateway.Api.Controllers.Api
                 return StatusCode(500, ApiResponse<bool>.ErrorResult("Internal server error", "An error occurred while checking delete permission"));
             }
         }
+
+        /// <summary>
+        /// Unlocks a locked user account
+        /// </summary>
+        /// <param name="id">User ID</param>
+        /// <returns>Success message</returns>
+        [HttpPost("{id}/unlock")]
+        [Authorize(Roles = Roles.Administrator)]
+        public async Task<ActionResult<ApiResponse<object>>> UnlockUser(string id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(id))
+                {
+                    return BadRequest(ApiResponse<object>.ErrorResult("Invalid user ID", "User ID cannot be empty"));
+                }
+
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+                
+                var result = await _userService.UnlockUserAsync(id, currentUserId);
+
+                if (!result)
+                {
+                    return NotFound(ApiResponse<object>.ErrorResult("User not found", "User does not exist"));
+                }
+
+                _logger.LogInformation("User {UserId} unlocked by {AdminId}", id, currentUserId);
+
+                return Ok(ApiResponse<object>.SuccessResult(null, "User unlocked successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "User not found: {UserId}", id);
+                return NotFound(ApiResponse<object>.ErrorResult("User not found", ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Failed to unlock user: {UserId}", id);
+                return BadRequest(ApiResponse<object>.ErrorResult("Failed to unlock user", ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unlocking user: {UserId}", id);
+                return StatusCode(500, ApiResponse<object>.ErrorResult("Internal server error", "An error occurred while unlocking the user"));
+            }
+        }
     }
 }

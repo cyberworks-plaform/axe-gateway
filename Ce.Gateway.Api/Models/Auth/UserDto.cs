@@ -12,5 +12,7 @@ namespace Ce.Gateway.Api.Models.Auth
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public bool IsLockedOut { get; set; }
+        public DateTimeOffset? LockoutEnd { get; set; }
     }
 }

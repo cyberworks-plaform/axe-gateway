@@ -36,6 +36,9 @@ namespace Ce.Gateway.Api.Controllers.Pages
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+                var isLockedOut = await _userManager.IsLockedOutAsync(user);
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                
                 userViewModels.Add(new UserDto
                 {
                     Id = user.Id,
@@ -45,7 +48,9 @@ namespace Ce.Gateway.Api.Controllers.Pages
                     Role = roles.FirstOrDefault(),
                     IsActive = user.IsActive,
                     CreatedAt = user.CreatedAt,
-                    LastLoginAt = user.LastLoginAt
+                    LastLoginAt = user.LastLoginAt,
+                    IsLockedOut = isLockedOut,
+                    LockoutEnd = lockoutEnd
                 });
             }
 
@@ -177,6 +182,33 @@ namespace Ce.Gateway.Api.Controllers.Pages
             ViewBag.Username = user.UserName;
 
             return View(model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Administrator")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unlock(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await _userManager.SetLockoutEndDateAsync(user, null);
+            
+            if (result.Succeeded)
+            {
+                await _userManager.ResetAccessFailedCountAsync(user);
+                TempData["Success"] = $"User {user.UserName} has been unlocked successfully.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to unlock user.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

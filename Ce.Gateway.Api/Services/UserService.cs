@@ -55,6 +55,8 @@ namespace Ce.Gateway.Api.Services
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 var role = roles.FirstOrDefault() ?? Roles.Monitor;
+                var isLockedOut = await _userManager.IsLockedOutAsync(user);
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
 
                 userDtos.Add(new UserDto
                 {
@@ -65,7 +67,9 @@ namespace Ce.Gateway.Api.Services
                     Role = role,
                     IsActive = user.IsActive,
                     CreatedAt = user.CreatedAt,
-                    LastLoginAt = user.LastLoginAt
+                    LastLoginAt = user.LastLoginAt,
+                    IsLockedOut = isLockedOut,
+                    LockoutEnd = lockoutEnd
                 });
             }
 
@@ -96,6 +100,8 @@ namespace Ce.Gateway.Api.Services
 
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? Roles.Monitor;
+            var isLockedOut = await _userManager.IsLockedOutAsync(user);
+            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
 
             return new UserDto
             {
@@ -106,7 +112,9 @@ namespace Ce.Gateway.Api.Services
                 Role = role,
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,
-                LastLoginAt = user.LastLoginAt
+                LastLoginAt = user.LastLoginAt,
+                IsLockedOut = isLockedOut,
+                LockoutEnd = lockoutEnd
             };
         }
 
@@ -169,7 +177,9 @@ namespace Ce.Gateway.Api.Services
                 Role = request.Role,
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,
-                LastLoginAt = user.LastLoginAt
+                LastLoginAt = user.LastLoginAt,
+                IsLockedOut = false,
+                LockoutEnd = null
             };
         }
 
@@ -251,6 +261,8 @@ namespace Ce.Gateway.Api.Services
 
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? Roles.Monitor;
+            var isLockedOut = await _userManager.IsLockedOutAsync(user);
+            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
 
             return new UserDto
             {
@@ -261,7 +273,9 @@ namespace Ce.Gateway.Api.Services
                 Role = role,
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,
-                LastLoginAt = user.LastLoginAt
+                LastLoginAt = user.LastLoginAt,
+                IsLockedOut = isLockedOut,
+                LockoutEnd = lockoutEnd
             };
         }
 
@@ -437,6 +451,38 @@ namespace Ce.Gateway.Api.Services
             }
 
             _logger.LogInformation("Password changed successfully for user: {UserId}", id);
+            return true;
+        }
+
+        /// <summary>
+        /// Unlock a locked user account
+        /// </summary>
+        /// <param name="id">User identifier</param>
+        /// <param name="unlockedBy">Username of person unlocking the user</param>
+        /// <returns>True if unlock succeeded</returns>
+        /// <exception cref="KeyNotFoundException">Thrown when user is not found</exception>
+        /// <exception cref="InvalidOperationException">Thrown when unlock fails</exception>
+        public async Task<bool> UnlockUserAsync(string id, string unlockedBy)
+        {
+            _logger.LogInformation("Unlocking user: {UserId} by {UnlockedBy}", id, unlockedBy);
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"User with ID {id} not found");
+            }
+
+            var result = await _userManager.SetLockoutEndDateAsync(user, null);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("Failed to unlock user {UserId}: {Errors}", id, errors);
+                throw new InvalidOperationException($"Failed to unlock user: {errors}");
+            }
+
+            await _userManager.ResetAccessFailedCountAsync(user);
+
+            _logger.LogInformation("User unlocked successfully: {UserId}", id);
             return true;
         }
     }
