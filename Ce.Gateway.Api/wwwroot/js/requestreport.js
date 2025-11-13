@@ -1,5 +1,9 @@
 let requestReportChart = null;
 
+// Cache configuration
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_KEY_PREFIX = 'reqreport_';
+
 function initChart() {
     const ctx = document.getElementById('requestReportChart');
     if (!ctx) return;
@@ -80,6 +84,68 @@ function initChart() {
     });
 }
 
+// Get data from sessionStorage cache
+function getCachedData(cacheKey) {
+    try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (!cached) return null;
+
+        const { data, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+
+        // Check if cache is still valid
+        if (age < CACHE_TTL_MS) {
+            console.log('Using cached data (age: ' + Math.round(age / 1000) + 's)');
+            return data;
+        }
+
+        // Cache expired, remove it
+        sessionStorage.removeItem(cacheKey);
+    } catch (e) {
+        console.error('Error reading cache:', e);
+    }
+    return null;
+}
+
+// Save data to sessionStorage cache
+function setCachedData(cacheKey, data) {
+    try {
+        const cacheEntry = {
+            data: data,
+            timestamp: Date.now()
+        };
+        const serialized = JSON.stringify(cacheEntry);
+        sessionStorage.setItem(cacheKey, serialized);
+        console.log('Data cached successfully (' + (serialized.length / 1024).toFixed(1) + ' KB)');
+    } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+            console.warn('Storage quota exceeded, clearing old cache entries');
+            // Clear old entries and retry
+            clearOldCacheEntries();
+            try {
+                const cacheEntry = {
+                    data: data,
+                    timestamp: Date.now()
+                };
+                sessionStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+                console.log('Data cached successfully after cleanup');
+            } catch (retryError) {
+                console.error('Failed to cache even after cleanup:', retryError);
+            }
+        } else {
+            console.error('Error writing cache:', e);
+        }
+    }
+}
+
+// Clear old cache entries when quota is exceeded
+function clearOldCacheEntries() {
+    const keys = Object.keys(sessionStorage);
+    const cacheKeys = keys.filter(k => k.startsWith(CACHE_KEY_PREFIX));
+    console.log('Clearing ' + cacheKeys.length + ' old cache entries');
+    cacheKeys.forEach(key => sessionStorage.removeItem(key));
+}
+
 // Convert label to UTC+7 display format
 function convertLabelToUTC7(label, timeFormat) {
     // For hour format (HH:00), add 7 hours
@@ -102,6 +168,8 @@ async function loadReportData() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     const startTime = performance.now(); // Record start time
     const startGeneratedDateTime = new Date();
+    let fromCache = false; // Declare outside try block to be accessible in finally
+    
     try {
         reportGeneratedInfo.text('Generating...');
         document.getElementById('totalRequests').textContent = '...';
@@ -111,12 +179,24 @@ async function loadReportData() {
 
         loadingOverlay.style.display = 'flex';
         
-        const response = await fetch(`/api/requestreport/data?period=${period}`);
-        if (!response.ok) {
-            throw new Error('Failed to load report data');
+        // Try to get from cache first
+        const cacheKey = CACHE_KEY_PREFIX + period;
+        let data = getCachedData(cacheKey);
+
+        if (!data) {
+            // Fetch from server if not in cache
+            const response = await fetch(`/api/requestreport/data?period=${period}`);
+            if (!response.ok) {
+                throw new Error('Failed to load report data');
+            }
+            
+            data = await response.json();
+            
+            // Cache the response
+            setCachedData(cacheKey, data);
+        } else {
+            fromCache = true;
         }
-        
-        const data = await response.json();
         
         // Update summary cards
         document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();
@@ -149,16 +229,18 @@ async function loadReportData() {
     } finally {
         loadingOverlay.style.display = 'none';
 
-        const endTime = performance.now(); // Record start time
+        const endTime = performance.now(); // Record end time
         var totalTimeInMs = endTime - startTime;
         var generateTimeText = "";
         if (totalTimeInMs < 1000) {
             generateTimeText = " (Generated in " + totalTimeInMs.toFixed(0) + " ms)"
         }
         else {
-            generateTimeText = " (Generated in " + (totalTimeInMs/1000).toFixed(0) + " s)"
+            generateTimeText = " (Generated in " + (totalTimeInMs/1000).toFixed(2) + " s)"
         }
-        reportGeneratedInfo.text("Report at " + startGeneratedDateTime.toISOString() + generateTimeText)
+        
+        var cacheInfo = fromCache ? " [cached]" : "";
+        reportGeneratedInfo.text("Report at " + startGeneratedDateTime.toISOString() + generateTimeText + cacheInfo)
     }
 }
 

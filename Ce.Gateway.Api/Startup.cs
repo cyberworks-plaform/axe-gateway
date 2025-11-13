@@ -158,6 +158,10 @@ namespace Ce.Gateway.Api
             // Register consolidated dashboard service with integrated caching
             services.AddScoped<IDashboardService, DashboardService>();
 
+            // Register request report services with caching and aggregation
+            services.AddScoped<IRequestReportRepository, Repositories.RequestReportRepository>();
+            services.AddScoped<IRequestReportService, Services.RequestReportService>();
+            services.AddHostedService<Workers.RequestReportAggregationWorker>();
             // Register authentication and user management services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();

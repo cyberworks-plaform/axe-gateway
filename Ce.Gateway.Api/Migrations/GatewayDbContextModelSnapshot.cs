@@ -185,183 +185,209 @@ namespace Ce.Gateway.Api.Migrations
                     b.ToTable("OcrGatewayLogEntries");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+            modelBuilder.Entity("Ce.Gateway.Api.Entities.RequestReportAggregate", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<DateTime>("PeriodStart")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
+                    b.Property<string>("Granularity")
+                        .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex");
-
-                    b.ToTable("AspNetRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("StatusCategory")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("Count")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ClaimType")
+                    b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
+                    b.HasKey("PeriodStart", "Granularity", "StatusCategory");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.HasIndex("PeriodStart");
 
-                    b.HasKey("Id");
+                    b.HasIndex("PeriodStart", "Granularity");
 
-                    b.HasIndex("UserId");
+                    b.ToTable("RequestReportAggregates");
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                        {
+                            b.Property<string>("Id")
+                                .HasColumnType("TEXT");
 
-                    b.ToTable("AspNetUserClaims", (string)null);
-                });
+                            b.Property<string>("ConcurrencyStamp")
+                                .IsConcurrencyToken()
+                                .HasColumnType("TEXT");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("Name")
+                                .HasMaxLength(256)
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("NormalizedName")
+                                .HasMaxLength(256)
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("TEXT");
+                            b.HasKey("Id");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                            b.HasIndex("NormalizedName")
+                                .IsUnique()
+                                .HasDatabaseName("RoleNameIndex");
 
-                    b.HasKey("LoginProvider", "ProviderKey");
+                            b.ToTable("AspNetRoles", (string)null);
+                        });
 
-                    b.HasIndex("UserId");
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.ToTable("AspNetUserLogins", (string)null);
-                });
+                            b.Property<string>("ClaimType")
+                                .HasColumnType("TEXT");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("ClaimValue")
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("RoleId")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("RoleId")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.HasKey("UserId", "RoleId");
+                            b.HasKey("Id");
 
-                    b.HasIndex("RoleId");
+                            b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
-                });
+                            b.ToTable("AspNetRoleClaims", (string)null);
+                        });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                        {
+                            b.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
 
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("ClaimType")
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("ClaimValue")
+                                .HasColumnType("TEXT");
 
-                    b.Property<string>("Value")
-                        .HasColumnType("TEXT");
+                            b.Property<string>("UserId")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-                    b.HasKey("UserId", "LoginProvider", "Name");
+                            b.HasKey("Id");
 
-                    b.ToTable("AspNetUserTokens", (string)null);
-                });
+                            b.HasIndex("UserId");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                            b.ToTable("AspNetUserClaims", (string)null);
+                        });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
-                {
-                    b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                        {
+                            b.Property<string>("LoginProvider")
+                                .HasColumnType("TEXT");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                            b.Property<string>("ProviderKey")
+                                .HasColumnType("TEXT");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                            b.Property<string>("ProviderDisplayName")
+                                .HasColumnType("TEXT");
 
-                    b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                            b.Property<string>("UserId")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                            b.HasKey("LoginProvider", "ProviderKey");
+
+                            b.HasIndex("UserId");
+
+                            b.ToTable("AspNetUserLogins", (string)null);
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                        {
+                            b.Property<string>("UserId")
+                                .HasColumnType("TEXT");
+
+                            b.Property<string>("RoleId")
+                                .HasColumnType("TEXT");
+
+                            b.HasKey("UserId", "RoleId");
+
+                            b.HasIndex("RoleId");
+
+                            b.ToTable("AspNetUserRoles", (string)null);
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                        {
+                            b.Property<string>("UserId")
+                                .HasColumnType("TEXT");
+
+                            b.Property<string>("LoginProvider")
+                                .HasColumnType("TEXT");
+
+                            b.Property<string>("Name")
+                                .HasColumnType("TEXT");
+
+                            b.Property<string>("Value")
+                                .HasColumnType("TEXT");
+
+                            b.HasKey("UserId", "LoginProvider", "Name");
+
+                            b.ToTable("AspNetUserTokens", (string)null);
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                        {
+                            b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                                .WithMany()
+                                .HasForeignKey("RoleId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                        {
+                            b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                        {
+                            b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                        {
+                            b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                                .WithMany()
+                                .HasForeignKey("RoleId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+
+                            b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                        {
+                            b.HasOne("Ce.Gateway.Api.Entities.ApplicationUser", null)
+                                .WithMany()
+                                .HasForeignKey("UserId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
                 });
 #pragma warning restore 612, 618
         }

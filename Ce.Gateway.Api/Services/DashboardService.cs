@@ -68,6 +68,9 @@ namespace Ce.Gateway.Api.Services
                 var cacheKey = GetCacheKey("overview", startTime, endTime);
                 var cacheDuration = GetCacheDuration(startTime, endTime);
 
+
+                //Todo: Cần refactor code lấy dữ liệu từ bảng RequestReportAggregate để tăng tốc độ truy xuất dữ liệu
+
                 return await _cache.GetOrCreateAsync(cacheKey, async entry =>
                 {
                     entry.AbsoluteExpirationRelativeToNow = cacheDuration;
@@ -364,39 +367,35 @@ namespace Ce.Gateway.Api.Services
         private TimeSpan GetCacheDuration(DateTime startTime, DateTime endTime)
         {
             var duration = endTime - startTime;
+            var now = DateTime.UtcNow;
+            var timeSinceEnd = now - endTime;
 
-            // Adaptive cache duration based on time range
-            if (duration.TotalHours < 1)
+            // Real-time strategy: Use short cache for recent data
+            // Matching /requestreport cache strategy for consistency
+            if (duration.TotalHours <= 1 || timeSinceEnd.TotalMinutes <= 10)
             {
-                return TimeSpan.FromSeconds(30); // 30s for real-time data
-            }
-            else if (duration.TotalHours <= 1)
-            {
-                return TimeSpan.FromMinutes(2); // 2 minutes
-            }
-            else if (duration.TotalHours <= 3)
-            {
-                return TimeSpan.FromMinutes(5); // 5 minutes
-            }
-            else if (duration.TotalHours <= 12)
-            {
-                return TimeSpan.FromMinutes(10); // 10 minutes
+                // Real-time data (≤1h range or last 10 minutes): 30s cache
+                return TimeSpan.FromSeconds(30);
             }
             else if (duration.TotalDays <= 1)
             {
-                return TimeSpan.FromMinutes(30); // 30 minutes
+                // Recent data (≤1 day): 2 min cache
+                return TimeSpan.FromMinutes(2);
             }
             else if (duration.TotalDays <= 7)
             {
-                return TimeSpan.FromHours(6); // 6 hours
+                // Weekly data: 10 min cache
+                return TimeSpan.FromMinutes(10);
             }
             else if (duration.TotalDays <= 30)
             {
-                return TimeSpan.FromDays(1); // 1 day
+                // Monthly data: 30 min cache
+                return TimeSpan.FromMinutes(30);
             }
             else
             {
-                return TimeSpan.FromDays(7); // 7 days for historical data
+                // Historical data (>30 days): 6 hour cache
+                return TimeSpan.FromHours(6);
             }
         }
 
