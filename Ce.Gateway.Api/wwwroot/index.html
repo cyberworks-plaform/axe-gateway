@@ -1,98 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Gateway</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart API Gateway</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
+    
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #f4f6f9;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+        .gateway-wrapper {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
         }
-        .gateway-card {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        .gateway-box {
+            width: 100%;
+            max-width: 600px;
+        }
+        .gateway-logo {
             text-align: center;
-            max-width: 500px;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            font-weight: 300;
         }
-        .status-indicator {
-            width: 100px;
-            height: 100px;
+        .gateway-logo b {
+            font-weight: 600;
+        }
+        .status-card {
+            border-top: 3px solid #007bff;
+        }
+        .status-icon {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            margin: 0 auto 30px;
+            background-color: #28a745;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0 auto 20px;
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); }
         }
-        .status-indicator i {
-            font-size: 50px;
+        .status-icon i {
+            font-size: 40px;
             color: white;
         }
-        h1 {
-            color: #2d3748;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        .status-text {
-            color: #38ef7d;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 30px;
-        }
-        .btn-login {
+        .metric-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
             color: white;
-            padding: 15px 50px;
-            font-size: 18px;
-            border-radius: 50px;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
         }
-        .btn-login:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            color: white;
+        .metric-box.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
-        .info-text {
-            color: #718096;
-            margin-top: 20px;
-            font-size: 14px;
+        .metric-box.info {
+            background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+            height: 2rem;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
-<body>
-    <div class="gateway-card">
-        <div class="status-indicator">
-            <i class="fas fa-check"></i>
-        </div>
-        <h1>API Gateway</h1>
-        <p class="status-text">
-            <i class="fas fa-circle"></i> Running
-        </p>
-        <p class="info-text">
-            Gateway is operational and ready to handle requests.
-        </p>
-        <div class="mt-4">
-            <a href="/account/login" class="btn-login">
-                <i class="fas fa-sign-in-alt mr-2"></i>Login to Dashboard
-            </a>
+<body class="hold-transition">
+    <div class="gateway-wrapper">
+        <div class="gateway-box">
+            <div class="gateway-logo">
+                <b>Smart</b> API Gateway
+            </div>
+
+            <div class="card status-card">
+                <div class="card-body text-center">
+                    <div class="status-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    
+                    <h4 class="mb-3">
+                        <span class="badge badge-success">
+                            <i class="fas fa-circle fa-xs"></i> System Running
+                        </span>
+                    </h4>
+
+                    <p class="text-muted mb-4">
+                        Gateway is operational and ready to handle requests.
+                    </p>
+
+                    <!-- Metrics -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="metric-box success">
+                                <div class="metric-value" id="uptime">
+                                    <div class="loading-skeleton" style="width: 100px; margin: 0 auto;"></div>
+                                </div>
+                                <div class="metric-label">
+                                    <i class="far fa-clock"></i> Uptime
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="metric-box info">
+                                <div class="metric-value" id="activeRequests">
+                                    <div class="loading-skeleton" style="width: 60px; margin: 0 auto;"></div>
+                                </div>
+                                <div class="metric-label">
+                                    <i class="fas fa-tasks"></i> Active Requests
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="metric-box">
+                                <div class="metric-value" id="totalRequests">
+                                    <div class="loading-skeleton" style="width: 120px; margin: 0 auto;"></div>
+                                </div>
+                                <div class="metric-label">
+                                    <i class="fas fa-chart-line"></i> Total Requests Processed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-4">
+                        <a href="/dashboard" class="btn btn-primary btn-lg mr-2">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard & Management
+                        </a>
+                        <a href="/account/login" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                    </div>
+
+                    <!-- Last Updated -->
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-sync-alt"></i> Last updated: 
+                            <span id="lastUpdate">Loading...</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center text-muted">
+                <small>&copy; 2025 Smart API Gateway. All rights reserved.</small>
+            </div>
         </div>
     </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+
+    <script>
+        // Fetch and update system status
+        function updateStatus() {
+            fetch('/api/systemstatus')
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success && result.data) {
+                        const data = result.data;
+                        
+                        // Update metrics
+                        document.getElementById('uptime').textContent = data.uptime;
+                        document.getElementById('activeRequests').textContent = data.activeRequests.toLocaleString();
+                        document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();
+                        
+                        // Update timestamp
+                        const now = new Date();
+                        document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching status:', error);
+                    // Show fallback data
+                    document.getElementById('uptime').textContent = 'N/A';
+                    document.getElementById('activeRequests').textContent = '0';
+                    document.getElementById('totalRequests').textContent = '0';
+                });
+        }
+
+        // Initial update
+        updateStatus();
+
+        // Update every 5 seconds
+        setInterval(updateStatus, 5000);
+    </script>
 </body>
 </html>
