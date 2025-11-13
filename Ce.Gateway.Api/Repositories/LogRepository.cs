@@ -290,23 +290,34 @@ namespace Ce.Gateway.Api.Repositories
             string displayFormat;
             int maxDataPoints = 100;
 
+            // Improved granularity logic matching /requestreport
             if (duration.TotalHours <= 1)
             {
+                // Minute granularity for ≤1h (real-time monitoring)
                 sqlFormat = "%Y-%m-%d %H:%M:00";
                 displayFormat = "HH:mm";
                 maxDataPoints = 60;
             }
             else if (duration.TotalDays <= 1)
             {
+                // Hour granularity for ≤1 day
                 sqlFormat = "%Y-%m-%d %H:00:00";
                 displayFormat = "HH:00";
                 maxDataPoints = 24;
             }
-            else
+            else if (duration.TotalDays <= 30)
             {
+                // Day granularity for ≤30 days
                 sqlFormat = "%Y-%m-%d 00:00:00";
                 displayFormat = "yyyy-MM-dd";
                 maxDataPoints = Math.Min((int)duration.TotalDays + 1, 100);
+            }
+            else
+            {
+                // Month granularity for >30 days
+                sqlFormat = "%Y-%m-01 00:00:00";
+                displayFormat = "yyyy-MM";
+                maxDataPoints = Math.Min((int)(duration.TotalDays / 30) + 1, 100);
             }
 
             var sql = $@"
@@ -354,23 +365,34 @@ namespace Ce.Gateway.Api.Repositories
             string displayFormat;
             int maxDataPoints = 100;
 
+            // Improved granularity logic matching /requestreport
             if (duration.TotalHours <= 1)
             {
+                // Minute granularity for ≤1h (real-time monitoring)
                 sqlFormat = "%Y-%m-%d %H:%M:00";
                 displayFormat = "HH:mm";
                 maxDataPoints = 60;
             }
             else if (duration.TotalDays <= 1)
             {
+                // Hour granularity for ≤1 day
                 sqlFormat = "%Y-%m-%d %H:00:00";
                 displayFormat = "HH:00";
                 maxDataPoints = 24;
             }
-            else
+            else if (duration.TotalDays <= 30)
             {
+                // Day granularity for ≤30 days
                 sqlFormat = "%Y-%m-%d 00:00:00";
                 displayFormat = "yyyy-MM-dd";
                 maxDataPoints = Math.Min((int)duration.TotalDays + 1, 100);
+            }
+            else
+            {
+                // Month granularity for >30 days
+                sqlFormat = "%Y-%m-01 00:00:00";
+                displayFormat = "yyyy-MM";
+                maxDataPoints = Math.Min((int)(duration.TotalDays / 30) + 1, 100);
             }
 
             var sql = $@"
