@@ -1,0 +1,105 @@
+@model Ce.Gateway.Api.Entities.ApplicationUser
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">My Profile</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">My Profile</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Profile Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 200px;">Username:</th>
+                                    <td>@Model.UserName</td>
+                                </tr>
+                                <tr>
+                                    <th>Full Name:</th>
+                                    <td>@Model.FullName</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>@Model.Email</td>
+                                </tr>
+                                <tr>
+                                    <th>Role:</th>
+                                    <td>
+                                        <span class="badge badge-primary">@ViewBag.Role</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        @if (Model.IsActive)
+                                        {
+                                            <span class="badge badge-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">Inactive</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Created At:</th>
+                                    <td>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Login:</th>
+                                    <td>
+                                        @if (Model.LastLoginAt.HasValue)
+                                        {
+                                            @Model.LastLoginAt.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Never</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <a href="/account/changepassword" class="btn btn-primary">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -3,6 +3,7 @@ using Ce.Gateway.Api.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Controllers.Pages
@@ -11,13 +12,16 @@ namespace Ce.Gateway.Api.Controllers.Pages
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            ILogger<AccountController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -81,6 +85,75 @@ namespace Ce.Gateway.Api.Controllers.Pages
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        /// <summary>
+        /// Display current user profile
+        /// </summary>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found when accessing profile");
+                return RedirectToAction(nameof(Login));
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            ViewBag.Role = roles.Count > 0 ? roles[0] : "Unknown";
+            
+            return View(user);
+        }
+
+        /// <summary>
+        /// Display change password form
+        /// </summary>
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Change password for current user
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordCurrentUserRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found when changing password");
+                return RedirectToAction(nameof(Login));
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User {Username} changed password successfully", user.UserName);
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["SuccessMessage"] = "Password changed successfully";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            _logger.LogWarning("Failed to change password for user {Username}", user.UserName);
+            return View(model);
         }
 
         private IActionResult RedirectToLocal(string returnUrl)

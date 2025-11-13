@@ -155,6 +155,10 @@ namespace Ce.Gateway.Api
             // Register consolidated dashboard service with integrated caching
             services.AddScoped<IDashboardService, DashboardService>();
 
+            // Register authentication and user management services
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
+
             services.AddSingleton<IDownstreamHealthStore, DownstreamHealthStore>();
 
             #region đăng ký DownstreamHealthMonitorService để dùng cho cả IHostedService và IDownstreamHealthMonitorService

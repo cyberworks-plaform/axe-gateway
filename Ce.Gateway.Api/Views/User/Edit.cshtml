@@ -64,7 +64,7 @@
 
                             <div class="form-group">
                                 <div class="custom-control custom-switch">
-                                    <input asp-for="IsActive" type="checkbox" class="custom-control-input" id="isActiveSwitch">
+                                    <input type="checkbox" class="custom-control-input" id="isActiveSwitch" checked="@(Model.IsActive ?? true)">
                                     <label class="custom-control-label" for="isActiveSwitch">Active</label>
                                 </div>
                             </div>
