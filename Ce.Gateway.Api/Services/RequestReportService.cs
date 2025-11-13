@@ -83,10 +83,14 @@ namespace Ce.Gateway.Api.Services
 
                 // Decide whether to use aggregates or raw query
                 // Use aggregates only if:
-                // 1. Granularity is Day or Month (not Hour)
+                // 1. Granularity is Day or Month (Hour aggregates can be used, but not Minute)
                 // 2. No additional filters are applied (filter is empty)
-                bool useAggregates = (granularity == Granularity.Day || granularity == Granularity.Month) 
-                    && filter.IsEmpty();
+                // 3. Data is not too recent (to avoid stale aggregates for real-time data)
+                
+                var isRecentData = (DateTime.UtcNow - to).TotalMinutes < 10; // Last 10 minutes is "recent"
+                bool useAggregates = (granularity == Granularity.Day || granularity == Granularity.Month || granularity == Granularity.Hour) 
+                    && filter.IsEmpty()
+                    && !isRecentData; // Don't use aggregates for very recent data
 
                 if (useAggregates)
                 {
@@ -95,8 +99,8 @@ namespace Ce.Gateway.Api.Services
                 }
                 else
                 {
-                    _logger.LogDebug("Using raw query (granularity: {Granularity}, hasFilters: {HasFilters})", 
-                        granularity, !filter.IsEmpty());
+                    _logger.LogDebug("Using raw query (granularity: {Granularity}, hasFilters: {HasFilters}, isRecent: {IsRecent})", 
+                        granularity, !filter.IsEmpty(), isRecentData);
                     result = await _repository.GetRawCountsAsync(from, to, granularity, filter);
                 }
 
@@ -171,6 +175,13 @@ namespace Ce.Gateway.Api.Services
         private TimeSpan CalculateCacheTtl(DateTime from, DateTime to)
         {
             var duration = to - from;
+            var timeSinceEnd = DateTime.UtcNow - to;
+            
+            // For very recent data (real-time, last 10 minutes), use very short TTL
+            if (timeSinceEnd.TotalMinutes < 10 || duration.TotalHours <= 1)
+            {
+                return TimeSpan.FromSeconds(30); // 30 seconds for real-time data
+            }
             
             // For short time ranges (< 1 day), use shorter TTL
             if (duration.TotalDays < 1)

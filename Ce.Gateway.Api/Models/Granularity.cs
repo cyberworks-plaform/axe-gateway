@@ -5,6 +5,7 @@ namespace Ce.Gateway.Api.Models
     /// </summary>
     public enum Granularity
     {
+        Minute,
         Hour,
         Day,
         Month

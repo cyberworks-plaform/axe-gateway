@@ -39,7 +39,7 @@ namespace Ce.Gateway.Api.Workers
 
             // Load configuration
             _intervalMinutes = _configuration.GetValue("RequestReport:AggregationIntervalMinutes", 5);
-            _lookbackDays = _configuration.GetValue("RequestReport:AggregationLookbackDays", 90);
+            _lookbackDays = _configuration.GetValue("RequestReport:AggregationLookbackDays", 30); // Reduced from 90 to 30 for faster aggregation
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -104,14 +104,33 @@ namespace Ce.Gateway.Api.Workers
                     var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<GatewayDbContext>>();
 
                     var startTime = DateTime.UtcNow;
-                    var lookbackDate = DateTime.UtcNow.AddDays(-_lookbackDays).Date;
+                    var now = DateTime.UtcNow;
+                    
+                    // For hour aggregation, only look back 7 days (more recent, more frequent updates)
+                    var hourLookbackDate = now.AddDays(-7).Date;
+                    
+                    // For day aggregation, look back configured days
+                    var dayLookbackDate = now.AddDays(-_lookbackDays).Date;
+                    
+                    // For month aggregation, look back 12 months
+                    var monthLookbackDate = now.AddMonths(-12);
+                    monthLookbackDate = new DateTime(monthLookbackDate.Year, monthLookbackDate.Month, 1);
+
+                    // Aggregate by hour (for recent data, real-time requirements)
+                    await AggregateByGranularityAsync(
+                        dbContextFactory, 
+                        repository, 
+                        reportService,
+                        hourLookbackDate, 
+                        Granularity.Hour, 
+                        cancellationToken);
 
                     // Aggregate by day
                     await AggregateByGranularityAsync(
                         dbContextFactory, 
                         repository, 
                         reportService,
-                        lookbackDate, 
+                        dayLookbackDate, 
                         Granularity.Day, 
                         cancellationToken);
 
@@ -120,7 +139,7 @@ namespace Ce.Gateway.Api.Workers
                         dbContextFactory, 
                         repository, 
                         reportService,
-                        lookbackDate, 
+                        monthLookbackDate, 
                         Granularity.Month, 
                         cancellationToken);
 
@@ -231,6 +250,7 @@ namespace Ce.Gateway.Api.Workers
             // Normalize current based on granularity
             current = granularity switch
             {
+                Granularity.Hour => new DateTime(current.Year, current.Month, current.Day, current.Hour, 0, 0),
                 Granularity.Day => current.Date,
                 Granularity.Month => new DateTime(current.Year, current.Month, 1),
                 _ => current.Date
@@ -242,6 +262,7 @@ namespace Ce.Gateway.Api.Workers
                 
                 current = granularity switch
                 {
+                    Granularity.Hour => current.AddHours(1),
                     Granularity.Day => current.AddDays(1),
                     Granularity.Month => current.AddMonths(1),
                     _ => current.AddDays(1)
@@ -255,6 +276,7 @@ namespace Ce.Gateway.Api.Workers
         {
             return granularity switch
             {
+                Granularity.Hour => periodStart.AddHours(1),
                 Granularity.Day => periodStart.AddDays(1),
                 Granularity.Month => periodStart.AddMonths(1),
                 _ => periodStart.AddDays(1)

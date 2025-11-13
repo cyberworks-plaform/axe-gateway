@@ -261,6 +261,7 @@ namespace Ce.Gateway.Api.Repositories
         {
             return granularity switch
             {
+                Granularity.Minute => new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, 0),
                 Granularity.Hour => new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0),
                 Granularity.Day => date.Date,
                 Granularity.Month => new DateTime(date.Year, date.Month, 1),
@@ -272,6 +273,7 @@ namespace Ce.Gateway.Api.Repositories
         {
             return granularity switch
             {
+                Granularity.Minute => date.AddMinutes(1),
                 Granularity.Hour => date.AddHours(1),
                 Granularity.Day => date.AddDays(1),
                 Granularity.Month => date.AddMonths(1),
@@ -283,6 +285,7 @@ namespace Ce.Gateway.Api.Repositories
         {
             return granularity switch
             {
+                Granularity.Minute => date.ToString("HH:mm"),
                 Granularity.Hour => date.ToString("HH:00"),
                 Granularity.Day => date.ToString("MM/dd"),
                 Granularity.Month => date.ToString("MMM yyyy"),
@@ -294,6 +297,7 @@ namespace Ce.Gateway.Api.Repositories
         {
             return granularity switch
             {
+                Granularity.Minute => "HH:mm",
                 Granularity.Hour => "HH:00",
                 Granularity.Day => "yyyy-MM-dd",
                 Granularity.Month => "yyyy-MM",
@@ -305,6 +309,7 @@ namespace Ce.Gateway.Api.Repositories
         {
             return granularity switch
             {
+                Granularity.Minute => "%Y-%m-%d %H:%M:00",
                 Granularity.Hour => "%Y-%m-%d %H:00:00",
                 Granularity.Day => "%Y-%m-%d 00:00:00",
                 Granularity.Month => "%Y-%m-01 00:00:00",
