@@ -10,7 +10,7 @@ namespace Ce.Gateway.Api.Services.Interface
         Task<UserDto> GetUserByIdAsync(string id);
         Task<UserDto> CreateUserAsync(CreateUserRequest request, string createdBy);
         Task<UserDto> UpdateUserAsync(string id, UpdateUserRequest request, string updatedBy);
-        Task<bool> DeleteUserAsync(string id, string deletedBy);
+        Task<bool> DeleteUserAsync(string id, string deletedBy, string currentUserId = null);
         Task<bool> CanDeleteUserAsync(string id, string currentUserId);
         Task<int> GetActiveUserCountAsync();
         Task<bool> IsRootAdminAsync(string userId);

@@ -226,7 +226,7 @@ namespace Ce.Gateway.Api.Tests.Services
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _userService.DeleteUserAsync("admin-id", "someuser"));
+                () => _userService.DeleteUserAsync("admin-id", "someuser", "someuser-id"));
 
             Assert.Contains("Cannot delete root administrator account", exception.Message);
         }
@@ -252,9 +252,26 @@ namespace Ce.Gateway.Api.Tests.Services
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _userService.DeleteUserAsync("admin-id", "someuser"));
+                () => _userService.DeleteUserAsync("admin-id", "someuser", "someuser-id"));
 
             Assert.Contains("Cannot delete the last active administrator", exception.Message);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_WithSelfDelete_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var user = IdentityTestHelper.CreateTestUser("user-id", "testuser", "test@example.com");
+
+            _mockUserManager
+                .Setup(um => um.FindByIdAsync("user-id"))
+                .ReturnsAsync(user);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _userService.DeleteUserAsync("user-id", "admin", "user-id"));
+
+            Assert.Contains("Cannot delete your own account", exception.Message);
         }
 
         [Fact]
@@ -276,7 +293,7 @@ namespace Ce.Gateway.Api.Tests.Services
                 .ReturnsAsync(IdentityResult.Success);
 
             // Act
-            var result = await _userService.DeleteUserAsync("user-id", "admin");
+            var result = await _userService.DeleteUserAsync("user-id", "admin", "admin-id");
 
             // Assert
             Assert.True(result);

@@ -59,10 +59,23 @@ namespace Ce.Gateway.Api.Services
             if (!user.IsActive)
             {
                 _logger.LogWarning("Login failed: User is inactive - {Username}", request.Username);
-                throw new InvalidOperationException("User account is inactive");
+                throw new InvalidOperationException("Your account has been disabled. Please contact administrator.");
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+            
+            if (result.IsLockedOut)
+            {
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                var remainingMinutes = lockoutEnd.HasValue 
+                    ? Math.Ceiling((lockoutEnd.Value - DateTimeOffset.Now).TotalMinutes) 
+                    : 5;
+                
+                _logger.LogWarning("Login failed: User is locked out - {Username}", request.Username);
+                throw new InvalidOperationException(
+                    $"Account locked due to multiple failed login attempts. Try again in {remainingMinutes} minutes.");
+            }
+
             if (!result.Succeeded)
             {
                 _logger.LogWarning("Login failed: Invalid password - {Username}", request.Username);

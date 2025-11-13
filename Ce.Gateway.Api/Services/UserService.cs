@@ -270,10 +270,11 @@ namespace Ce.Gateway.Api.Services
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <param name="deletedBy">Username of deleter</param>
+        /// <param name="currentUserId">Current user's ID to prevent self-deletion</param>
         /// <returns>True if deletion succeeded</returns>
         /// <exception cref="KeyNotFoundException">Thrown when user is not found</exception>
         /// <exception cref="InvalidOperationException">Thrown when business rules prevent deletion</exception>
-        public async Task<bool> DeleteUserAsync(string id, string deletedBy)
+        public async Task<bool> DeleteUserAsync(string id, string deletedBy, string currentUserId = null)
         {
             _logger.LogInformation("Deleting user: {UserId} by {DeletedBy}", id, deletedBy);
 
@@ -281,6 +282,12 @@ namespace Ce.Gateway.Api.Services
             if (user == null)
             {
                 throw new KeyNotFoundException($"User with ID {id} not found");
+            }
+
+            if (!string.IsNullOrEmpty(currentUserId) && id == currentUserId)
+            {
+                _logger.LogWarning("User {UserId} attempted to delete themselves", id);
+                throw new InvalidOperationException("Cannot delete your own account");
             }
 
             if (await IsRootAdminAsync(id))
@@ -307,6 +314,7 @@ namespace Ce.Gateway.Api.Services
 
                 if (adminCount <= 1)
                 {
+                    _logger.LogWarning("Cannot delete last active administrator: {UserId}", id);
                     throw new InvalidOperationException("Cannot delete the last active administrator");
                 }
             }

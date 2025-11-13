@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Controllers.Pages
@@ -42,9 +43,16 @@ namespace Ce.Gateway.Api.Controllers.Pages
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByNameAsync(model.Username);
-                if (user == null || !user.IsActive)
+                if (user == null)
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                    return View(model);
+                }
+
+                if (!user.IsActive)
+                {
+                    _logger.LogWarning("Inactive user login attempt: {Username}", model.Username);
+                    ModelState.AddModelError(string.Empty, "Your account has been disabled. Please contact administrator.");
                     return View(model);
                 }
 
@@ -56,16 +64,24 @@ namespace Ce.Gateway.Api.Controllers.Pages
                     user.LastLoginAt = System.DateTime.UtcNow;
                     await _userManager.UpdateAsync(user);
 
+                    _logger.LogInformation("User logged in successfully: {Username}", model.Username);
                     return RedirectToLocal(returnUrl);
                 }
                 if (result.IsLockedOut)
                 {
-                    ModelState.AddModelError(string.Empty, "Account locked due to multiple failed login attempts.");
+                    var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                    var remainingMinutes = lockoutEnd.HasValue 
+                        ? Math.Ceiling((lockoutEnd.Value - System.DateTimeOffset.Now).TotalMinutes) 
+                        : 5;
+                    
+                    _logger.LogWarning("Locked out user login attempt: {Username}", model.Username);
+                    ModelState.AddModelError(string.Empty, 
+                        $"Account locked due to multiple failed login attempts. Try again in {remainingMinutes} minutes.");
                     return View(model);
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
                     return View(model);
                 }
             }

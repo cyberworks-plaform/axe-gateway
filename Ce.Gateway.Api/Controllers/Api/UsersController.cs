@@ -212,7 +212,7 @@ namespace Ce.Gateway.Api.Controllers.Api
                     return StatusCode(403, ApiResponse<object>.ErrorResult("Cannot delete user", "You cannot delete yourself or the root administrator"));
                 }
 
-                var result = await _userService.DeleteUserAsync(id, currentUserId);
+                var result = await _userService.DeleteUserAsync(id, currentUserId, currentUserId);
 
                 if (!result)
                 {

@@ -184,21 +184,63 @@ namespace Ce.Gateway.Api.Controllers.Pages
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
+            try
             {
-                return NotFound();
-            }
+                var currentUser = await _userManager.GetUserAsync(User);
+                var user = await _userManager.FindByIdAsync(id);
+                
+                if (user == null)
+                {
+                    TempData["Error"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            var result = await _userManager.DeleteAsync(user);
+                // Check if trying to delete self
+                if (currentUser != null && id == currentUser.Id)
+                {
+                    TempData["Error"] = "Cannot delete your own account.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            if (result.Succeeded)
-            {
-                TempData["Success"] = "User deleted successfully.";
+                // Check if trying to delete last admin
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains(Roles.Administrator))
+                {
+                    var activeAdmins = await _userManager.Users
+                        .Where(u => u.IsActive)
+                        .ToListAsync();
+
+                    var adminCount = 0;
+                    foreach (var u in activeAdmins)
+                    {
+                        var userRoles = await _userManager.GetRolesAsync(u);
+                        if (userRoles.Contains(Roles.Administrator))
+                        {
+                            adminCount++;
+                        }
+                    }
+
+                    if (adminCount <= 1)
+                    {
+                        TempData["Error"] = "Cannot delete the last active administrator.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                var result = await _userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
+                {
+                    TempData["Success"] = "User deleted successfully.";
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to delete user: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                TempData["Error"] = "Failed to delete user.";
+                TempData["Error"] = "Error deleting user: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Index));

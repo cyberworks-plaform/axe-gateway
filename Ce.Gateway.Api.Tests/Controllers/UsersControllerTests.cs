@@ -241,7 +241,7 @@ namespace Ce.Gateway.Api.Tests.Controllers
             SetupUserContext("admin-id", Roles.Administrator);
 
             _mockUserService
-                .Setup(s => s.DeleteUserAsync("root-admin-id", "admin-id"))
+                .Setup(s => s.DeleteUserAsync("root-admin-id", "admin-id", "admin-id"))
                 .ThrowsAsync(new InvalidOperationException("Cannot delete root administrator"));
 
             // Act
@@ -260,7 +260,7 @@ namespace Ce.Gateway.Api.Tests.Controllers
             SetupUserContext("admin-id", Roles.Administrator);
 
             _mockUserService
-                .Setup(s => s.DeleteUserAsync("last-admin-id", "admin-id"))
+                .Setup(s => s.DeleteUserAsync("last-admin-id", "admin-id", "admin-id"))
                 .ThrowsAsync(new InvalidOperationException("Cannot delete the last administrator"));
 
             // Act
@@ -279,7 +279,7 @@ namespace Ce.Gateway.Api.Tests.Controllers
             SetupUserContext("admin-id", Roles.Administrator);
 
             _mockUserService
-                .Setup(s => s.DeleteUserAsync("user-123", "admin-id"))
+                .Setup(s => s.DeleteUserAsync("user-123", "admin-id", "admin-id"))
                 .ReturnsAsync(true);
 
             // Act

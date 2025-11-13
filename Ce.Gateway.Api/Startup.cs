@@ -118,9 +118,12 @@ namespace Ce.Gateway.Api
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
 
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
+                // Lockout settings - READ FROM CONFIG
+                var lockoutMinutes = Configuration.GetValue<int>("Identity:Lockout:LockoutDurationMinutes", 5);
+                var maxAttempts = Configuration.GetValue<int>("Identity:Lockout:MaxFailedAccessAttempts", 5);
+                
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(lockoutMinutes);
+                options.Lockout.MaxFailedAccessAttempts = maxAttempts;
                 options.Lockout.AllowedForNewUsers = true;
 
                 // User settings

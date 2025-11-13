@@ -60,7 +60,7 @@ namespace Ce.Gateway.Api.Tests.Services
                 .ReturnsAsync(user);
 
             _mockSignInManager
-                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, false))
+                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, true))
                 .ReturnsAsync(SignInResult.Success);
 
             _mockUserManager
@@ -122,7 +122,7 @@ namespace Ce.Gateway.Api.Tests.Services
                 .ReturnsAsync(user);
 
             _mockSignInManager
-                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, false))
+                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, true))
                 .ReturnsAsync(SignInResult.Failed);
 
             // Act & Assert
@@ -151,7 +151,40 @@ namespace Ce.Gateway.Api.Tests.Services
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _authService.LoginAsync(request));
 
-            Assert.Equal("User account is inactive", exception.Message);
+            Assert.Equal("Your account has been disabled. Please contact administrator.", exception.Message);
+        }
+
+        [Fact]
+        public async Task LoginAsync_WithLockedOutUser_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var user = IdentityTestHelper.CreateTestUser("user-id", "testuser", "test@example.com", "Test User", true);
+            var request = new LoginRequest
+            {
+                Username = "testuser",
+                Password = "WrongPassword"
+            };
+            
+            var lockoutEnd = DateTimeOffset.UtcNow.AddMinutes(5);
+
+            _mockUserManager
+                .Setup(um => um.FindByNameAsync(request.Username))
+                .ReturnsAsync(user);
+
+            _mockSignInManager
+                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, true))
+                .ReturnsAsync(SignInResult.LockedOut);
+
+            _mockUserManager
+                .Setup(um => um.GetLockoutEndDateAsync(user))
+                .ReturnsAsync(lockoutEnd);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _authService.LoginAsync(request));
+
+            Assert.Contains("Account locked due to multiple failed login attempts", exception.Message);
+            Assert.Contains("minutes", exception.Message);
         }
 
         [Fact]
@@ -172,7 +205,7 @@ namespace Ce.Gateway.Api.Tests.Services
                 .ReturnsAsync(user);
 
             _mockSignInManager
-                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, false))
+                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, true))
                 .ReturnsAsync(SignInResult.Success);
 
             _mockUserManager
@@ -327,7 +360,7 @@ namespace Ce.Gateway.Api.Tests.Services
                 .ReturnsAsync(user);
 
             _mockSignInManager
-                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, false))
+                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, true))
                 .ReturnsAsync(SignInResult.Success);
 
             _mockUserManager
@@ -361,7 +394,7 @@ namespace Ce.Gateway.Api.Tests.Services
                 .ReturnsAsync(user);
 
             _mockSignInManager
-                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, false))
+                .Setup(sm => sm.CheckPasswordSignInAsync(user, request.Password, true))
                 .ReturnsAsync(SignInResult.Success);
 
             _mockUserManager
