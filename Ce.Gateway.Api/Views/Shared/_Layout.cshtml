@@ -1,3 +1,4 @@
+@using Ce.Gateway.Api.Models.Auth
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,7 +86,7 @@
                         </div>
                         <div class="info">
                             <a href="#" class="d-block">@User.Identity.Name</a>
-                            <small class="d-block text-muted">@(User.IsInRole("Administrator") ? "Administrator" : User.IsInRole("Management") ? "Management" : "Monitor")</small>
+                            <small class="d-block text-muted">@(User.IsInRole(Roles.Administrator) ? "Administrator" : User.IsInRole(Roles.Management) ? "Management" : "Monitor")</small>
                         </div>
                     </div>
                 }
@@ -124,10 +125,10 @@
                             </a>
                         </li>
 
-                        @if (User.IsInRole("Administrator") || User.IsInRole("Management"))
+                        @if (User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Management))
                         {
                             <li class="nav-header">SYSTEM MANAGEMENT</li>
-                            @if (User.IsInRole("Administrator") || User.IsInRole("Management"))
+                            @if (User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Management))
                             {
                                 <li class="nav-item">
                                     <a href="/user" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">

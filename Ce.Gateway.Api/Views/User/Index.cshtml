@@ -1,3 +1,4 @@
+@using Ce.Gateway.Api.Models.Auth
 @model IEnumerable<Ce.Gateway.Api.Models.Auth.UserDto>
 @{
     ViewData["Title"] = "User Management";
@@ -41,7 +42,7 @@
             <div class="card-header">
                 <h3 class="card-title">All Users</h3>
                 <div class="card-tools">
-                    @if (User.IsInRole("Administrator"))
+                    @if (User.IsInRole(Roles.Administrator))
                     {
                         <a asp-action="Create" class="btn btn-primary btn-sm">
                             <i class="fas fa-plus"></i> Add User
@@ -71,11 +72,11 @@
                                 <td>@user.FullName</td>
                                 <td>@user.Email</td>
                                 <td>
-                                    @if (user.Role == "Administrator")
+                                    @if (user.Role == Roles.Administrator)
                                     {
                                         <span class="badge badge-danger">@user.Role</span>
                                     }
-                                    else if (user.Role == "Management")
+                                    else if (user.Role == Roles.Management)
                                     {
                                         <span class="badge badge-warning">@user.Role</span>
                                     }
@@ -108,7 +109,7 @@
                                 <td>@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                                 <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</td>
                                 <td>
-                                    @if (User.IsInRole("Administrator"))
+                                    @if (User.IsInRole(Roles.Administrator))
                                     {
                                         <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-info" title="Edit">
                                             <i class="fas fa-edit"></i>

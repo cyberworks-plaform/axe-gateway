@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Controllers.Pages
 {
-    [Authorize(Roles = "Administrator,Management")]
+    [Authorize(Roles = Roles.Administrator + "," + Roles.Management)]
     public class UserController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -58,7 +58,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         public async Task<IActionResult> Create()
         {
             ViewBag.Roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
@@ -66,7 +66,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserRequest model)
         {
@@ -105,7 +105,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         public async Task<IActionResult> Edit(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -131,7 +131,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, UpdateUserRequest model)
         {
@@ -185,7 +185,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Unlock(string id)
         {
@@ -212,7 +212,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
