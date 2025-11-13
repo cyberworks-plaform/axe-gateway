@@ -361,3 +361,5 @@ Ce.Gateway.Api/logs/
 
 # All log text files
 **/*log*.txt
+/Ce.Gateway.Api/Data/gateway.development.db-shm
+/Ce.Gateway.Api/Data/gateway.development.db-wal

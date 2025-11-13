@@ -6,7 +6,16 @@ namespace Ce.Gateway.Api.Services.Interface
 {
     public interface IUserService
     {
+        /// <summary>
+        /// Get paginated list of users with optimized query (no N+1)
+        /// </summary>
         Task<PaginatedResult<UserDto>> GetUsersAsync(int page, int pageSize);
+        
+        /// <summary>
+        /// Get all users without pagination - optimized for display (no N+1)
+        /// </summary>
+        Task<System.Collections.Generic.List<UserDto>> GetAllUsersAsync();
+        
         Task<UserDto> GetUserByIdAsync(string id);
         Task<UserDto> CreateUserAsync(CreateUserRequest request, string createdBy);
         Task<UserDto> UpdateUserAsync(string id, UpdateUserRequest request, string updatedBy);

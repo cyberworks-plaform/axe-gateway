@@ -20,58 +20,99 @@ namespace Ce.Gateway.Api.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserService> _logger;
+        private readonly Data.GatewayDbContext _context;
 
         public UserService(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ILogger<UserService> logger)
+            ILogger<UserService> logger,
+            Data.GatewayDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _context = context;
         }
 
         /// <summary>
-        /// Get paginated list of users with their roles
+        /// Get all users without pagination - OPTIMIZED (no N+1 query problem)
+        /// Uses single query with JOIN to fetch users and their roles
+        /// </summary>
+        /// <returns>List of all users with complete information</returns>
+        public async Task<List<UserDto>> GetAllUsersAsync()
+        {
+            // OPTIMIZED: Single query with JOIN to eliminate N+1 problem
+            var userDtos = await _context.Users
+                .OrderByDescending(u => u.CreatedAt)
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Username = u.UserName,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    // LEFT JOIN to UserRoles and Roles tables in single query
+                    Role = _context.UserRoles
+                        .Where(ur => ur.UserId == u.Id)
+                        .Join(_context.Roles,
+                              ur => ur.RoleId,
+                              r => r.Id,
+                              (ur, r) => r.Name)
+                        .FirstOrDefault() ?? Roles.Monitor,
+                    IsActive = u.IsActive,
+                    CreatedAt = u.CreatedAt,
+                    LastLoginAt = u.LastLoginAt,
+                    // Calculate lockout status in SQL
+                    IsLockedOut = u.LockoutEnd.HasValue && u.LockoutEnd > DateTimeOffset.UtcNow,
+                    LockoutEnd = u.LockoutEnd
+                })
+                .ToListAsync();
+
+            _logger.LogInformation("Retrieved {Count} users with optimized query", userDtos.Count);
+            return userDtos;
+        }
+
+        /// <summary>
+        /// Get paginated list of users with their roles - OPTIMIZED (no N+1 query problem)
+        /// Uses single query with JOIN for better performance
         /// </summary>
         /// <param name="page">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>Paginated result of users</returns>
         public async Task<PaginatedResult<UserDto>> GetUsersAsync(int page, int pageSize)
         {
-            var query = _userManager.Users.AsQueryable();
-
-            var totalCount = await query.CountAsync();
+            // OPTIMIZED: Get total count
+            var totalCount = await _context.Users.CountAsync();
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            var users = await query
-                .OrderBy(u => u.UserName)
+            // OPTIMIZED: Single query with JOIN to fetch users and roles
+            var userDtos = await _context.Users
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Username = u.UserName,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    // JOIN to get role in same query
+                    Role = _context.UserRoles
+                        .Where(ur => ur.UserId == u.Id)
+                        .Join(_context.Roles,
+                              ur => ur.RoleId,
+                              r => r.Id,
+                              (ur, r) => r.Name)
+                        .FirstOrDefault() ?? Roles.Monitor,
+                    IsActive = u.IsActive,
+                    CreatedAt = u.CreatedAt,
+                    LastLoginAt = u.LastLoginAt,
+                    // Calculate lockout in SQL
+                    IsLockedOut = u.LockoutEnd.HasValue && u.LockoutEnd > DateTimeOffset.UtcNow,
+                    LockoutEnd = u.LockoutEnd
+                })
                 .ToListAsync();
 
-            var userDtos = new List<UserDto>();
-            foreach (var user in users)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                var role = roles.FirstOrDefault() ?? Roles.Monitor;
-                var isLockedOut = await _userManager.IsLockedOutAsync(user);
-                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
-
-                userDtos.Add(new UserDto
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Role = role,
-                    IsActive = user.IsActive,
-                    CreatedAt = user.CreatedAt,
-                    LastLoginAt = user.LastLoginAt,
-                    IsLockedOut = isLockedOut,
-                    LockoutEnd = lockoutEnd
-                });
-            }
+            _logger.LogInformation("Retrieved page {Page} of users ({Count} items)", page, userDtos.Count);
 
             return new PaginatedResult<UserDto>
             {

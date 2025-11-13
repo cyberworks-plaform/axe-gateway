@@ -15,45 +15,27 @@ namespace Ce.Gateway.Api.Controllers.Pages
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly Services.Interface.IUserService _userService;
 
         public UserController(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            Services.Interface.IUserService userService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _userService = userService;
         }
 
+        /// <summary>
+        /// Display list of all users
+        /// Business logic is delegated to UserService layer
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var users = await _userManager.Users
-                .OrderByDescending(u => u.CreatedAt)
-                .ToListAsync();
-
-            var userViewModels = new System.Collections.Generic.List<UserDto>();
-
-            foreach (var user in users)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                var isLockedOut = await _userManager.IsLockedOutAsync(user);
-                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
-                
-                userViewModels.Add(new UserDto
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Role = roles.FirstOrDefault(),
-                    IsActive = user.IsActive,
-                    CreatedAt = user.CreatedAt,
-                    LastLoginAt = user.LastLoginAt,
-                    IsLockedOut = isLockedOut,
-                    LockoutEnd = lockoutEnd
-                });
-            }
-
+            // Delegate to service layer - proper separation of concerns
+            var userViewModels = await _userService.GetAllUsersAsync();
             return View(userViewModels);
         }
 
