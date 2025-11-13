@@ -68,6 +68,9 @@ namespace Ce.Gateway.Api.Services
                 var cacheKey = GetCacheKey("overview", startTime, endTime);
                 var cacheDuration = GetCacheDuration(startTime, endTime);
 
+
+                //Todo: Cần refactor code lấy dữ liệu từ bảng RequestReportAggregate để tăng tốc độ truy xuất dữ liệu
+
                 return await _cache.GetOrCreateAsync(cacheKey, async entry =>
                 {
                     entry.AbsoluteExpirationRelativeToNow = cacheDuration;
