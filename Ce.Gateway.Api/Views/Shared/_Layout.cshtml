@@ -1,3 +1,4 @@
+@using Ce.Gateway.Api.Models.Auth
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,8 +47,11 @@
                         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                             <span class="dropdown-item dropdown-header">@User.Identity.Name</span>
                             <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item">
-                                <i class="fas fa-user mr-2"></i> Profile
+                            <a href="/account/profile" class="dropdown-item">
+                                <i class="fas fa-user mr-2"></i> My Profile
+                            </a>
+                            <a href="/account/changepassword" class="dropdown-item">
+                                <i class="fas fa-key mr-2"></i> Change Password
                             </a>
                             <div class="dropdown-divider"></div>
                             <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item p-0">
@@ -82,7 +86,7 @@
                         </div>
                         <div class="info">
                             <a href="#" class="d-block">@User.Identity.Name</a>
-                            <small class="d-block text-muted">@(User.IsInRole("Administrator") ? "Administrator" : User.IsInRole("Management") ? "Management" : "Monitor")</small>
+                            <small class="d-block text-muted">@(User.IsInRole(Roles.Administrator) ? "Administrator" : User.IsInRole(Roles.Management) ? "Management" : "Monitor")</small>
                         </div>
                     </div>
                 }
@@ -121,15 +125,15 @@
                             </a>
                         </li>
 
-                        @if (User.IsInRole("Administrator") || User.IsInRole("Management"))
+                        @if (User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Management))
                         {
-                            <li class="nav-header">QUẢN TRỊ HỆ THỐNG</li>
-                            @if (User.IsInRole("Administrator"))
+                            <li class="nav-header">SYSTEM MANAGEMENT</li>
+                            @if (User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Management))
                             {
                                 <li class="nav-item">
                                     <a href="/user" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
                                         <i class="nav-icon fas fa-users"></i>
-                                        <p>Quản lý User</p>
+                                        <p>User Management</p>
                                     </a>
                                 </li>
                             }

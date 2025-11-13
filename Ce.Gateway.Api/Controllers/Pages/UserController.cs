@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Controllers.Pages
 {
-    [Authorize(Roles = "Administrator,Management")]
+    [Authorize(Roles = Roles.Administrator + "," + Roles.Management)]
     public class UserController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -36,6 +36,9 @@ namespace Ce.Gateway.Api.Controllers.Pages
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+                var isLockedOut = await _userManager.IsLockedOutAsync(user);
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                
                 userViewModels.Add(new UserDto
                 {
                     Id = user.Id,
@@ -45,7 +48,9 @@ namespace Ce.Gateway.Api.Controllers.Pages
                     Role = roles.FirstOrDefault(),
                     IsActive = user.IsActive,
                     CreatedAt = user.CreatedAt,
-                    LastLoginAt = user.LastLoginAt
+                    LastLoginAt = user.LastLoginAt,
+                    IsLockedOut = isLockedOut,
+                    LockoutEnd = lockoutEnd
                 });
             }
 
@@ -53,7 +58,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         public async Task<IActionResult> Create()
         {
             ViewBag.Roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
@@ -61,7 +66,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserRequest model)
         {
@@ -100,7 +105,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         public async Task<IActionResult> Edit(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -126,7 +131,7 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, UpdateUserRequest model)
         {
@@ -180,25 +185,94 @@ namespace Ce.Gateway.Api.Controllers.Pages
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = Roles.Administrator)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Unlock(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
-                return NotFound();
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var result = await _userManager.DeleteAsync(user);
-
+            var result = await _userManager.SetLockoutEndDateAsync(user, null);
+            
             if (result.Succeeded)
             {
-                TempData["Success"] = "User deleted successfully.";
+                await _userManager.ResetAccessFailedCountAsync(user);
+                TempData["Success"] = $"User {user.UserName} has been unlocked successfully.";
             }
             else
             {
-                TempData["Error"] = "Failed to delete user.";
+                TempData["Error"] = "Failed to unlock user.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [Authorize(Roles = Roles.Administrator)]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var user = await _userManager.FindByIdAsync(id);
+                
+                if (user == null)
+                {
+                    TempData["Error"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Check if trying to delete self
+                if (currentUser != null && id == currentUser.Id)
+                {
+                    TempData["Error"] = "Cannot delete your own account.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Check if trying to delete last admin
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains(Roles.Administrator))
+                {
+                    var activeAdmins = await _userManager.Users
+                        .Where(u => u.IsActive)
+                        .ToListAsync();
+
+                    var adminCount = 0;
+                    foreach (var u in activeAdmins)
+                    {
+                        var userRoles = await _userManager.GetRolesAsync(u);
+                        if (userRoles.Contains(Roles.Administrator))
+                        {
+                            adminCount++;
+                        }
+                    }
+
+                    if (adminCount <= 1)
+                    {
+                        TempData["Error"] = "Cannot delete the last active administrator.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                var result = await _userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
+                {
+                    TempData["Success"] = "User deleted successfully.";
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to delete user: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error deleting user: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Index));
