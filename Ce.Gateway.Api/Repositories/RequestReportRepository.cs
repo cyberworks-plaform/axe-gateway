@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Ce.Gateway.Api.Repositories
@@ -105,7 +106,9 @@ namespace Ce.Gateway.Api.Repositories
             
             string sqlFormat = GetSqlFormat(granularity);
 
-            var sql = $@"
+            // Use StringBuilder for better SQL construction
+            var sqlBuilder = new StringBuilder();
+            sqlBuilder.AppendLine($@"
                 SELECT
                     strftime('{sqlFormat}', CreatedAtUtc) as TimeValue,
                     '' as Label,
@@ -114,7 +117,7 @@ namespace Ce.Gateway.Api.Repositories
                     SUM(CASE WHEN DownstreamStatusCode >= 500 AND DownstreamStatusCode < 600 THEN 1 ELSE 0 END) as ServerErrorCount,
                     SUM(CASE WHEN DownstreamStatusCode < 200 OR (DownstreamStatusCode >= 300 AND DownstreamStatusCode < 400) OR DownstreamStatusCode >= 600 THEN 1 ELSE 0 END) as OtherCount
                 FROM OcrGatewayLogEntries
-                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1";
+                WHERE CreatedAtUtc >= @p0 AND CreatedAtUtc <= @p1");
 
             // Add filter conditions if needed
             var paramIndex = 2;
@@ -122,26 +125,28 @@ namespace Ce.Gateway.Api.Repositories
 
             if (!string.IsNullOrWhiteSpace(filter?.UpstreamPath))
             {
-                sql += $" AND UpstreamPath LIKE @p{paramIndex}";
+                sqlBuilder.AppendLine($" AND UpstreamPath LIKE @p{paramIndex}");
                 parameters.Add($"%{filter.UpstreamPath}%");
                 paramIndex++;
             }
 
             if (!string.IsNullOrWhiteSpace(filter?.DownstreamHost))
             {
-                sql += $" AND DownstreamHost LIKE @p{paramIndex}";
+                sqlBuilder.AppendLine($" AND DownstreamHost LIKE @p{paramIndex}");
                 parameters.Add($"%{filter.DownstreamHost}%");
                 paramIndex++;
             }
 
             if (!string.IsNullOrWhiteSpace(filter?.UpstreamClientIp))
             {
-                sql += $" AND UpstreamClientIp LIKE @p{paramIndex}";
+                sqlBuilder.AppendLine($" AND UpstreamClientIp LIKE @p{paramIndex}");
                 parameters.Add($"%{filter.UpstreamClientIp}%");
                 paramIndex++;
             }
 
-            sql += " GROUP BY TimeValue ORDER BY TimeValue";
+            sqlBuilder.AppendLine(" GROUP BY TimeValue ORDER BY TimeValue");
+            
+            var sql = sqlBuilder.ToString();
 
             var dbResults = await dbContext.Database
                 .SqlQueryRaw<TimeSlotData>(sql, parameters.ToArray())

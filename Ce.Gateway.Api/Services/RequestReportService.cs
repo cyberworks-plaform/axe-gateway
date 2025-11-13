@@ -115,6 +115,13 @@ namespace Ce.Gateway.Api.Services
                     // Clean up tracking when cache entry is evicted
                     var keyStr = key.ToString();
                     _cacheKeyRanges.TryRemove(keyStr, out _);
+                    
+                    // Cleanup and dispose SemaphoreSlim to prevent memory leak
+                    if (_locks.TryRemove(keyStr, out var semaphore))
+                    {
+                        semaphore?.Dispose();
+                    }
+                    
                     _logger.LogDebug("Cache entry evicted: {Key}, reason: {Reason}", keyStr, reason);
                 });
 
@@ -178,7 +185,8 @@ namespace Ce.Gateway.Api.Services
         private bool RangesOverlap(DateTime range1From, DateTime range1To, DateTime range2From, DateTime range2To)
         {
             // Two ranges overlap if one starts before the other ends
-            return range1From <= range2To && range2From <= range1To;
+            // Using < instead of <= for stricter boundary handling to avoid false positives
+            return range1From < range2To && range2From < range1To;
         }
     }
 }

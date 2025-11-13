@@ -114,10 +114,36 @@ function setCachedData(cacheKey, data) {
             data: data,
             timestamp: Date.now()
         };
-        sessionStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+        const serialized = JSON.stringify(cacheEntry);
+        sessionStorage.setItem(cacheKey, serialized);
+        console.log('Data cached successfully (' + (serialized.length / 1024).toFixed(1) + ' KB)');
     } catch (e) {
-        console.error('Error writing cache:', e);
+        if (e.name === 'QuotaExceededError') {
+            console.warn('Storage quota exceeded, clearing old cache entries');
+            // Clear old entries and retry
+            clearOldCacheEntries();
+            try {
+                const cacheEntry = {
+                    data: data,
+                    timestamp: Date.now()
+                };
+                sessionStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+                console.log('Data cached successfully after cleanup');
+            } catch (retryError) {
+                console.error('Failed to cache even after cleanup:', retryError);
+            }
+        } else {
+            console.error('Error writing cache:', e);
+        }
     }
+}
+
+// Clear old cache entries when quota is exceeded
+function clearOldCacheEntries() {
+    const keys = Object.keys(sessionStorage);
+    const cacheKeys = keys.filter(k => k.startsWith(CACHE_KEY_PREFIX));
+    console.log('Clearing ' + cacheKeys.length + ' old cache entries');
+    cacheKeys.forEach(key => sessionStorage.removeItem(key));
 }
 
 // Convert label to UTC+7 display format

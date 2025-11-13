@@ -26,6 +26,7 @@ namespace Ce.Gateway.Api.Workers
         private readonly IConfiguration _configuration;
         private readonly int _intervalMinutes;
         private readonly int _lookbackDays;
+        private readonly SemaphoreSlim _executionLock = new SemaphoreSlim(1, 1);
 
         public RequestReportAggregationWorker(
             IServiceProvider serviceProvider,
@@ -52,13 +53,25 @@ namespace Ce.Gateway.Api.Workers
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                try
+                // Acquire lock before aggregation to prevent overlapping executions
+                if (await _executionLock.WaitAsync(0, stoppingToken))
                 {
-                    await PerformAggregationAsync(stoppingToken);
+                    try
+                    {
+                        await PerformAggregationAsync(stoppingToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error during aggregation process");
+                    }
+                    finally
+                    {
+                        _executionLock.Release();
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError(ex, "Error during aggregation process");
+                    _logger.LogWarning("Skipping aggregation - previous execution still running");
                 }
 
                 // Wait for the configured interval
@@ -67,39 +80,69 @@ namespace Ce.Gateway.Api.Workers
 
             _logger.LogInformation("RequestReportAggregationWorker stopped");
         }
+        
+        public override void Dispose()
+        {
+            _executionLock?.Dispose();
+            base.Dispose();
+        }
 
         private async Task PerformAggregationAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Starting aggregation process");
+            const int maxRetries = 3;
+            int retryCount = 0;
+            
+            while (retryCount < maxRetries)
+            {
+                try
+                {
+                    _logger.LogInformation("Starting aggregation process (attempt {Attempt})", retryCount + 1);
 
-            using var scope = _serviceProvider.CreateScope();
-            var repository = scope.ServiceProvider.GetRequiredService<IRequestReportRepository>();
-            var reportService = scope.ServiceProvider.GetRequiredService<IRequestReportService>();
-            var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<GatewayDbContext>>();
+                    using var scope = _serviceProvider.CreateScope();
+                    var repository = scope.ServiceProvider.GetRequiredService<IRequestReportRepository>();
+                    var reportService = scope.ServiceProvider.GetRequiredService<IRequestReportService>();
+                    var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<GatewayDbContext>>();
 
-            var startTime = DateTime.UtcNow;
-            var lookbackDate = DateTime.UtcNow.AddDays(-_lookbackDays).Date;
+                    var startTime = DateTime.UtcNow;
+                    var lookbackDate = DateTime.UtcNow.AddDays(-_lookbackDays).Date;
 
-            // Aggregate by day
-            await AggregateByGranularityAsync(
-                dbContextFactory, 
-                repository, 
-                reportService,
-                lookbackDate, 
-                Granularity.Day, 
-                cancellationToken);
+                    // Aggregate by day
+                    await AggregateByGranularityAsync(
+                        dbContextFactory, 
+                        repository, 
+                        reportService,
+                        lookbackDate, 
+                        Granularity.Day, 
+                        cancellationToken);
 
-            // Aggregate by month
-            await AggregateByGranularityAsync(
-                dbContextFactory, 
-                repository, 
-                reportService,
-                lookbackDate, 
-                Granularity.Month, 
-                cancellationToken);
+                    // Aggregate by month
+                    await AggregateByGranularityAsync(
+                        dbContextFactory, 
+                        repository, 
+                        reportService,
+                        lookbackDate, 
+                        Granularity.Month, 
+                        cancellationToken);
 
-            var duration = DateTime.UtcNow - startTime;
-            _logger.LogInformation("Aggregation process completed in {Duration}ms", duration.TotalMilliseconds);
+                    var duration = DateTime.UtcNow - startTime;
+                    _logger.LogInformation("Aggregation process completed in {Duration}ms", duration.TotalMilliseconds);
+                    
+                    return; // Success - exit
+                }
+                catch (DbUpdateException ex) when (retryCount < maxRetries - 1)
+                {
+                    retryCount++;
+                    var delay = TimeSpan.FromSeconds(Math.Pow(2, retryCount)); // Exponential backoff: 2s, 4s, 8s
+                    _logger.LogWarning(ex, "Aggregation failed, retrying in {Delay}s (attempt {Attempt}/{Max})", 
+                        delay.TotalSeconds, retryCount, maxRetries);
+                    await Task.Delay(delay, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Fatal error during aggregation process");
+                    throw;
+                }
+            }
         }
 
         private async Task AggregateByGranularityAsync(
