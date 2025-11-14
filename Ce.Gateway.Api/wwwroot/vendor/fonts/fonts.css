@@ -1,0 +1,11 @@
+/* Fallback for Google Fonts - using system fonts for offline mode */
+
+/* Inter Font Family Fallback */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* Source Sans Pro Fallback - AdminLTE default */
+.source-sans-pro {
+    font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
