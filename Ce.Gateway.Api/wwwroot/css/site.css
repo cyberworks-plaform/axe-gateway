@@ -669,6 +669,11 @@ body {
         max-width: 100%;
         height: auto !important;
     }
+    
+    /* Node network graph responsive */
+    .node-network-container {
+        min-height: 350px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -729,6 +734,16 @@ body {
     .table thead th,
     .table tbody td {
         padding: 0.4rem 0.5rem;
+    }
+    
+    /* Node network graph responsive - smaller on mobile */
+    .node-network-container {
+        min-height: 300px;
+    }
+    
+    .network-legend {
+        font-size: 10px;
+        padding: 6px 10px;
     }
 }
 
