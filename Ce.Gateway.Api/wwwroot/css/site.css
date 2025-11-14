@@ -672,6 +672,7 @@ body {
     
     /* Node network graph responsive */
     .node-network-container {
+        height: 350px;
         min-height: 350px;
     }
 }
@@ -738,6 +739,7 @@ body {
     
     /* Node network graph responsive - smaller on mobile */
     .node-network-container {
+        height: 300px;
         min-height: 300px;
     }
     
