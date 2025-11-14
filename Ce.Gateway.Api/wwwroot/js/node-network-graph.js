@@ -27,7 +27,7 @@ class NodeNetworkGraph {
         const networkContainer = document.createElement('div');
         networkContainer.id = `${this.containerId}-network`;
         networkContainer.style.width = '100%';
-        networkContainer.style.height = '500px';
+        networkContainer.style.height = '100%';
         networkContainer.style.border = '1px solid #ddd';
         networkContainer.style.borderRadius = '4px';
         this.container.appendChild(networkContainer);

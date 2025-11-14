@@ -534,6 +534,22 @@ body {
 }
 
 /* ========================================
+   Dashboard Controls
+   ======================================== */
+
+.dashboard-controls {
+    gap: 0.5rem;
+}
+
+.form-control-timefilter {
+    width: 180px;
+}
+
+.form-control-periodfilter {
+    width: 200px;
+}
+
+/* ========================================
    Responsive Adjustments
    ======================================== */
 
@@ -546,13 +562,190 @@ body {
         font-size: 1.8rem;
     }
     
-    .table {
+    .small-box .inner p {
         font-size: 0.9rem;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.75rem;
     }
     
     .container-fluid {
         padding-left: 1rem;
         padding-right: 1rem;
+    }
+    
+    /* Dashboard controls responsive */
+    .dashboard-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .form-control-timefilter {
+        width: 150px;
+        font-size: 0.875rem;
+    }
+    
+    .form-control-periodfilter {
+        width: 170px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-reset-layout {
+        min-width: 36px;
+        height: 36px;
+    }
+    
+    .refresh-control-group {
+        flex-shrink: 0;
+    }
+    
+    .form-control-refresh {
+        min-width: 70px;
+        font-size: 0.875rem;
+    }
+    
+    /* Network stats bar responsive */
+    .network-stats-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .network-stat-item {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 140px;
+    }
+    
+    .stat-icon-mini {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .stat-value-mini {
+        font-size: 20px;
+    }
+    
+    .stat-label-mini {
+        font-size: 10px;
+    }
+    
+    /* Card header responsive */
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    /* Node status summary responsive */
+    .node-status-summary {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: 0;
+        margin-top: 0.5rem;
+        gap: 8px;
+    }
+    
+    /* Status badges smaller on mobile */
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 3px 8px;
+    }
+    
+    .status-badge .status-dot {
+        width: 8px;
+        height: 8px;
+    }
+    
+    /* Chart containers responsive */
+    canvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+    
+    /* Node network graph responsive */
+    .node-network-container {
+        height: 350px;
+        min-height: 350px;
+    }
+}
+
+@media (max-width: 576px) {
+    .content-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    /* Stack controls vertically on very small screens */
+    .dashboard-controls {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .form-control-timefilter,
+    .form-control-periodfilter {
+        width: 100%;
+    }
+    
+    .btn-reset-layout {
+        width: 100%;
+    }
+    
+    .refresh-control-group {
+        width: 100%;
+    }
+    
+    .form-control-refresh {
+        flex: 1;
+    }
+    
+    /* Small boxes full width on tiny screens */
+    .col-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    /* Network stats bar stacked */
+    .network-stat-item {
+        flex: 1 1 100%;
+    }
+    
+    /* Node status filter */
+    #nodeStatusFilter {
+        width: 100% !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-tools {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    /* Table even smaller font */
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.4rem 0.5rem;
+    }
+    
+    /* Node network graph responsive - smaller on mobile */
+    .node-network-container {
+        height: 300px;
+        min-height: 300px;
+    }
+    
+    .network-legend {
+        font-size: 10px;
+        padding: 6px 10px;
     }
 }
 

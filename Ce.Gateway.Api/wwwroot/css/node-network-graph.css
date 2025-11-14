@@ -4,7 +4,22 @@
 .node-network-container {
     position: relative;
     width: 100%;
+    height: 500px;
     min-height: 500px;
+}
+
+/* Ensure vis-network fills container */
+.node-network-container > div {
+    height: 100% !important;
+}
+
+.vis-network {
+    height: 100% !important;
+}
+
+.vis-network canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* Network Stats Bar */
