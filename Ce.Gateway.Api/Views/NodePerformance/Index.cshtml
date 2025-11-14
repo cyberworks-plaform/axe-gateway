@@ -6,33 +6,35 @@
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
-            <div class="col-sm-12 d-flex justify-content-between align-items-center">
-                <h1 class="m-0">Node Performance Monitoring</h1>
-                <div class="ml-auto d-flex align-items-center gap-2">
-                    <select id="timeFilter" class="form-control" style="width: 180px;">
-                        <option value="5m">Last 5 minutes</option>
-                        <option value="15m">Last 15 minutes</option>
-                        <option value="30m">Last 30 minutes</option>
-                        <option value="1h" selected>Last 1 hour</option>
-                        <option value="3h">Last 3 hours</option>
-                        <option value="6h">Last 6 hours</option>
-                        <option value="12h">Last 12 hours</option>
-                        <option value="24h">Last 24 hours</option>
-                        <option value="7d">Last 7 days</option>
-                        <option value="30d">Last 30 days</option>
-                        <option value="60d">Last 60 days</option>
-                        <option value="90d">Last 90 days</option>
-                    </select>
-                    <div class="refresh-control-group">
-                        <button id="manualRefreshBtn" class="btn-refresh-icon" title="Refresh dashboard">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                        <select id="refreshInterval" class="form-control-refresh">
-                            <option value="off">Off</option>
-                            <option value="10s">10s</option>
-                            <option value="30s">30s</option>
-                            <option value="1m">1m</option>
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                    <h1 class="m-0 mb-2 mb-md-0">Node Performance Monitoring</h1>
+                    <div class="d-flex flex-wrap align-items-center gap-2 dashboard-controls">
+                        <select id="timeFilter" class="form-control form-control-timefilter">
+                            <option value="5m">Last 5 minutes</option>
+                            <option value="15m">Last 15 minutes</option>
+                            <option value="30m">Last 30 minutes</option>
+                            <option value="1h" selected>Last 1 hour</option>
+                            <option value="3h">Last 3 hours</option>
+                            <option value="6h">Last 6 hours</option>
+                            <option value="12h">Last 12 hours</option>
+                            <option value="24h">Last 24 hours</option>
+                            <option value="7d">Last 7 days</option>
+                            <option value="30d">Last 30 days</option>
+                            <option value="60d">Last 60 days</option>
+                            <option value="90d">Last 90 days</option>
                         </select>
+                        <div class="refresh-control-group">
+                            <button id="manualRefreshBtn" class="btn-refresh-icon" title="Refresh dashboard">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <select id="refreshInterval" class="form-control-refresh">
+                                <option value="off">Off</option>
+                                <option value="10s">10s</option>
+                                <option value="30s">30s</option>
+                                <option value="1m">1m</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
