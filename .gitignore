@@ -271,6 +271,9 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
+# NPM package files used for dependency download only
+Ce.Gateway.Api/package.json
+Ce.Gateway.Api/package-lock.json
 
 # Visual Studio 6 build log
 *.plg
