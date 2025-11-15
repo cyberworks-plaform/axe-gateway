@@ -34,9 +34,10 @@ public class RouteConfigService : IRouteConfigService
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNamingPolicy = null, // Use PascalCase to match Ocelot configuration format
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true // Allow case-insensitive property matching
     };
 
     public RouteConfigService(

@@ -7,18 +7,21 @@ $(document).ready(function() {
 
 // Load configuration history
 function loadHistory() {
+    console.log('Loading configuration history');
     $.ajax({
         url: '/api/routes/history?limit=50',
         method: 'GET',
         success: function(response) {
+            console.log('History API response:', response);
             if (response.success) {
                 renderHistory(response.data);
             } else {
                 showError('Failed to load history: ' + response.message);
             }
         },
-        error: function(xhr) {
-            showError('Failed to load configuration history. Please try again.');
+        error: function(xhr, status, error) {
+            console.error('Error loading history:', status, error, xhr);
+            showError('Failed to load configuration history: ' + (xhr.responseJSON?.message || error || 'Please try again.'));
         }
     });
 }
@@ -106,9 +109,27 @@ function escapeHtml(text) {
 }
 
 function showSuccess(message) {
-    toastr.success(message);
+    console.log('Success:', message);
+    // Show Bootstrap alert
+    const alert = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> ${escapeHtml(message)}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>`;
+    $('.content').prepend(alert);
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => $('.alert-success').fadeOut(), 5000);
 }
 
 function showError(message) {
-    toastr.error(message);
+    console.error('Error:', message);
+    // Show Bootstrap alert
+    const alert = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> ${escapeHtml(message)}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>`;
+    $('.content').prepend(alert);
 }

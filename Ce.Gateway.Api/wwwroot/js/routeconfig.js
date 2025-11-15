@@ -16,10 +16,12 @@ $(document).ready(function() {
 
 // Load all routes
 function loadRoutes() {
+    console.log('Loading routes from /api/routes');
     $.ajax({
         url: '/api/routes',
         method: 'GET',
         success: function(response) {
+            console.log('Routes API response:', response);
             if (response.success) {
                 allRoutes = response.data;
                 renderRoutes(allRoutes);
@@ -27,8 +29,9 @@ function loadRoutes() {
                 showError('Failed to load routes: ' + response.message);
             }
         },
-        error: function(xhr) {
-            showError('Failed to load routes. Please try again.');
+        error: function(xhr, status, error) {
+            console.error('Error loading routes:', status, error, xhr);
+            showError('Failed to load routes: ' + (xhr.responseJSON?.message || error || 'Please try again.'));
         }
     });
 }
@@ -37,6 +40,9 @@ function loadRoutes() {
 function renderRoutes(routes) {
     const container = $('#routesContainer');
     container.empty();
+    
+    // Hide loading indicator
+    $('#loadingIndicator').hide();
     
     if (routes.length === 0) {
         container.html('<div class="alert alert-info">No routes found matching your criteria.</div>');
@@ -343,9 +349,29 @@ function escapeHtml(text) {
 }
 
 function showSuccess(message) {
-    toastr.success(message);
+    console.log('Success:', message);
+    // Show Bootstrap alert
+    const alert = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> ${escapeHtml(message)}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>`;
+    $('#routesContainer').prepend(alert);
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => $('.alert-success').fadeOut(), 5000);
 }
 
 function showError(message) {
-    toastr.error(message);
+    console.error('Error:', message);
+    // Hide loading indicator
+    $('#loadingIndicator').hide();
+    // Show Bootstrap alert
+    const alert = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> ${escapeHtml(message)}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>`;
+    $('#routesContainer').prepend(alert);
 }
