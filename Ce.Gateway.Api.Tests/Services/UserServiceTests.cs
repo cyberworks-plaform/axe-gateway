@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Ce.Gateway.Api.Data;
 
 namespace Ce.Gateway.Api.Tests.Services
 {
@@ -21,6 +22,7 @@ namespace Ce.Gateway.Api.Tests.Services
         private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
         private readonly Mock<RoleManager<IdentityRole>> _mockRoleManager;
         private readonly Mock<ILogger<UserService>> _mockLogger;
+        private readonly GatewayDbContext _context;
         private readonly UserService _userService;
 
         public UserServiceTests()
@@ -28,11 +30,13 @@ namespace Ce.Gateway.Api.Tests.Services
             _mockUserManager = IdentityTestHelper.CreateMockUserManager();
             _mockRoleManager = IdentityTestHelper.CreateMockRoleManager();
             _mockLogger = new Mock<ILogger<UserService>>();
+            _context = TestHelpers.TestDbContextFactory.CreateInMemoryDbContext();
 
             _userService = new UserService(
                 _mockUserManager.Object,
                 _mockRoleManager.Object,
-                _mockLogger.Object);
+                _mockLogger.Object,
+                _context);
         }
 
         [Fact]
