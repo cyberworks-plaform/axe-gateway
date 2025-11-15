@@ -40,6 +40,11 @@ public interface IRouteConfigService
     Task<bool> UpdateRouteAsync(UpdateRouteRequest request, string userName);
 
     /// <summary>
+    /// Create a new route
+    /// </summary>
+    Task<bool> CreateRouteAsync(RouteDto route, string userName);
+
+    /// <summary>
     /// Get configuration history
     /// </summary>
     Task<List<ConfigurationHistoryDto>> GetConfigurationHistoryAsync(int limit = 50);

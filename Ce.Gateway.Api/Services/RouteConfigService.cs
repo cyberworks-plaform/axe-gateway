@@ -262,6 +262,64 @@ public class RouteConfigService : IRouteConfigService
         }
     }
 
+    public async Task<bool> CreateRouteAsync(RouteDto routeDto, string userName)
+    {
+        ArgumentNullException.ThrowIfNull(routeDto);
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
+
+        if (string.IsNullOrWhiteSpace(routeDto.UpstreamPathTemplate))
+            throw new ArgumentException("Upstream path template is required", nameof(routeDto));
+
+        await _configLock.WaitAsync();
+        try
+        {
+            var config = await ReadConfigurationAsync();
+
+            // Check if route already exists
+            if (config.Routes.Any(r => r.UpstreamPathTemplate == routeDto.UpstreamPathTemplate))
+            {
+                throw new InvalidOperationException($"Route with upstream path '{routeDto.UpstreamPathTemplate}' already exists");
+            }
+
+            // Create new Ocelot route
+            var newRoute = new OcelotRoute
+            {
+                UpstreamPathTemplate = routeDto.UpstreamPathTemplate,
+                DownstreamPathTemplate = routeDto.DownstreamPathTemplate,
+                DownstreamScheme = routeDto.DownstreamScheme,
+                UpstreamHttpMethod = routeDto.UpstreamHttpMethod ?? new List<string> { "GET" },
+                DownstreamHostAndPorts = routeDto.DownstreamHostAndPorts?.Select(n => new OcelotHostAndPort
+                {
+                    Host = n.Host,
+                    Port = n.Port
+                }).ToList() ?? new List<OcelotHostAndPort>(),
+                LoadBalancerOptions = routeDto.LoadBalancerOptions != null ? new OcelotLoadBalancerOptions
+                {
+                    Type = routeDto.LoadBalancerOptions.Type,
+                    Key = routeDto.LoadBalancerOptions.Key,
+                    Expiry = routeDto.LoadBalancerOptions.Expiry
+                } : null,
+                QoSOptions = routeDto.QoSOptions != null ? new OcelotQoSOptions
+                {
+                    TimeoutValue = routeDto.QoSOptions.TimeoutValue,
+                    ExceptionsAllowedBeforeBreaking = routeDto.QoSOptions.ExceptionsAllowedBeforeBreaking,
+                    DurationOfBreak = routeDto.QoSOptions.DurationOfBreak
+                } : null,
+                DangerousAcceptAnyServerCertificateValidator = routeDto.DangerousAcceptAnyServerCertificateValidator,
+                Priority = routeDto.Priority,
+                RequestIdKey = routeDto.RequestIdKey
+            };
+
+            config.Routes.Add(newRoute);
+            await BackupAndSaveConfigurationAsync(config, $"Created route {routeDto.UpstreamPathTemplate}", userName);
+            return true;
+        }
+        finally
+        {
+            _configLock.Release();
+        }
+    }
+
     public async Task<List<ConfigurationHistoryDto>> GetConfigurationHistoryAsync(int limit = 50)
     {
         var histories = await _context.ConfigurationHistories
@@ -363,14 +421,22 @@ public class RouteConfigService : IRouteConfigService
 
     private async Task BackupAndSaveConfigurationAsync(OcelotConfiguration config, string description, string userName)
     {
-        // Create backup
+        // SECURITY FIX: Create backup and save to database first, then write config file
+        // This ensures database consistency if file write fails
         await CreateBackupAsync(config, description, userName, true);
 
-        // Save configuration
-        var json = JsonSerializer.Serialize(config, _jsonOptions);
-        await File.WriteAllTextAsync(_configFilePath, json);
-
-        _logger.LogInformation("Configuration updated: {Description} by {UserName}", description, userName);
+        // Save configuration file only after successful backup and DB save
+        try
+        {
+            var json = JsonSerializer.Serialize(config, _jsonOptions);
+            await File.WriteAllTextAsync(_configFilePath, json);
+            _logger.LogInformation("Configuration updated: {Description} by {UserName}", description, userName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to write configuration file after backup and DB save. Manual intervention may be required to restore consistency.");
+            throw;
+        }
     }
 
     private async Task CreateBackupAsync(OcelotConfiguration config, string description, string userName, bool setAsActive)

@@ -250,6 +250,61 @@ namespace Ce.Gateway.Api.Controllers.Api
         }
 
         /// <summary>
+        /// Create a new route
+        /// </summary>
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<bool>>> CreateRoute([FromBody] RouteDto request)
+        {
+            try
+            {
+                var userName = User.Identity?.Name ?? "Unknown";
+                var result = await _routeConfigService.CreateRouteAsync(request, userName);
+
+                if (!result)
+                {
+                    return BadRequest(new ApiResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Failed to create route. Route may already exist."
+                    });
+                }
+
+                return Ok(new ApiResponse<bool>
+                {
+                    Success = true,
+                    Message = $"Route '{request.UpstreamPathTemplate}' created successfully"
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid route data");
+                return BadRequest(new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Route creation conflict");
+                return Conflict(new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating route");
+                return StatusCode(500, new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Failed to create route"
+                });
+            }
+        }
+
+        /// <summary>
         /// Get configuration history
         /// </summary>
         [HttpGet("history")]

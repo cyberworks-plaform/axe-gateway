@@ -205,6 +205,137 @@
     </div>
 </div>
 
+<!-- Copy Route Modal -->
+<div class="modal fade" id="copyRouteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Copy Route</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="copyRouteForm">
+                    <input type="hidden" id="copyRouteId">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Modify the route configuration as needed. The new route will be created with all settings copied from the original.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="copyUpstreamPath">Upstream Path Template: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="copyUpstreamPath" required>
+                        <small class="form-text text-muted">Must be unique. Example: /gateway/my-api/{everything}</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="copyDownstreamScheme">Downstream Scheme:</label>
+                                <select class="form-control" id="copyDownstreamScheme">
+                                    <option value="http">HTTP</option>
+                                    <option value="https">HTTPS</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="copyDownstreamPath">Downstream Path Template:</label>
+                                <input type="text" class="form-control" id="copyDownstreamPath">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="copyHttpMethods">HTTP Methods (comma-separated):</label>
+                        <input type="text" class="form-control" id="copyHttpMethods" placeholder="GET, POST, PUT, DELETE">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="copyLoadBalancerType">Load Balancer Type:</label>
+                                <select class="form-control" id="copyLoadBalancerType">
+                                    <option value="">None</option>
+                                    <option value="LeastConnection">Least Connection</option>
+                                    <option value="RoundRobin">Round Robin</option>
+                                    <option value="NoLoadBalancer">No Load Balancer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="copyPriority">Priority:</label>
+                                <input type="number" class="form-control" id="copyPriority" min="0" placeholder="Optional">
+                                <small class="form-text text-muted">Lower values = higher priority</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="copyQosTimeout">QoS Timeout (ms):</label>
+                                <input type="number" class="form-control" id="copyQosTimeout" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="copyQosExceptions">Max Errors:</label>
+                                <input type="number" class="form-control" id="copyQosExceptions" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="copyQosDuration">Break Duration (ms):</label>
+                                <input type="number" class="form-control" id="copyQosDuration" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nodes (will be copied):</label>
+                        <div id="copyNodesDisplay" class="border rounded p-2"></div>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="copyDangerousAccept">
+                        <label class="form-check-label" for="copyDangerousAccept">
+                            Accept Any Server Certificate (Development only)
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="btnConfirmCopy">Create Copy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="confirmModalMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmModalBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="/js/routeconfig.js"></script>
 }
@@ -222,6 +353,9 @@
         }
         .gap-2 > * {
             margin: 0.25rem;
+        }
+        .btn-group > .btn {
+            margin-left: 0;
         }
     </style>
 }
