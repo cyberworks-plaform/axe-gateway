@@ -29,10 +29,13 @@ namespace Ce.Gateway.Api.Tests.Services
             _mockRoleManager = IdentityTestHelper.CreateMockRoleManager();
             _mockLogger = new Mock<ILogger<UserService>>();
 
+            var context = TestDbContextFactory.CreateInMemoryDbContext();
+
             _userService = new UserService(
                 _mockUserManager.Object,
                 _mockRoleManager.Object,
-                _mockLogger.Object);
+                _mockLogger.Object,
+                context);
         }
 
         [Fact]

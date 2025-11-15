@@ -135,6 +135,15 @@
                                     </a>
                                 </li>
                             }
+                            @if (User.IsInRole(Roles.Administrator))
+                            {
+                                <li class="nav-item">
+                                    <a href="/update" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Update" ? "active" : "")">
+                                        <i class="nav-icon fas fa-sync-alt"></i>
+                                        <p>System Update</p>
+                                    </a>
+                                </li>
+                            }
                         }
                     </ul>
                 </nav>
