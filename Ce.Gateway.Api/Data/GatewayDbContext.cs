@@ -14,6 +14,7 @@ namespace Ce.Gateway.Api.Data
 
         public DbSet<RequestLogEntry> OcrGatewayLogEntries { get; set; }
         public DbSet<RequestReportAggregate> RequestReportAggregates { get; set; }
+        public DbSet<ConfigurationHistory> ConfigurationHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +36,13 @@ namespace Ce.Gateway.Api.Data
                 entity.HasIndex(e => e.PeriodStart);
                 entity.HasIndex(e => new { e.PeriodStart, e.Granularity });
                 entity.Property(e => e.Granularity).HasMaxLength(16);
+            });
+
+            modelBuilder.Entity<ConfigurationHistory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Timestamp);
+                entity.HasIndex(e => e.IsActive);
             });
 
         }

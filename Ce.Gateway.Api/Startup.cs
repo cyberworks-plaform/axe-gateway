@@ -166,6 +166,9 @@ namespace Ce.Gateway.Api
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
 
+            // Register route configuration management service
+            services.AddScoped<IRouteConfigService, RouteConfigService>();
+
             services.AddSingleton<IDownstreamHealthStore, DownstreamHealthStore>();
 
             #region đăng ký DownstreamHealthMonitorService để dùng cho cả IHostedService và IDownstreamHealthMonitorService
