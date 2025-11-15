@@ -126,6 +126,15 @@
                         @if (User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Management))
                         {
                             <li class="nav-header">SYSTEM MANAGEMENT</li>
+                            @if (User.IsInRole(Roles.Administrator))
+                            {
+                                <li class="nav-item">
+                                    <a href="/routes" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RouteConfig" ? "active" : "")">
+                                        <i class="nav-icon fas fa-route"></i>
+                                        <p>Route Configuration</p>
+                                    </a>
+                                </li>
+                            }
                             @if (User.IsInRole(Roles.Administrator) || User.IsInRole(Roles.Management))
                             {
                                 <li class="nav-item">
