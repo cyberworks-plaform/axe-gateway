@@ -1,0 +1,449 @@
+@{
+    ViewData["Title"] = "System Update";
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-12">
+                <h1 class="m-0">System Update</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.content-header -->
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <!-- Current Version -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Current Version</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Version:</strong> <span id="currentVersion">Loading...</span></p>
+                                <p><strong>Last Check:</strong> <span id="lastCheckTime">Never</span></p>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button id="checkUpdateBtn" class="btn btn-primary">
+                                    <i class="fas fa-sync-alt"></i> Check for Updates
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Available -->
+        <div class="row" id="updateAvailableSection" style="display: none;">
+            <div class="col-md-12">
+                <div class="card card-success card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-check-circle"></i> Update Available
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h4>Version <span id="availableVersion"></span></h4>
+                                <p><strong>Release Date:</strong> <span id="releaseDate"></span></p>
+                                <p><strong>File Size:</strong> <span id="fileSize"></span></p>
+                                <div id="releaseNotesSection">
+                                    <strong>Release Notes:</strong>
+                                    <div id="releaseNotes" class="mt-2" style="max-height: 200px; overflow-y: auto; background: #f4f4f4; padding: 10px; border-radius: 4px;"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <button id="downloadUpdateBtn" class="btn btn-success btn-lg">
+                                    <i class="fas fa-download"></i> Download Update
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Upload -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-info card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Manual Upload</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>For servers without internet access, you can manually upload an update package:</p>
+                        <form id="uploadForm">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="updateFile" accept=".zip">
+                                        <label class="custom-file-label" for="updateFile">Choose file (ZIP only)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-info btn-block">
+                                        <i class="fas fa-upload"></i> Upload Update
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="progress mt-3" id="uploadProgress" style="display: none;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update History -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-secondary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Update History</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="updateHistoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Version</th>
+                                        <th>Status</th>
+                                        <th>File Name</th>
+                                        <th>Size</th>
+                                        <th>Created</th>
+                                        <th>Initiated By</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    $(document).ready(function() {
+        let updateCheckResult = null;
+
+        // Initialize
+        loadCurrentVersion();
+        loadUpdateHistory();
+
+        // Update file input label with selected file name
+        $('#updateFile').on('change', function() {
+            const fileName = $(this).val().split('\\').pop();
+            $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
+        });
+
+        // Check for updates
+        $('#checkUpdateBtn').click(function() {
+            checkForUpdates();
+        });
+
+        // Download update
+        $('#downloadUpdateBtn').click(function() {
+            if (updateCheckResult && updateCheckResult.updateAvailable) {
+                downloadUpdate();
+            }
+        });
+
+        // Upload form
+        $('#uploadForm').submit(function(e) {
+            e.preventDefault();
+            uploadUpdate();
+        });
+
+        function loadCurrentVersion() {
+            $.ajax({
+                url: '/api/update/version',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        $('#currentVersion').text(response.data);
+                    }
+                },
+                error: function() {
+                    $('#currentVersion').text('Error loading version');
+                }
+            });
+        }
+
+        function checkForUpdates() {
+            const $btn = $('#checkUpdateBtn');
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Checking...');
+
+            $.ajax({
+                url: '/api/update/check',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        updateCheckResult = response.data;
+                        $('#lastCheckTime').text(new Date(response.data.checkedAt).toLocaleString());
+
+                        if (response.data.updateAvailable) {
+                            showUpdateAvailable(response.data);
+                        } else {
+                            $('#updateAvailableSection').hide();
+                            toastr.success('You are running the latest version');
+                        }
+                    } else {
+                        toastr.error(response.message || 'Failed to check for updates');
+                    }
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.message || 'Error checking for updates';
+                    toastr.error(error);
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Check for Updates');
+                }
+            });
+        }
+
+        function showUpdateAvailable(data) {
+            $('#availableVersion').text(data.latestVersion);
+            $('#releaseDate').text(data.publishedAt ? new Date(data.publishedAt).toLocaleString() : 'N/A');
+            $('#fileSize').text(formatFileSize(data.fileSize));
+            
+            if (data.releaseNotes) {
+                $('#releaseNotes').html(formatMarkdown(data.releaseNotes));
+                $('#releaseNotesSection').show();
+            } else {
+                $('#releaseNotesSection').hide();
+            }
+
+            $('#updateAvailableSection').show();
+        }
+
+        function downloadUpdate() {
+            // For automatic download, we would need to create a pending update record first
+            // This is simplified - in production, you might want to create the record first
+            toastr.info('Automatic download from GitHub will be implemented. For now, please use manual upload.');
+        }
+
+        function uploadUpdate() {
+            const fileInput = document.getElementById('updateFile');
+            if (!fileInput.files.length) {
+                toastr.warning('Please select a file to upload');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            if (!file.name.endsWith('.zip')) {
+                toastr.error('Only ZIP files are allowed');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const $progress = $('#uploadProgress');
+            const $progressBar = $progress.find('.progress-bar');
+            $progress.show();
+            $progressBar.css('width', '0%');
+
+            $.ajax({
+                url: '/api/update/upload',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    const xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable) {
+                            const percentComplete = (e.loaded / e.total) * 100;
+                            $progressBar.css('width', percentComplete + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('Update uploaded successfully');
+                        $('#uploadForm')[0].reset();
+                        $('.custom-file-label').html('Choose file (ZIP only)');
+                        loadUpdateHistory();
+                    } else {
+                        toastr.error(response.message || 'Failed to upload update');
+                    }
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.message || 'Error uploading update';
+                    toastr.error(error);
+                },
+                complete: function() {
+                    setTimeout(() => $progress.hide(), 1000);
+                }
+            });
+        }
+
+        function loadUpdateHistory() {
+            $.ajax({
+                url: '/api/update/history',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.data.updates) {
+                        renderUpdateHistory(response.data.updates);
+                    }
+                },
+                error: function() {
+                    $('#updateHistoryTable tbody').html('<tr><td colspan="7" class="text-center">Error loading update history</td></tr>');
+                }
+            });
+        }
+
+        function renderUpdateHistory(updates) {
+            const $tbody = $('#updateHistoryTable tbody');
+            $tbody.empty();
+
+            if (updates.length === 0) {
+                $tbody.html('<tr><td colspan="7" class="text-center">No update history</td></tr>');
+                return;
+            }
+
+            updates.forEach(function(update) {
+                const statusBadge = getStatusBadge(update.status);
+                const currentBadge = update.isCurrentVersion ? '<span class="badge badge-primary ml-2">Current</span>' : '';
+                
+                let actions = '';
+                if (update.status === 'Downloaded') {
+                    actions += `<button class="btn btn-sm btn-success apply-update-btn" data-id="${update.id}" data-toggle="tooltip" title="Apply this update">
+                                    <i class="fas fa-play"></i> Apply
+                                </button> `;
+                }
+                if (!update.isCurrentVersion) {
+                    actions += `<button class="btn btn-sm btn-danger delete-update-btn" data-id="${update.id}" data-toggle="tooltip" title="Delete this update">
+                                    <i class="fas fa-trash"></i>
+                                </button>`;
+                }
+
+                $tbody.append(`
+                    <tr>
+                        <td>${update.version}${currentBadge}</td>
+                        <td>${statusBadge}</td>
+                        <td>${update.fileName || 'N/A'}</td>
+                        <td>${formatFileSize(update.fileSize)}</td>
+                        <td>${new Date(update.createdAt).toLocaleString()}</td>
+                        <td>${update.initiatedBy || 'System'}</td>
+                        <td>${actions}</td>
+                    </tr>
+                `);
+            });
+
+            // Attach event handlers
+            $('.apply-update-btn').click(function() {
+                const updateId = $(this).data('id');
+                applyUpdate(updateId);
+            });
+
+            $('.delete-update-btn').click(function() {
+                const updateId = $(this).data('id');
+                deleteUpdate(updateId);
+            });
+
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+        }
+
+        function applyUpdate(updateId) {
+            if (!confirm('Are you sure you want to apply this update? The application will restart.')) {
+                return;
+            }
+
+            $.ajax({
+                url: `/api/update/${updateId}/apply`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ createBackup: true }),
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('Update is being applied. Application will restart shortly...');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 15000);
+                    } else {
+                        toastr.error(response.message || 'Failed to apply update');
+                    }
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.message || 'Error applying update';
+                    toastr.error(error);
+                }
+            });
+        }
+
+        function deleteUpdate(updateId) {
+            if (!confirm('Are you sure you want to delete this update?')) {
+                return;
+            }
+
+            $.ajax({
+                url: `/api/update/${updateId}`,
+                method: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('Update deleted successfully');
+                        loadUpdateHistory();
+                    } else {
+                        toastr.error(response.message || 'Failed to delete update');
+                    }
+                },
+                error: function(xhr) {
+                    const error = xhr.responseJSON?.message || 'Error deleting update';
+                    toastr.error(error);
+                }
+            });
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'Pending': '<span class="badge badge-secondary">Pending</span>',
+                'Downloading': '<span class="badge badge-info">Downloading</span>',
+                'Downloaded': '<span class="badge badge-success">Downloaded</span>',
+                'Installing': '<span class="badge badge-warning">Installing</span>',
+                'Installed': '<span class="badge badge-success">Installed</span>',
+                'Failed': '<span class="badge badge-danger">Failed</span>',
+                'RolledBack': '<span class="badge badge-dark">Rolled Back</span>'
+            };
+            return badges[status] || `<span class="badge badge-secondary">${status}</span>`;
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return 'N/A';
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+        }
+
+        function formatMarkdown(text) {
+            // Simple markdown-like formatting
+            return text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>');
+        }
+    });
+</script>
+}
