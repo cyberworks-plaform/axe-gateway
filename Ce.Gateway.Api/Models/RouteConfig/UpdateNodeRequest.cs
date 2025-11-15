@@ -18,6 +18,7 @@ public class UpdateNodeRequest
     /// Original host address
     /// </summary>
     [Required]
+    [RegularExpression(@"^[a-zA-Z0-9.-]+$", ErrorMessage = "Host must contain only alphanumeric characters, dots, and hyphens")]
     public string OldHost { get; set; } = string.Empty;
 
     /// <summary>
@@ -31,6 +32,7 @@ public class UpdateNodeRequest
     /// New host address
     /// </summary>
     [Required]
+    [RegularExpression(@"^[a-zA-Z0-9.-]+$", ErrorMessage = "Host must contain only alphanumeric characters, dots, and hyphens")]
     public string NewHost { get; set; } = string.Empty;
 
     /// <summary>

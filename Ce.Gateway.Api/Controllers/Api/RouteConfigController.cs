@@ -12,6 +12,8 @@ namespace Ce.Gateway.Api.Controllers.Api
 {
     /// <summary>
     /// API Controller for managing route configurations
+    /// Note: CSRF protection via antiforgery tokens should be implemented for production
+    /// Current implementation relies on Authorization header validation
     /// </summary>
     [Authorize(Roles = "Administrator")]
     [ApiController]

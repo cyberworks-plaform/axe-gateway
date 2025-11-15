@@ -19,6 +19,7 @@ public class DeleteNodeRequest
     /// Host address to delete
     /// </summary>
     [Required]
+    [RegularExpression(@"^[a-zA-Z0-9.-]+$", ErrorMessage = "Host must contain only alphanumeric characters, dots, and hyphens")]
     public string Host { get; set; } = string.Empty;
 
     /// <summary>
