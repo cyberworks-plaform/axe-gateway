@@ -58,4 +58,19 @@ public interface IRouteConfigService
     /// Reload Ocelot configuration (triggers hot reload)
     /// </summary>
     Task<bool> ReloadConfigurationAsync();
+
+    /// <summary>
+    /// Get current system version information
+    /// </summary>
+    Task<VersionInfo> GetCurrentVersionAsync();
+
+    /// <summary>
+    /// Upload and apply new configuration from file
+    /// </summary>
+    Task<bool> UploadConfigurationAsync(UploadConfigRequest request, string userName);
+
+    /// <summary>
+    /// Compare upload version with current version
+    /// </summary>
+    Task<VersionComparisonResult> CompareVersionsAsync(string? uploadVersion);
 }

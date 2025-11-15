@@ -392,5 +392,105 @@ namespace Ce.Gateway.Api.Controllers.Api
                 });
             }
         }
+
+        /// <summary>
+        /// Get current system version
+        /// </summary>
+        [HttpGet("version")]
+        public async Task<ActionResult<ApiResponse<VersionInfo>>> GetCurrentVersion()
+        {
+            try
+            {
+                var version = await _routeConfigService.GetCurrentVersionAsync();
+                return Ok(new ApiResponse<VersionInfo>
+                {
+                    Success = true,
+                    Data = version
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting current version");
+                return StatusCode(500, new ApiResponse<VersionInfo>
+                {
+                    Success = false,
+                    Message = "Failed to get current version"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Compare upload version with current version
+        /// </summary>
+        [HttpPost("version/compare")]
+        public async Task<ActionResult<ApiResponse<VersionComparisonResult>>> CompareVersions([FromBody] string uploadVersion)
+        {
+            try
+            {
+                var comparison = await _routeConfigService.CompareVersionsAsync(uploadVersion);
+                return Ok(new ApiResponse<VersionComparisonResult>
+                {
+                    Success = true,
+                    Data = comparison
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error comparing versions");
+                return StatusCode(500, new ApiResponse<VersionComparisonResult>
+                {
+                    Success = false,
+                    Message = "Failed to compare versions"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Upload and apply new configuration
+        /// </summary>
+        [HttpPost("upload")]
+        public async Task<ActionResult<ApiResponse<bool>>> UploadConfiguration([FromBody] UploadConfigRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ApiResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Invalid request data"
+                    });
+                }
+
+                var userName = User.Identity?.Name ?? "Unknown";
+                var success = await _routeConfigService.UploadConfigurationAsync(request, userName);
+
+                return Ok(new ApiResponse<bool>
+                {
+                    Success = success,
+                    Message = success 
+                        ? "Configuration uploaded and applied successfully" 
+                        : "Failed to upload configuration"
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Configuration upload validation failed");
+                return BadRequest(new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading configuration");
+                return StatusCode(500, new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "An error occurred while uploading configuration"
+                });
+            }
+        }
     }
 }

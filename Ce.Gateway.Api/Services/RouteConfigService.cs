@@ -519,4 +519,174 @@ public class RouteConfigService : IRouteConfigService
     }
 
     #endregion
+
+    #region Version and Upload Methods
+
+    public async Task<VersionInfo> GetCurrentVersionAsync()
+    {
+        await Task.CompletedTask;
+        
+        var version = _configuration["Version"] ?? "2.4.3"; // Default from .csproj
+        
+        // Try to get git hash if available
+        string? gitHash = null;
+        try
+        {
+            var gitHashFile = Path.Combine(_environment.ContentRootPath, ".git", "refs", "heads", "main");
+            if (File.Exists(gitHashFile))
+            {
+                var fullHash = await File.ReadAllTextAsync(gitHashFile);
+                gitHash = fullHash.Trim().Substring(0, Math.Min(7, fullHash.Length));
+            }
+        }
+        catch
+        {
+            // Ignore git hash errors
+        }
+
+        return new VersionInfo
+        {
+            Version = version,
+            GitHash = gitHash
+        };
+    }
+
+    public async Task<VersionComparisonResult> CompareVersionsAsync(string? uploadVersion)
+    {
+        var currentVersion = await GetCurrentVersionAsync();
+        var uploadVer = new VersionInfo { Version = uploadVersion ?? "0.0.0" };
+
+        var result = new VersionComparisonResult
+        {
+            CurrentVersion = currentVersion,
+            UploadVersion = uploadVer
+        };
+
+        var comparison = uploadVer.CompareTo(currentVersion);
+
+        if (comparison < 0)
+        {
+            result.IsDowngrade = true;
+            result.Message = $"⚠️ DOWNGRADE DETECTED: Uploading v{uploadVer.Version} will downgrade from v{currentVersion.Version}";
+            result.Warnings.Add("This is a version downgrade which may cause compatibility issues");
+            result.Warnings.Add("Some features from the current version may not work correctly");
+            result.Warnings.Add("Database schema may be incompatible");
+            result.Warnings.Add("Consider creating a full system backup before proceeding");
+        }
+        else if (comparison > 0)
+        {
+            result.IsUpgrade = true;
+            result.Message = $"✅ UPGRADE: Uploading v{uploadVer.Version} will upgrade from v{currentVersion.Version}";
+            result.Warnings.Add("Service may restart during configuration reload");
+            result.Warnings.Add("Active connections may be interrupted briefly");
+            result.Warnings.Add("Monitor system logs after upgrade");
+        }
+        else
+        {
+            result.IsSameVersion = true;
+            result.Message = $"ℹ️ SAME VERSION: Both current and upload are v{currentVersion.Version}";
+            result.Warnings.Add("Configuration will be replaced even though version is the same");
+            result.Warnings.Add("Service may restart during configuration reload");
+        }
+
+        // Add general warnings
+        result.Warnings.Add("Automatic backup will be created before applying changes");
+        result.Warnings.Add("You can rollback to previous configuration if needed");
+        result.Warnings.Add("Ensure the uploaded configuration file is valid JSON");
+
+        return result;
+    }
+
+    public async Task<bool> UploadConfigurationAsync(UploadConfigRequest request, string userName)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
+
+        if (!request.ConfirmRisks)
+        {
+            _logger.LogWarning("Upload rejected: User {UserName} did not confirm risks", userName);
+            throw new InvalidOperationException("You must confirm that you understand the risks before uploading");
+        }
+
+        await _configLock.WaitAsync();
+        try
+        {
+            // Validate JSON structure
+            OcelotConfiguration? uploadedConfig;
+            try
+            {
+                uploadedConfig = JsonSerializer.Deserialize<OcelotConfiguration>(request.ConfigurationContent, _jsonOptions);
+                if (uploadedConfig == null || uploadedConfig.Routes == null)
+                {
+                    throw new InvalidOperationException("Invalid configuration file: Routes section is required");
+                }
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Invalid JSON in uploaded configuration");
+                throw new InvalidOperationException($"Invalid JSON format: {ex.Message}");
+            }
+
+            // Read current configuration for backup
+            var currentConfig = await ReadConfigurationAsync();
+
+            // Create backup with version info
+            var backupFileName = $"config-backup-{DateTime.UtcNow:yyyyMMddHHmmss}.json";
+            var backupPath = Path.Combine(_backupDirectory, backupFileName);
+            var currentJson = JsonSerializer.Serialize(currentConfig, _jsonOptions);
+            await File.WriteAllTextAsync(backupPath, currentJson);
+
+            // Save history record with version
+            var history = new ConfigurationHistory
+            {
+                Timestamp = DateTime.UtcNow,
+                ChangedBy = userName,
+                Description = $"Configuration Upload: {request.Description}",
+                BackupFileName = backupFileName,
+                IsActive = false, // Will be set to true after successful application
+                Version = request.Version,
+                ChangeType = "Upload"
+            };
+
+            _context.ConfigurationHistories.Add(history);
+            await _context.SaveChangesAsync();
+
+            // Write new configuration file
+            try
+            {
+                await File.WriteAllTextAsync(_configFilePath, request.ConfigurationContent);
+                _logger.LogInformation("Configuration uploaded successfully by {UserName}. Version: {Version}", 
+                    userName, request.Version ?? "N/A");
+
+                // Mark as active
+                history.IsActive = true;
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to write configuration file after backup and DB save");
+                
+                // Try to restore backup
+                try
+                {
+                    await File.WriteAllTextAsync(_configFilePath, currentJson);
+                    _logger.LogInformation("Rolled back to previous configuration after write failure");
+                }
+                catch (Exception restoreEx)
+                {
+                    _logger.LogError(restoreEx, "CRITICAL: Failed to restore backup. Manual intervention required.");
+                }
+                
+                throw;
+            }
+        }
+        finally
+        {
+            _configLock.Release();
+        }
+    }
+
+    #endregion
 }

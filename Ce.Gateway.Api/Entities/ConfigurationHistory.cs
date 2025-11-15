@@ -41,4 +41,16 @@ public class ConfigurationHistory
     /// Whether this is the current active configuration
     /// </summary>
     public bool IsActive { get; set; }
+
+    /// <summary>
+    /// Version information (e.g., "2.4.3")
+    /// </summary>
+    [MaxLength(50)]
+    public string? Version { get; set; }
+
+    /// <summary>
+    /// Change type: Manual, Upload, Rollback
+    /// </summary>
+    [MaxLength(50)]
+    public string ChangeType { get; set; } = "Manual";
 }
